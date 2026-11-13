@@ -22,7 +22,13 @@ Lyrics are looked up on [LRCLIB](https://lrclib.net/), not obtained from Spotify
 - Internet connection for LRCLIB searches.
 - Swift and Apple Command Line Tools to build from source.
 
-## Build and run
+## Download and run
+
+Download the latest ZIP from [GitHub Releases](../../releases), extract it, and open `Lyrics Overlay.app`. The early release is **not notarized or signed with an Apple Developer ID**; macOS Gatekeeper may block it. Only open it if you trust the source. If blocked, review Apple's [instructions for safely opening an app](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac). Do not disable Gatekeeper globally. This release has not yet been tested on another Mac or on Intel hardware.
+
+Play a song in Spotify and allow Lyrics Overlay to control Spotify when macOS asks. If permission is denied, check **System Settings → Privacy & Security → Automation**. The app reads the current track and playback position through Spotify's AppleScript interface; it does not require a Spotify login or API credentials.
+
+## Build from source
 
 Clone or download this repository, then run the following from the project directory:
 
@@ -31,9 +37,7 @@ bash build-app.sh
 open "Lyrics Overlay.app"
 ```
 
-Play a song in Spotify and allow Lyrics Overlay to control Spotify when macOS asks. If permission is denied, check **System Settings → Privacy & Security → Automation**. The app reads the current track and playback position through Spotify's AppleScript interface; it does not require a Spotify login or API credentials.
-
-The build script creates a locally ad-hoc-signed app, not a Developer ID-signed or notarized distribution. Gatekeeper behavior can differ on another Mac. A signed and notarized downloadable release has not been prepared yet.
+The build script creates a locally ad-hoc-signed app, not a Developer ID-signed or notarized distribution. Gatekeeper behavior can differ on another Mac. A signed and notarized release has not been prepared yet.
 
 ## Using the overlay
 
@@ -54,6 +58,8 @@ LRCLIB is a third-party service, and its availability and policies may change. U
 ```sh
 swift build
 swift run LyricsCoreChecks
+# Create an ad-hoc signed universal ZIP in dist/:
+bash build-release.sh 0.1.0
 ```
 
 The checks cover LRC parsing and conservative track matching. They do not replace an end-to-end test with Spotify: verify the automation prompt, loading lyrics, pausing, seeking, changing tracks, the overlay controls, and the global shortcut. XCTest is not available in every Command Line Tools installation, so the current checks use a standalone executable.

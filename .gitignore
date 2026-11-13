@@ -4,6 +4,7 @@
 
 # Locally built application
 Lyrics Overlay.app/
+dist/
 
 # macOS and editor files
 .DS_Store

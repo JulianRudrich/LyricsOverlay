@@ -1,0 +1,25 @@
+name: macOS build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build
+      - name: Run core checks
+        run: swift run LyricsCoreChecks
+      - name: Build app bundle
+        run: bash build-app.sh
+      - name: Verify app bundle
+        run: |
+          plutil -lint 'Lyrics Overlay.app/Contents/Info.plist'
+          codesign --verify --verbose=2 'Lyrics Overlay.app'

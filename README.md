@@ -2,19 +2,49 @@
   <img src="assets/brand/hero.svg" width="100%" alt="Illustration of the Lyrics Overlay window with the current line highlighted above a desktop app.">
 </p>
 
-# Lyrics Overlay
+<h1 align="center">Your music, in view.</h1>
 
-**Synced lyrics for Spotify and Apple Music, above the apps you already use.**
+<p align="center">
+  A floating lyrics overlay for macOS.<br>
+  Follow along, make it yours, and fix the timing for any song.
+</p>
 
-Keep a single lyric line on screen or show the lines around it. If a song is early or late, tune it once. If the lyrics are missing, import an LRC file or time your own in the editor.
+<p align="center">
+  <a href="#try-it-on-macos"><strong>Get the preview ↗</strong></a> &nbsp; · &nbsp;
+  <a href="#stay-with-what-youre-doing">Explore the overlay</a> &nbsp; · &nbsp;
+  <a href="#use-your-own-lyrics">Your own lyrics</a>
+</p>
 
-[**Try it on macOS**](#try-it-on-macos) · [Use your own lyrics](#use-your-own-lyrics) · [Troubleshooting](#troubleshooting)
+<p align="center"><sub>macOS 13+ target &nbsp; · &nbsp; Spotify & Apple Music desktop apps &nbsp; · &nbsp; Early preview</sub></p>
 
-| At a glance | For each song | Your own lyrics |
-| --- | --- | --- |
-| Switch between one line, current and next, or surrounding lines. Drag the overlay to a corner and let clicks pass through. | Nudge the timing in 0.25-second steps. Lyrics Overlay remembers the adjustment the next time that song plays. | Import a timed file or paste your lyrics and stamp each line as the song plays. Saved lyrics work offline. |
+> **Looking at the 0.2 preview.** The features below are available on the [preview branch](../../tree/preview/lyrics-overlay-0.2). The default branch and latest published release currently contain the earlier Spotify-only 0.1.0. The preview is still awaiting real-world Mac playback testing.
+
+<br>
+
+## Stay with what you're doing
+
+Lyrics Overlay keeps the current line in a small window above your other apps. Pick how much you want to see, place it where it fits, and keep listening.
+
+**A line or a little more.** Choose a single line, the current and next line, or the lines around it. Adjust the type size, make the background subtle or transparent, and move the overlay to a corner.
+
+**Ready for your workflow.** Let clicks pass through to the window underneath. Show or hide lyrics with **⌥ ⇧ L**. Switch between Spotify and Apple Music from the menu bar, or let the app follow the active player.
+
+**Timing that remembers.** A song a little ahead or behind? Adjust it in quarter-second steps. Your correction stays with that song for the next listen.
+
+**Your lyrics, on your Mac.** Import an LRC file, or paste a song and add timestamps as you listen. Your own lyrics take precedence and remain available offline.
 
 ## Try it on macOS
+
+### Download the preview
+
+1. Open the latest successful run for this branch in [GitHub Actions](../../actions/workflows/ci.yml).
+2. Download **Lyrics-Overlay-0.2.0-universal** from its Artifacts section. GitHub requires sign-in.
+3. Extract the archive and open **Lyrics Overlay.app**.
+4. Play a song in Spotify or Music and allow macOS Automation access when prompted.
+
+The preview is ad-hoc signed and has not been notarized with an Apple Developer ID. Gatekeeper may block the download. If you trust the build, follow [Apple's instructions for opening an app from an unidentified developer](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac).
+
+### Build from source or try the demo
 
 Requires macOS 13 or later, the Apple Command Line Tools, and the desktop version of Spotify or Apple's Music app for live playback. The example below launches a built-in demo without a player or network requests.
 
@@ -44,7 +74,7 @@ The source build is ad-hoc signed. For a prebuilt copy, download the universal Z
 
 Own lyrics take precedence for the current recording. You can remove them, reset timing independently, or disable online search and use only your files. Imports support UTF-8 LRC up to 512 KB per track. An empty timed line marks an instrumental break.
 
-## Troubleshooting
+## Need a hand?
 
 - **The player is open, but the overlay cannot read it.** Check **System Settings → Privacy & Security → Automation** and enable the player for Lyrics Overlay.
 - **Apple Music is playing, but the track is unavailable.** On some macOS versions, Music can fail to expose playback metadata for songs outside your library. Add the track to your library and play it from there. [Apple Developer Forums](https://developer.apple.com/forums/thread/798267)

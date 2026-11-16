@@ -19,7 +19,7 @@ Keep a single lyric line on screen or show the lines around it. If a song is ear
 Requires macOS 13 or later, the Apple Command Line Tools, and the desktop version of Spotify or Apple's Music app for live playback. The example below launches a built-in demo without a player or network requests.
 
 ```sh
-git clone https://github.com/JulianRudrich/LyricsOverlay.git
+git clone --branch preview/lyrics-overlay-0.2 https://github.com/JulianRudrich/LyricsOverlay.git
 cd LyricsOverlay
 bash build-app.sh
 open "Lyrics Overlay.app" --args --demo
@@ -30,6 +30,8 @@ Quit the demo and open `Lyrics Overlay.app` again for live playback. Play a song
 - **Choose a player** in **Song & Timing**. Automatic mode follows an active player. You can also lock the source to Spotify or Apple Music.
 - **Open settings** with the waveform button in the overlay or a left-click on the menu-bar icon.
 - **Move or hide the overlay** from the menu-bar icon's context menu. **⌥ ⇧ L** toggles visibility from any app.
+- **Switch players** from the menu bar. Click-through is remembered, and can be turned off from the same menu. Reopening the app also restores mouse interaction.
+- **Launch at login** can be enabled in the appearance settings. macOS may ask for approval in Login Items.
 
 The source build is ad-hoc signed. For a prebuilt copy, download the universal ZIP artifact from a successful [macOS build](../../actions/workflows/ci.yml). GitHub requires sign-in for workflow artifacts. The [0.1.0 release](../../releases/tag/v0.1.0) is the earlier Spotify-only preview.
 

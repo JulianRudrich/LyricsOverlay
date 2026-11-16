@@ -1,4 +1,6 @@
+import AppKit
 import Foundation
+import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
@@ -17,6 +19,8 @@ struct SettingsView: View {
 
     @State private var importError: String?
     @State private var editingTrack: EditingTrack?
+    @State private var loginStatus = SMAppService.mainApp.status
+    @State private var loginError: String?
 
     private struct EditingTrack: Identifiable {
         let track: Track
@@ -75,6 +79,37 @@ struct SettingsView: View {
             Text("⌥ ⇧ L blendet das Overlay ein oder aus.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Divider()
+            Toggle("Bei Anmeldung öffnen", isOn: Binding(
+                get: { loginStatus == .enabled },
+                set: { enabled in
+                    do {
+                        if enabled {
+                            try SMAppService.mainApp.register()
+                        } else {
+                            try SMAppService.mainApp.unregister()
+                        }
+                        loginError = nil
+                    } catch {
+                        loginError = "Die Einstellung konnte nicht geändert werden: \(error.localizedDescription)"
+                    }
+                    loginStatus = SMAppService.mainApp.status
+                }
+            ))
+            if loginStatus == .requiresApproval {
+                Text("Erlaube Lyrics Overlay unter Systemeinstellungen → Allgemein → Anmeldeobjekte.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if let loginError {
+                Text(loginError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            loginStatus = SMAppService.mainApp.status
         }
     }
 

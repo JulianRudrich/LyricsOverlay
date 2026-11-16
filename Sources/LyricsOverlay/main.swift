@@ -2,7 +2,7 @@ import AppKit
 import Carbon
 import SwiftUI
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDelegate {
     let model = PlayerModel(isDemo: CommandLine.arguments.contains("--demo"))
     var overlay: NSPanel!
     var settings: NSWindow!
@@ -35,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         } else { position("topRight") }
         overlay.orderFrontRegardless()
         buildMenu()
+        setClickThrough(UserDefaults.standard.bool(forKey: "clickThrough"))
         registerHotKey()
         model.start()
     }
@@ -68,9 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if let hotKeyHandler { RemoveEventHandler(hotKeyHandler) }
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        clickThrough = false
-        overlay.ignoresMouseEvents = false
-        clickItem.state = .off
+        setClickThrough(false)
         overlay.orderFrontRegardless()
         visibilityItem.title = "Overlay ausblenden"
         showSettings()
@@ -123,10 +122,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem.button?.action = #selector(statusClicked(_:))
         statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         let menu = NSMenu()
+        menu.delegate = self
         let title = NSMenuItem(title: "Lyrics Overlay", action: nil, keyEquivalent: ""); title.isEnabled = false; menu.addItem(title)
         menu.addItem(.separator())
         visibilityItem = NSMenuItem(title: "Overlay ausblenden", action: #selector(toggleVisibility), keyEquivalent: ""); visibilityItem.target = self; menu.addItem(visibilityItem)
         clickItem = NSMenuItem(title: "Klicks durchlassen", action: #selector(toggleClick), keyEquivalent: ""); clickItem.target = self; menu.addItem(clickItem)
+        let players = NSMenu(title: "Wiedergabequelle")
+        for source in PlayerPreference.allCases {
+            let item = NSMenuItem(title: source.title, action: #selector(selectPlayer(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = source.rawValue
+            item.isEnabled = !model.isDemo
+            players.addItem(item)
+        }
+        let playerItem = NSMenuItem(title: "Wiedergabequelle", action: nil, keyEquivalent: "")
+        playerItem.submenu = players
+        menu.addItem(playerItem)
         let corners = NSMenu(title: "Position")
         for (title, key) in [("Oben links", "topLeft"), ("Oben rechts", "topRight"), ("Unten links", "bottomLeft"), ("Unten rechts", "bottomRight")] {
             let item = NSMenuItem(title: title, action: #selector(selectCorner(_:)), keyEquivalent: ""); item.representedObject = key; item.target = self; corners.addItem(item)
@@ -136,6 +147,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let preferences = NSMenuItem(title: "Einstellungen …", action: #selector(showSettings), keyEquivalent: ","); preferences.target = self; menu.addItem(preferences)
         let quit = NSMenuItem(title: "Beenden", action: #selector(quitApp), keyEquivalent: "q"); quit.target = self; menu.addItem(quit)
         statusMenu = menu
+    }
+    func menuWillOpen(_ menu: NSMenu) {
+        guard menu === statusMenu,
+              let sources = menu.items.first(where: { $0.title == "Wiedergabequelle" })?.submenu else { return }
+        let selected = UserDefaults.standard.string(forKey: "playerPreference") ?? PlayerPreference.automatic.rawValue
+        for item in sources.items {
+            item.state = (item.representedObject as? String) == selected ? .on : .off
+        }
     }
     @objc func statusClicked(_ sender: NSStatusBarButton) {
         if NSApp.currentEvent?.type == .rightMouseUp {
@@ -147,7 +166,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
     @objc func toggleVisibility() { if overlay.isVisible { overlay.orderOut(nil) } else { overlay.orderFrontRegardless() }; visibilityItem.title = overlay.isVisible ? "Overlay ausblenden" : "Overlay einblenden" }
-    @objc func toggleClick() { clickThrough.toggle(); overlay.ignoresMouseEvents = clickThrough; clickItem.state = clickThrough ? .on : .off }
+    private func setClickThrough(_ enabled: Bool) {
+        clickThrough = enabled
+        overlay.ignoresMouseEvents = enabled
+        clickItem.state = enabled ? .on : .off
+        UserDefaults.standard.set(enabled, forKey: "clickThrough")
+    }
+    @objc func toggleClick() { setClickThrough(!clickThrough) }
+    @objc func selectPlayer(_ sender: NSMenuItem) {
+        guard !model.isDemo, let raw = sender.representedObject as? String,
+              let source = PlayerPreference(rawValue: raw) else { return }
+        UserDefaults.standard.set(raw, forKey: "playerPreference")
+        model.setPlayerPreference(source)
+    }
     @objc func selectCorner(_ sender: NSMenuItem) { if let key = sender.representedObject as? String { position(key) } }
     @objc func showSettings() {
         if settings == nil {

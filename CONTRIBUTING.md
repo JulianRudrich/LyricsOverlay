@@ -2,6 +2,6 @@
 
 Thanks for considering a contribution! This project is an early prototype. The project code is available under the [MIT License](LICENSE).
 
-For a bug report, please include your macOS version, Spotify version, how you installed the app, the steps to reproduce, and what you expected to happen. Do not include private information, Spotify credentials, or full copyrighted song lyrics.
+For a bug report, include your macOS version, the player and its version, how you installed the app, and the steps to reproduce. For Apple Music playback, include whether the track is in your library. Keep credentials, personal information, and copyrighted lyrics out of reports.
 
-For code changes, run `swift build` and `swift run LyricsCoreChecks`, then test the affected behavior with Spotify when possible. Explain any test limitations in your pull request. Do not add copyrighted lyrics to fixtures or documentation.
+For code changes, run `swift build` and `swift run LyricsCoreChecks`, then test with the relevant desktop player on a Mac. Use the demo to check layout changes and original sample lyrics for fixtures.

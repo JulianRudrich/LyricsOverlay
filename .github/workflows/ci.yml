@@ -13,6 +13,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Read preview version
+        run: echo "PREVIEW_VERSION=$(cat VERSION)" >> "$GITHUB_ENV"
       - name: Build
         run: swift build
       - name: Run core checks
@@ -20,19 +22,22 @@ jobs:
       - name: Build app bundle
         run: bash build-app.sh
       - name: Build universal preview archive
-        run: bash build-release.sh 0.1.0
+        run: bash build-release.sh "$PREVIEW_VERSION"
       - name: Verify packaged app
         run: |
           mkdir -p "$RUNNER_TEMP/verify"
-          ditto -x -k dist/Lyrics-Overlay-0.1.0-universal.zip "$RUNNER_TEMP/verify"
+          ditto -x -k "dist/Lyrics-Overlay-$PREVIEW_VERSION-universal.zip" "$RUNNER_TEMP/verify"
           APP="$RUNNER_TEMP/verify/Lyrics Overlay.app"
+          cmp LICENSE "$APP/Contents/Resources/LICENSE"
+          cmp assets/brand/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
           plutil -lint "$APP/Contents/Info.plist"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "0.1.0"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "$PREVIEW_VERSION"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$APP/Contents/Info.plist")" = "AppIcon"
           codesign --verify --verbose=2 "$APP"
           lipo "$APP/Contents/MacOS/LyricsOverlay" -verify_arch arm64 x86_64
       - name: Upload preview archive
         uses: actions/upload-artifact@v4
         with:
-          name: Lyrics-Overlay-0.1.0-universal
-          path: dist/Lyrics-Overlay-0.1.0-universal.zip
+          name: Lyrics-Overlay-${{ env.PREVIEW_VERSION }}-universal
+          path: dist/Lyrics-Overlay-${{ env.PREVIEW_VERSION }}-universal.zip
           if-no-files-found: error

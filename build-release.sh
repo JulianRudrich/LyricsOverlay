@@ -13,11 +13,9 @@ ARM_DIR="$(swift build -c release --triple arm64-apple-macosx13.0 --product Lyri
 swift build -c release --triple x86_64-apple-macosx13.0 --product LyricsOverlay
 INTEL_DIR="$(swift build -c release --triple x86_64-apple-macosx13.0 --product LyricsOverlay --show-bin-path)"
 
-bash build-app.sh
+bash build-app.sh "$VERSION"
 APP="$PWD/Lyrics Overlay.app"
 lipo -create "$ARM_DIR/LyricsOverlay" "$INTEL_DIR/LyricsOverlay" -output "$APP/Contents/MacOS/LyricsOverlay"
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$APP/Contents/Info.plist"
 # Local ad-hoc signature only: this is NOT a Developer ID signature or notarization.
 codesign --force --deep --sign - "$APP"
 codesign --verify --verbose=2 "$APP"

@@ -1,37 +1,28 @@
-<p align="center">
-  <img src="assets/brand/hero.svg" width="100%" alt="Illustration of the Lyrics Overlay window with the current line highlighted above a desktop app.">
-</p>
+# Lyrics Overlay
 
-<h1 align="center">Your music, in view.</h1>
+Follow the words while you work. Adjust the timing when a line arrives early. Add the lyrics yourself when a track doesn't have them.
 
-<p align="center">
-  A floating lyrics overlay for macOS.<br>
-  Follow along, make it yours, and fix the timing for any song.
-</p>
-
-<p align="center">
-  <a href="#try-it-on-macos"><strong>Get the preview ↗</strong></a> &nbsp; · &nbsp;
-  <a href="#stay-with-what-youre-doing">Explore the overlay</a> &nbsp; · &nbsp;
-  <a href="#use-your-own-lyrics">Your own lyrics</a>
-</p>
-
-<p align="center"><sub>macOS 13+ target &nbsp; · &nbsp; Spotify & Apple Music desktop apps &nbsp; · &nbsp; Early preview</sub></p>
+Lyrics Overlay is a native macOS app that keeps synchronized lyrics above your other windows. This repository contains the original project by Julian Rudrich.
 
 > **Looking at the 0.2 preview.** The features below are available on the [preview branch](../../tree/preview/lyrics-overlay-0.2). The default branch and latest published release currently contain the earlier Spotify-only 0.1.0. The preview is still awaiting real-world Mac playback testing.
 
-<br>
-
-## Stay with what you're doing
+## An overlay you can adjust
 
 Lyrics Overlay keeps the current line in a small window above your other apps. Pick how much you want to see, place it where it fits, and keep listening.
 
-**A line or a little more.** Choose a single line, the current and next line, or the lines around it. Adjust the type size, make the background subtle or transparent, and move the overlay to a corner.
+### Choose how much you see
 
-**Ready for your workflow.** Let clicks pass through to the window underneath. Show or hide lyrics with **⌥ ⇧ L**. Switch between Spotify and Apple Music from the menu bar, or let the app follow the active player.
+Show one line, the current and next line, or the lines around it. Adjust the type size, make the background subtle or transparent, and move the overlay to a corner.
 
-**Timing that remembers.** A song a little ahead or behind? Adjust it in quarter-second steps. Your correction stays with that song for the next listen.
+Let clicks pass through to the window underneath. Show or hide lyrics with **⌥ ⇧ L**. Switch between Spotify and Apple Music from the menu bar, or let the app follow the active player.
 
-**Your lyrics, on your Mac.** Import an LRC file, or paste a song and add timestamps as you listen. Your own lyrics take precedence and remain available offline.
+### Fix timing once
+
+A song a little ahead or behind? Adjust it in quarter-second steps. Your correction stays with that song for the next listen.
+
+### Bring your own lyrics
+
+Import an LRC file, or paste a song and add timestamps as you listen. Your own lyrics take precedence and remain available offline.
 
 ## Try it on macOS
 
@@ -63,7 +54,7 @@ Quit the demo and open `Lyrics Overlay.app` again for live playback. Play a song
 - **Switch players** from the menu bar. Click-through is remembered, and can be turned off from the same menu. Reopening the app also restores mouse interaction.
 - **Launch at login** can be enabled in the appearance settings. macOS may ask for approval in Login Items.
 
-The source build is ad-hoc signed. For a prebuilt copy, download the universal ZIP artifact from a successful [macOS build](../../actions/workflows/ci.yml). GitHub requires sign-in for workflow artifacts. The [0.1.0 release](../../releases/tag/v0.1.0) is the earlier Spotify-only preview.
+The [0.1.0 release](../../releases/tag/v0.1.0) is the earlier Spotify-only preview.
 
 ## Use your own lyrics
 

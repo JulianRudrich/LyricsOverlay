@@ -32,7 +32,7 @@ enum LyricsState: Equatable {
         case .offline: return "Offline. Eigene LRC-Dateien bleiben verfügbar."
         case .lookupFailed: return "Lyrics konnten gerade nicht geladen werden."
         case .rateLimited: return "LRCLIB ist ausgelastet. Versuch es gleich erneut."
-        case .localOnly: return "Onlinesuche ist aus. Du kannst eine LRC-Datei importieren."
+        case .localOnly: return "Onlinesuche ist aus. Erstelle eigene Lyrics oder importiere eine LRC-Datei."
         }
     }
 
@@ -43,13 +43,9 @@ enum LyricsState: Equatable {
 
 private enum LocalLyricsError: LocalizedError {
     case demo
-    case tooLarge
 
     var errorDescription: String? {
-        switch self {
-        case .demo: return "Die Beispiel-Lyrics lassen sich nicht speichern."
-        case .tooLarge: return "Die LRC-Datei darf höchstens 512 KB groß sein."
-        }
+        "Die Beispiel-Lyrics lassen sich nicht speichern."
     }
 }
 
@@ -65,7 +61,6 @@ final class PlayerModel: ObservableObject {
     let isDemo: Bool
     private let lookup: any LyricsLookingUp
     private let trackStore = TrackLyricsStore()
-    private static let localLyricsByteLimit = 512 * 1024
     private let reader = PlaybackReader()
     private var preference = PlayerPreference.automatic
     private var preferenceRevision = 0
@@ -131,7 +126,7 @@ final class PlayerModel: ObservableObject {
         let revision = preferenceRevision
         queue.async { [weak self, reader] in
             let result = reader.poll(preference)
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 self.pending = false
                 guard self.preferenceRevision == revision else {
@@ -167,7 +162,6 @@ final class PlayerModel: ObservableObject {
         if isPlaying != snapshot.isPlaying { isPlaying = snapshot.isPlaying }
         guard track != snapshot.track else { return }
         track = snapshot.track
-        songOffset = trackStore.preferences(for: snapshot.track.id).timingOffset
         reloadLyrics()
     }
 
@@ -178,7 +172,9 @@ final class PlayerModel: ObservableObject {
         lines = []
         guard let track else { return }
 
-        if let local = trackStore.preferences(for: track.id).localLyrics {
+        let preferences = trackStore.preferences(for: track.id)
+        songOffset = preferences.timingOffset
+        if let local = preferences.localLyrics {
             let parsed = LRC.parse(local)
             if parsed.contains(where: { !$0.text.isEmpty }) {
                 lines = parsed
@@ -240,7 +236,6 @@ final class PlayerModel: ObservableObject {
 
     func saveLocalLyrics(_ text: String, for selectedTrack: Track) throws {
         guard !isDemo else { throw LocalLyricsError.demo }
-        guard text.utf8.count <= Self.localLyricsByteLimit else { throw LocalLyricsError.tooLarge }
         _ = try trackStore.importLyrics(text, for: selectedTrack.id)
         if track?.id == selectedTrack.id { reloadLyrics() }
     }
@@ -256,7 +251,7 @@ final class PlayerModel: ObservableObject {
         do {
             let file = try FileHandle(forReadingFrom: url)
             defer { try? file.close() }
-            let limit = Self.localLyricsByteLimit
+            let limit = TrackLyricsStore.maximumLyricsBytes
             guard let data = try file.read(upToCount: limit + 1), data.count <= limit,
                   let text = String(data: data, encoding: .utf8) else {
                 return "Wähle eine UTF-8-kodierte LRC-Datei mit höchstens 512 KB."

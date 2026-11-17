@@ -5,7 +5,7 @@ use std::sync::mpsc::{Receiver, RecvTimeoutError};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use lyrics_core::{lrc, Lyrics};
+use lyrics_core::{lrc, Lyrics, PlaybackClock};
 use lyrics_providers::{LookupOptions, LyricsOutcome, Query};
 use media_session::{
     default_backends, Backend, Capabilities, Command, CommandError, DemoBackend, Engine,
@@ -40,6 +40,9 @@ pub struct PlaybackView {
     pub position: Option<f64>,
     pub rate: f64,
     pub capabilities: Capabilities,
+    /// When `position` was read, so it can be moved on to a later moment.
+    #[serde(skip)]
+    pub sampled_at: Instant,
 }
 
 impl PlaybackView {
@@ -53,7 +56,22 @@ impl PlaybackView {
             position: None,
             rate: 1.0,
             capabilities: Capabilities::default(),
+            sampled_at: Instant::now(),
         }
+    }
+
+    /// The position at `now`: the reading moved on while the track plays, never
+    /// past its end. `None` when the player reports no position.
+    pub fn position_at(&self, now: Instant) -> Option<f64> {
+        let position = self.position?;
+        let elapsed = now.saturating_duration_since(self.sampled_at).as_secs_f64();
+        let duration = self
+            .track
+            .as_ref()
+            .and_then(|track| track.duration)
+            .unwrap_or(0.0);
+        let clock = PlaybackClock::new(position, 0.0, self.playing).with_rate(self.rate);
+        Some(clock.position_at(elapsed, duration))
     }
 
     fn new(now_playing: &NowPlaying, now: Instant) -> Self {
@@ -74,6 +92,7 @@ impl PlaybackView {
                 position: snapshot.position_at(now),
                 rate: snapshot.rate,
                 capabilities: snapshot.capabilities,
+                sampled_at: now,
             },
         }
     }

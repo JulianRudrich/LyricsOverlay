@@ -1,4 +1,4 @@
-//! The overlay and settings windows.
+//! The overlay, settings and lyrics editor windows.
 
 use tauri::{
     AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindow,
@@ -10,6 +10,7 @@ use crate::{i18n, tray, AppState};
 
 pub const OVERLAY: &str = "overlay";
 pub const SETTINGS: &str = "settings";
+pub const EDITOR: &str = "editor";
 
 /// Distance from the screen edge, in logical pixels.
 const MARGIN: f64 = 16.0;
@@ -153,6 +154,44 @@ pub fn open_settings(app: &AppHandle) {
 
 pub fn set_settings_title(app: &AppHandle, title: &str) {
     if let Some(window) = app.get_webview_window(SETTINGS) {
+        let _ = window.set_title(title);
+    }
+}
+
+/// Opens the editor for your own lyrics, or brings it to the front when it is
+/// already open. On Windows, call this from an async command or another thread:
+/// building a webview inside a synchronous command deadlocks there.
+pub fn open_editor(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(EDITOR) {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+        return;
+    }
+    let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
+        .get("editor.title");
+    let built =
+        WebviewWindowBuilder::new(app, EDITOR, WebviewUrl::App("index.html#/editor".into()))
+            .title(title)
+            .inner_size(560.0, 560.0)
+            .min_inner_size(440.0, 400.0)
+            .resizable(true)
+            .center()
+            .focused(true)
+            .build();
+    if let Err(error) = built {
+        eprintln!("could not open the lyrics editor: {error}");
+    }
+}
+
+pub fn close_editor(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(EDITOR) {
+        let _ = window.close();
+    }
+}
+
+pub fn set_editor_title(app: &AppHandle, title: &str) {
+    if let Some(window) = app.get_webview_window(EDITOR) {
         let _ = window.set_title(title);
     }
 }

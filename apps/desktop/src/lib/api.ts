@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { AppInfo, Corner, LyricsView, Playback, Settings, Snapshot } from "./types";
+import type { AppInfo, Corner, EditorState, LyricsView, Playback, Settings, Snapshot, StampEdit } from "./types";
 
 export type PlayerCommand =
   | { kind: "playPause" }
@@ -14,6 +14,15 @@ export const api = {
   adjustSongOffset: (delta: number) => invoke<number>("adjust_song_offset", { delta }),
   setSongOffset: (value: number) => invoke<number>("set_song_offset", { value }),
   reloadLyrics: () => invoke<void>("reload_lyrics"),
+  // Own lyrics. Failures reject with an OwnLyricsError or a StampError name.
+  openEditor: () => invoke<void>("open_editor"),
+  closeEditor: () => invoke<void>("close_editor"),
+  editorState: () => invoke<EditorState | null>("editor_state"),
+  stampLine: (draft: string, caret: number) => invoke<StampEdit>("stamp_line", { draft, caret }),
+  saveLocalLyrics: (trackKey: string, text: string) => invoke<void>("save_local_lyrics", { trackKey, text }),
+  /** Resolves to false when the listener closes the file picker without a choice. */
+  importLyricsFile: (trackKey: string, title: string) => invoke<boolean>("import_lyrics_file", { trackKey, title }),
+  removeLocalLyrics: (trackKey: string) => invoke<void>("remove_local_lyrics", { trackKey }),
   playerCommand: (command: PlayerCommand) => invoke<void>("player_command", { command }),
   openSettings: () => invoke<void>("open_settings"),
   moveOverlay: (corner: Corner) => invoke<void>("move_overlay", { corner }),

@@ -3,6 +3,7 @@
 
 mod commands;
 mod i18n;
+mod own_lyrics;
 mod playback;
 mod settings;
 mod tray;
@@ -107,6 +108,8 @@ impl AppState {
         if old.language != new.language {
             let title = i18n::Texts::new(i18n::resolve(new.language)).get("settings.title");
             windows::set_settings_title(app, &title);
+            let title = i18n::Texts::new(i18n::resolve(new.language)).get("editor.title");
+            windows::set_editor_title(app, &title);
         }
         let tray_changed = old.click_through != new.click_through
             || old.overlay_visible != new.overlay_visible
@@ -192,6 +195,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         requests: Mutex::new(sender),
         hotkey_error: AtomicBool::new(false),
     });
+    app.manage(own_lyrics::EditorSession::default());
 
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
@@ -224,6 +228,7 @@ fn main() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
+        .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, _shortcut, event| {
@@ -239,6 +244,13 @@ fn main() {
             commands::adjust_song_offset,
             commands::set_song_offset,
             commands::reload_lyrics,
+            own_lyrics::open_editor,
+            own_lyrics::close_editor,
+            own_lyrics::editor_state,
+            own_lyrics::stamp_line,
+            own_lyrics::save_local_lyrics,
+            own_lyrics::import_lyrics_file,
+            own_lyrics::remove_local_lyrics,
             commands::player_command,
             commands::open_settings,
             commands::move_overlay,

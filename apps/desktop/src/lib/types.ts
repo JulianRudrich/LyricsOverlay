@@ -88,6 +88,29 @@ export interface LyricsView {
   canRetry: boolean;
 }
 
+/** The song the lyrics editor belongs to, fixed when its window opens. */
+export interface EditorState {
+  trackKey: string;
+  title: string;
+  artist: string;
+  /** Your own lyrics as LRC text, null before you add some. */
+  lrc: string | null;
+}
+
+/** Replaces `length` characters at `start`; all counts are UTF-16 code units. */
+export interface StampEdit {
+  start: number;
+  length: number;
+  replacement: string;
+  nextCaret: number;
+}
+
+/** Why the Rust side did not stamp a line. */
+export type StampError = "otherTrack" | "noPosition" | "notALyricLine";
+
+/** Why own lyrics could not be opened, imported, saved or removed. */
+export type OwnLyricsError = "noTrack" | "tooLarge" | "notText" | "missingTimestamps" | "unreadable" | "storage";
+
 export interface Settings {
   layout: Layout;
   fontSize: number;

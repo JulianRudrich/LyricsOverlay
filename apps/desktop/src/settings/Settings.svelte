@@ -4,6 +4,7 @@
   import { hotkeyLabel } from "../lib/hotkey";
   import { formatNumber, formatOffset, translator, type MessageKey } from "../lib/i18n";
   import type { AppInfo, Language, Layout, LyricsView, Playback, Settings, SourcePreference } from "../lib/types";
+  import OwnLyrics from "./OwnLyrics.svelte";
 
   let settings = $state<Settings | null>(null);
   let playback = $state<Playback | null>(null);
@@ -170,6 +171,10 @@
                 <button onclick={() => api.reloadLyrics()}>{t("settings.searchAgain")}</button>
               {/if}
             </div>
+
+            {#if !app.demo}
+              <OwnLyrics {track} lyrics={lyricsOfTrack} {t} />
+            {/if}
           {:else if !app.demo}
             <span class="secondary">{t("settings.noTrack")}</span>
           {/if}

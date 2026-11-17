@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/lyrics-core", "crates/media-session"]
+members = ["crates/lyrics-core", "crates/media-session", "crates/lyrics-providers"]
 
 [workspace.package]
 version = "0.3.0-alpha.0"

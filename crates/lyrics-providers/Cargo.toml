@@ -1,0 +1,27 @@
+[package]
+name = "lyrics-providers"
+description = "Finding lyrics for a track: your own files first, then a local cache, then LRCLIB."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+lyrics-core.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "rustls-tls-native-roots", "http2"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { version = "1", features = ["time", "sync"] }
+unicode-normalization.workspace = true
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+wiremock = "0.6"
+
+[lints]
+workspace = true

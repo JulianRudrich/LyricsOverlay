@@ -1,6 +1,6 @@
 {
-  "app.name": "Lyrics Overlay",
-  "tray.tooltip": "Lyrics Overlay",
+  "app.name": "Singline",
+  "tray.tooltip": "Singline",
   "tray.showOverlay": "Show overlay",
   "tray.hideOverlay": "Hide overlay",
   "tray.clickThrough": "Click-through",
@@ -36,7 +36,7 @@
   "lyrics.failed": "Lyrics could not be loaded right now.",
   "lyrics.rateLimited": "LRCLIB is busy. Try again in a moment.",
   "lyrics.localOnly": "Online search is turned off.",
-  "settings.title": "Lyrics Overlay – Settings",
+  "settings.title": "Singline – Settings",
   "settings.tabAppearance": "Appearance",
   "settings.tabSong": "Song & timing",
   "settings.layout": "Layout",

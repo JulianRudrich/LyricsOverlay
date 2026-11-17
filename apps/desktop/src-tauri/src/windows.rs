@@ -30,7 +30,7 @@ pub fn create_overlay(app: &AppHandle, settings: &Settings) -> tauri::Result<Web
 
     let window =
         WebviewWindowBuilder::new(app, OVERLAY, WebviewUrl::App("index.html#/overlay".into()))
-            .title("Lyrics Overlay")
+            .title("Singline")
             .inner_size(width, height)
             .position(position[0], position[1])
             .decorations(false)

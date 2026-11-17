@@ -18,8 +18,7 @@ async fn main() {
         album: args.next(),
         duration: duration.parse().unwrap_or(0.0),
     };
-    let client =
-        LrclibClient::new("LyricsOverlay/dev (https://github.com/JulianRudrich/LyricsOverlay)");
+    let client = LrclibClient::new("Singline/dev (https://github.com/JulianRudrich/LyricsOverlay)");
     match client.find(&query).await {
         Ok(LookupResult::Found { lyrics }) => {
             let worded = lyrics

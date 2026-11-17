@@ -12,7 +12,7 @@ use serde_json::json;
 use wiremock::matchers::{header, method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-const AGENT: &str = "LyricsOverlay/test (https://github.com/JulianRudrich/LyricsOverlay)";
+const AGENT: &str = "Singline/test (https://github.com/JulianRudrich/LyricsOverlay)";
 
 fn client(server: &MockServer) -> LrclibClient {
     LrclibClient::with_base_url(&server.uri(), AGENT).with_pause(Duration::ZERO)

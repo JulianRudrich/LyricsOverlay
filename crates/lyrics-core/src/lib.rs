@@ -1,4 +1,4 @@
-//! Pure lyric logic for Lyrics Overlay: parsing, matching and timing.
+//! Pure lyric logic for Singline: parsing, matching and timing.
 //!
 //! Nothing in this crate touches the network, the file system or a player. Every
 //! function is deterministic, so the whole crate is covered by plain unit tests.

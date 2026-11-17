@@ -50,7 +50,7 @@ const CORNERS: [(Corner, &str, &str); 4] = [
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let menu = build_menu(app)?;
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
-        .tooltip("Lyrics Overlay")
+        .tooltip("Singline")
         .menu(&menu)
         .show_menu_on_left_click(true)
         .on_menu_event(handle_event);

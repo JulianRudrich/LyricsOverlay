@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <key>NSAppleEventsUsageDescription</key>
-  <string>Lyrics Overlay reads the current song and playback position from Spotify or Music to show synced lyrics.</string>
+  <string>Singline reads the current song and playback position from Spotify or Music to show synced lyrics.</string>
   <key>LSUIElement</key>
   <true/>
 </dict>

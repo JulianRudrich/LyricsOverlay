@@ -1,6 +1,6 @@
 # Roadmap
 
-Lyrics Overlay wird plattformübergreifend neu gebaut: eine Codebasis für Windows, macOS und Linux, mit Spotify, Apple Music und Amazon Music. Die Swift-App bleibt bis zur Funktionsgleichheit die macOS-Version.
+Singline (bisher „Lyrics Overlay“) wird plattformübergreifend neu gebaut: eine Codebasis für Windows, macOS und Linux, mit Spotify, Apple Music und Amazon Music. Die Swift-App bleibt bis zur Funktionsgleichheit die macOS-Version.
 
 ## Entscheidungen
 
@@ -11,7 +11,8 @@ Lyrics Overlay wird plattformübergreifend neu gebaut: eine Codebasis für Windo
 | Entwicklung | ein Projekt im Original-Repo auf `main`: der Neubau im Hauptordner, die bisherige macOS-App in `apps/macos`, bis der Neubau sie ablöst |
 | Tests | Mac und Windows-PC durch Julian; Linux automatisiert in CI |
 | Umfang | jede Linory-Funktion ist Pflicht, dazu mehr ([PARITY.md](PARITY.md)) |
-| Branding | eigener Name, eigenes Logo, eigene Bilder; weder Linory noch Mikes Icon |
+| Name | **Singline** (singen + Zeile). Verworfen, weil schon vergeben oder zu ähnlich: Lyrify (iPhone-Lyrics-App und Firefox-Add-on), Lyricify, Overline (Entwickler-Tool), Linelight (Spiel). Vor Version 1.0 eine richtige Markenrecherche machen. |
+| Branding | eigenes Logo und eigene Bilder; weder Linory noch Mikes Icon |
 | 0.2-Funktionen | LRC-Editor, Korrektur pro Song und drei Layouts kommen nur in den Neubau (Phase 1) |
 
 ## Neu: Mike gibt Linory zurück (17.11.2026)
@@ -27,7 +28,7 @@ Mike (MikeLeonFox) hat [JulianRudrich/LyricsOverlay#1](https://github.com/Julian
 
 **Phase 0: Fundament und Messungen.** Fast fertig.
 - [x] Kern in Rust mit allen Prüfungen der Swift-App
-- [x] Player-Erkennung: MPRIS, SMTC, AppleScript; Diagnose-Werkzeug `lyrics-overlay-watch`
+- [x] Player-Erkennung: MPRIS, SMTC, AppleScript; Diagnose-Werkzeug `singline-watch`
 - [x] LRCLIB-Suche, Cache, eigene Lyrics, Korrektur pro Song (SQLite)
 - [x] App: Overlay, Einstellungen, Tray, Shortcut, Demo-Modus
 - [x] Linux-Gesamttest in CI mit Screenshot

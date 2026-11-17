@@ -1,5 +1,5 @@
 [package]
-name = "lyrics-overlay"
+name = "singline"
 description = "Synced lyrics above your other windows, for Spotify, Apple Music and Amazon Music."
 version = "0.3.0"
 edition.workspace = true
@@ -8,7 +8,7 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 publish.workspace = true
-default-run = "lyrics-overlay"
+default-run = "singline"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

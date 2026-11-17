@@ -8,7 +8,7 @@ const IMPORTED: &str = "\u{FEFF}[ar:Example]\r\n[00:00.25] First\r\n[00:01.00] [
 
 fn temporary_path(name: &str) -> std::path::PathBuf {
     let unique = format!(
-        "lyrics-overlay-{name}-{}-{}.sqlite",
+        "singline-{name}-{}-{}.sqlite",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)

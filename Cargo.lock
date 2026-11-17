@@ -2319,23 +2319,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lyrics-overlay"
-version = "0.3.0"
-dependencies = [
- "lyrics-core",
- "lyrics-providers",
- "media-session",
- "serde",
- "serde_json",
- "sys-locale",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-single-instance",
-]
-
-[[package]]
 name = "lyrics-providers"
 version = "0.3.0-alpha.0"
 dependencies = [
@@ -3915,6 +3898,23 @@ name = "simd-adler32"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+
+[[package]]
+name = "singline"
+version = "0.3.0"
+dependencies = [
+ "lyrics-core",
+ "lyrics-providers",
+ "media-session",
+ "serde",
+ "serde_json",
+ "sys-locale",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-single-instance",
+]
 
 [[package]]
 name = "siphasher"

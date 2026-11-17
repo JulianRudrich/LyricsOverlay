@@ -21,7 +21,7 @@ const SCHEMA_VERSION: i32 = 1;
 pub enum StoreError {
     #[error("the song database is not available: {0}")]
     Database(#[from] rusqlite::Error),
-    #[error("the song database was written by a newer version of Lyrics Overlay")]
+    #[error("the song database was written by a newer version of Singline")]
     NewerSchema,
 }
 

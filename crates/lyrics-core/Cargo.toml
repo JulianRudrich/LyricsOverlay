@@ -1,6 +1,6 @@
 [package]
 name = "lyrics-core"
-description = "Pure lyric logic for Lyrics Overlay: parsing, matching and timing. No I/O."
+description = "Pure lyric logic for Singline: parsing, matching and timing. No I/O."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

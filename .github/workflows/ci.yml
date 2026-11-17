@@ -44,9 +44,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Check the interface
         run: |
-          pnpm --filter lyrics-overlay-desktop check
-          pnpm --filter lyrics-overlay-desktop test
-          pnpm --filter lyrics-overlay-desktop build
+          pnpm --filter singline-desktop check
+          pnpm --filter singline-desktop test
+          pnpm --filter singline-desktop build
       - name: Rust formatting
         run: cargo fmt --all --check
       - name: Rust lints
@@ -55,7 +55,7 @@ jobs:
         run: cargo test --workspace
       - name: Build the app
         run: |
-          pnpm --filter lyrics-overlay-desktop tauri build --debug --no-bundle
+          pnpm --filter singline-desktop tauri build --debug --no-bundle
           cargo build -p media-session --example fake_mpris_player
       - name: End-to-end test
         run: bash apps/desktop/e2e/linux-smoke.sh
@@ -101,28 +101,28 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Tests on this system
         run: cargo test -p lyrics-core -p media-session -p lyrics-providers
-      - name: Build lyrics-overlay-watch
+      - name: Build singline-watch
         run: |
           mkdir -p dist-test
           if [ "${{ runner.os }}" = "macOS" ]; then
-            cargo build --release -p media-session --bin lyrics-overlay-watch --target aarch64-apple-darwin
-            cargo build --release -p media-session --bin lyrics-overlay-watch --target x86_64-apple-darwin
-            lipo -create -output dist-test/lyrics-overlay-watch \
-              target/aarch64-apple-darwin/release/lyrics-overlay-watch target/x86_64-apple-darwin/release/lyrics-overlay-watch
-            tar -czf dist-test/lyrics-overlay-watch-macos.tar.gz -C dist-test lyrics-overlay-watch
-            rm dist-test/lyrics-overlay-watch
+            cargo build --release -p media-session --bin singline-watch --target aarch64-apple-darwin
+            cargo build --release -p media-session --bin singline-watch --target x86_64-apple-darwin
+            lipo -create -output dist-test/singline-watch \
+              target/aarch64-apple-darwin/release/singline-watch target/x86_64-apple-darwin/release/singline-watch
+            tar -czf dist-test/singline-watch-macos.tar.gz -C dist-test singline-watch
+            rm dist-test/singline-watch
           else
-            cargo build --release -p media-session --bin lyrics-overlay-watch
-            cp target/release/lyrics-overlay-watch.exe dist-test/
+            cargo build --release -p media-session --bin singline-watch
+            cp target/release/singline-watch.exe dist-test/
           fi
       - name: Build the app
-        run: pnpm --filter lyrics-overlay-desktop tauri build ${{ matrix.tauri-args }}
+        run: pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }}
       - name: Collect the installers
         run: |
           find target -path '*/release/bundle/*' \( -name '*.dmg' -o -name '*-setup.exe' -o -name '*.msi' \) -exec cp {} dist-test/ \;
           ls -la dist-test
       - uses: actions/upload-artifact@v4
         with:
-          name: lyrics-overlay-${{ matrix.name }}
+          name: singline-${{ matrix.name }}
           path: dist-test
           if-no-files-found: error

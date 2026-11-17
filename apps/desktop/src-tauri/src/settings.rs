@@ -186,7 +186,7 @@ mod tests {
     #[test]
     fn missing_or_broken_files_give_defaults() {
         let directory =
-            std::env::temp_dir().join(format!("lyrics-overlay-settings-{}", std::process::id()));
+            std::env::temp_dir().join(format!("singline-settings-{}", std::process::id()));
         let path = directory.join("settings.json");
         assert_eq!(Settings::load(&path), Settings::default());
 

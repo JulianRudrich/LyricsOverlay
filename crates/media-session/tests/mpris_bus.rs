@@ -162,7 +162,7 @@ fn reads_and_controls_players_over_dbus() {
 
 #[test]
 fn reports_a_missing_bus_instead_of_failing() {
-    let mut backend = MprisBackend::with_address("unix:path=/nonexistent/lyrics-overlay-test-bus");
+    let mut backend = MprisBackend::with_address("unix:path=/nonexistent/singline-test-bus");
     assert!(backend.poll().is_empty());
     assert!(backend
         .last_error()

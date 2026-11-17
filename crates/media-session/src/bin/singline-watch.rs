@@ -1,13 +1,13 @@
-//! `lyrics-overlay-watch` shows, live, what the music players on this computer
+//! `singline-watch` shows, live, what the music players on this computer
 //! report: title, artist, album, position and which controls they offer. It
 //! also measures how far each reported position drifts from the expected one.
 //!
 //! ```text
-//! lyrics-overlay-watch                 # print every reading, once a second
-//! lyrics-overlay-watch --json          # one JSON object per reading and line
-//! lyrics-overlay-watch --once          # read once and exit
-//! lyrics-overlay-watch --command playpause [--player ID]
-//! lyrics-overlay-watch --command seek=42.5
+//! singline-watch                 # print every reading, once a second
+//! singline-watch --json          # one JSON object per reading and line
+//! singline-watch --once          # read once and exit
+//! singline-watch --command playpause [--player ID]
+//! singline-watch --command seek=42.5
 //! ```
 
 use std::collections::HashMap;
@@ -47,7 +47,7 @@ fn main() -> ExitCode {
     }
 }
 
-const USAGE: &str = "Usage: lyrics-overlay-watch [--json] [--once] [--interval MS]\n       lyrics-overlay-watch --command playpause|next|previous|seek=SECONDS [--player ID]";
+const USAGE: &str = "Usage: singline-watch [--json] [--once] [--interval MS]\n       singline-watch --command playpause|next|previous|seek=SECONDS [--player ID]";
 
 fn parse_args(args: impl Iterator<Item = String>) -> Result<Options, String> {
     let mut options = Options {

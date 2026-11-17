@@ -12,7 +12,7 @@ use crate::model::{
 pub const DEMO_PLAYER_ID: &str = "demo";
 
 const DEMO_TITLE: &str = "Nachthimmel";
-const DEMO_ARTIST: &str = "Lyrics Overlay";
+const DEMO_ARTIST: &str = "Singline";
 const DEMO_DURATION: f64 = 24.0;
 
 /// The demo song in enhanced LRC.

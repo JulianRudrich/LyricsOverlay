@@ -5,12 +5,12 @@
 #
 # Needs: xvfb-run, dbus-run-session, python3, ImageMagick (import).
 # Build first:
-#   pnpm --filter lyrics-overlay-desktop tauri build --debug --no-bundle
+#   pnpm --filter singline-desktop tauri build --debug --no-bundle
 #   cargo build -p media-session --example fake_mpris_player
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
-APP="${APP:-$ROOT/target/debug/lyrics-overlay}"
+APP="${APP:-$ROOT/target/debug/singline}"
 PLAYER="${PLAYER:-$ROOT/target/debug/examples/fake_mpris_player}"
 OUT="${OUT:-$ROOT/target/e2e}"
 PORT="${PORT:-18765}"

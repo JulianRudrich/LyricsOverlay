@@ -1,25 +1,25 @@
 # Testen auf Mac und Windows
 
-Ein Durchgang dauert pro System etwa zehn Minuten. Schick mir danach die Ausgabe von `lyrics-overlay-watch` und deine Notizen; Screenshots helfen bei allem, was komisch aussieht.
+Ein Durchgang dauert pro System etwa zehn Minuten. Schick mir danach die Ausgabe von `singline-watch` und deine Notizen; Screenshots helfen bei allem, was komisch aussieht.
 
 ## Builds holen
 
 1. Im GitHub-Repo unter **Actions → CI** den neuesten Lauf auf `main` öffnen. CI baut die Testversionen bei jedem Push auf `main`; einen neuen Lauf startest du mit **Run workflow**.
 2. Wenn der Lauf fertig ist, unten bei **Artifacts** herunterladen:
-   - `lyrics-overlay-macOS`: `.dmg` und `lyrics-overlay-watch-macos.tar.gz`
-   - `lyrics-overlay-Windows`: Installer `…-setup.exe` (oder `.msi`) und `lyrics-overlay-watch.exe`
+   - `singline-macOS`: `.dmg` und `singline-watch-macos.tar.gz`
+   - `singline-Windows`: Installer `…-setup.exe` (oder `.msi`) und `singline-watch.exe`
 
 Die Builds sind nicht signiert:
 
-- **macOS:** Die App aus der `.dmg` in „Programme“ ziehen, dann einmal mit Rechtsklick → Öffnen starten und bestätigen. Für das Werkzeug: `tar -xzf lyrics-overlay-watch-macos.tar.gz` und `xattr -d com.apple.quarantine lyrics-overlay-watch`.
+- **macOS:** Die App aus der `.dmg` in „Programme“ ziehen, dann einmal mit Rechtsklick → Öffnen starten und bestätigen. Für das Werkzeug: `tar -xzf singline-watch-macos.tar.gz` und `xattr -d com.apple.quarantine singline-watch`.
 - **Windows:** Bei der SmartScreen-Warnung auf „Weitere Informationen“ → „Trotzdem ausführen“.
 
 ## 1. Was melden die Player? (Messung B)
 
 Spiele nacheinander in **Spotify**, **Apple Music** und **Amazon Music** einen Song ab (was auf dem System verfügbar ist) und lass dabei das Werkzeug laufen:
 
-- macOS (Terminal): `./lyrics-overlay-watch`
-- Windows (PowerShell, im Download-Ordner): `.\lyrics-overlay-watch.exe`
+- macOS (Terminal): `./singline-watch`
+- Windows (PowerShell, im Download-Ordner): `.\singline-watch.exe`
 
 macOS fragt beim ersten Mal, ob das Terminal Spotify bzw. Musik steuern darf: erlauben.
 
@@ -30,9 +30,9 @@ Zusätzlich auf Windows: einen Song im **Browser** abspielen (zum Beispiel Amazo
 Befehle testen, während ein Player läuft:
 
 ```bash
-./lyrics-overlay-watch --command playpause
-./lyrics-overlay-watch --command seek=60
-./lyrics-overlay-watch --command next
+./singline-watch --command playpause
+./singline-watch --command seek=60
+./singline-watch --command next
 ```
 
 ## 2. Die App
@@ -60,5 +60,5 @@ Notiere zu jedem Punkt ✅ oder was passiert ist.
 
 `--demo` spielt einen eingebauten Song mit Wortzeiten:
 
-- macOS: `/Applications/Lyrics\ Overlay.app/Contents/MacOS/lyrics-overlay --demo`
-- Windows: `"%LOCALAPPDATA%\Lyrics Overlay\lyrics-overlay.exe" --demo` (bei der `.msi`: `"C:\Program Files\Lyrics Overlay\lyrics-overlay.exe"`)
+- macOS: `/Applications/Singline.app/Contents/MacOS/singline --demo`
+- Windows: `"%LOCALAPPDATA%\Singline\singline.exe" --demo` (bei der `.msi`: `"C:\Program Files\Singline\singline.exe"`)

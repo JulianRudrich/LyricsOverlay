@@ -1,4 +1,4 @@
-//! Lyrics Overlay: synced lyrics above your other windows.
+//! Singline: synced lyrics above your other windows.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
@@ -147,7 +147,7 @@ fn register_hotkey(app: &AppHandle, state: &AppState, hotkey: &str) {
 
 fn user_agent(app: &AppHandle) -> String {
     format!(
-        "LyricsOverlay/{} (https://github.com/JulianRudrich/LyricsOverlay)",
+        "Singline/{} (https://github.com/JulianRudrich/LyricsOverlay)",
         app.package_info().version
     )
 }
@@ -166,7 +166,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         .map(Settings::load)
         .unwrap_or_default();
     let store = match (&data_dir, demo) {
-        (Some(dir), false) => Store::open(&dir.join("lyrics-overlay.sqlite")).or_else(|error| {
+        (Some(dir), false) => Store::open(&dir.join("singline.sqlite")).or_else(|error| {
             eprintln!("could not open the song database, keeping data in memory: {error}");
             Store::open_in_memory()
         })?,
@@ -247,7 +247,7 @@ fn main() {
         ])
         .setup(move |app| setup(app, demo))
         .build(tauri::generate_context!())
-        .expect("Lyrics Overlay could not start")
+        .expect("Singline could not start")
         .run(|app, event| match event {
             // Closing the settings window must not quit the app.
             tauri::RunEvent::ExitRequested {

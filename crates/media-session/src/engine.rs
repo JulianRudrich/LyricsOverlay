@@ -1,0 +1,348 @@
+//! Deciding which player the overlay follows.
+
+use lyrics_core::{PlaybackActivity, PlaybackSelection};
+use serde::{Deserialize, Serialize};
+
+use crate::model::{
+    PlaybackStatus, PlayerId, PlayerInfo, PlayerSnapshot, Problem, Reading, Service,
+};
+
+/// Which players the listener wants the overlay to follow.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum SourcePreference {
+    /// Follows whichever known service plays, and other players when allowed.
+    #[default]
+    Automatic,
+    Spotify,
+    AppleMusic,
+    AmazonMusic,
+}
+
+impl SourcePreference {
+    pub fn service(self) -> Option<Service> {
+        match self {
+            SourcePreference::Automatic => None,
+            SourcePreference::Spotify => Some(Service::Spotify),
+            SourcePreference::AppleMusic => Some(Service::AppleMusic),
+            SourcePreference::AmazonMusic => Some(Service::AmazonMusic),
+        }
+    }
+
+    fn accepts(self, player: &PlayerInfo, include_other: bool) -> bool {
+        match self.service() {
+            Some(service) => player.service == service,
+            None => player.service != Service::Other || include_other,
+        }
+    }
+}
+
+/// What the overlay should show after a poll.
+#[derive(Debug, Clone, PartialEq)]
+pub enum NowPlaying {
+    /// Nothing the overlay follows has a track loaded.
+    Idle,
+    /// The player the overlay follows is open but cannot be read.
+    Problem {
+        player: PlayerInfo,
+        problem: Problem,
+    },
+    /// A track is loaded, playing or paused.
+    Track(PlayerSnapshot),
+}
+
+/// Turns the readings of all backends into one [`NowPlaying`].
+#[derive(Debug, Clone, Default)]
+pub struct Engine {
+    selection: PlaybackSelection<PlayerId>,
+    preference: SourcePreference,
+    include_other: bool,
+}
+
+impl Engine {
+    pub fn new(preference: SourcePreference, include_other: bool) -> Self {
+        Self {
+            selection: PlaybackSelection::new(),
+            preference,
+            include_other,
+        }
+    }
+
+    pub fn preference(&self) -> SourcePreference {
+        self.preference
+    }
+
+    /// Changing what is followed starts the selection over.
+    pub fn set_preference(&mut self, preference: SourcePreference, include_other: bool) {
+        if (preference, include_other) != (self.preference, self.include_other) {
+            *self = Self::new(preference, include_other);
+        }
+    }
+
+    /// The player that was followed after the last [`choose`](Self::choose).
+    pub fn current(&self) -> Option<&PlayerId> {
+        self.selection.current()
+    }
+
+    pub fn choose(&mut self, readings: Vec<Reading>) -> NowPlaying {
+        let accepted: Vec<Reading> = readings
+            .into_iter()
+            .filter(|reading| {
+                self.preference
+                    .accepts(reading.player(), self.include_other)
+            })
+            .collect();
+        let activity: Vec<(PlayerId, PlaybackActivity)> = accepted
+            .iter()
+            .map(|reading| (reading.player().id.clone(), activity(reading)))
+            .collect();
+        let selected = self.selection.choose(&activity);
+
+        let mut first_problem = None;
+        let mut chosen = None;
+        for reading in accepted {
+            let is_selected = selected.as_ref() == Some(&reading.player().id);
+            match reading {
+                Reading::Snapshot(snapshot) if is_selected => {
+                    if snapshot.track.is_some() && snapshot.status != PlaybackStatus::Stopped {
+                        chosen = Some(NowPlaying::Track(snapshot));
+                    }
+                }
+                Reading::Unavailable {
+                    player, problem, ..
+                } => {
+                    let report = NowPlaying::Problem { player, problem };
+                    if is_selected {
+                        chosen = Some(report);
+                    } else if first_problem.is_none() {
+                        first_problem = Some(report);
+                    }
+                }
+                Reading::Snapshot(_) => {}
+            }
+        }
+        chosen.or(first_problem).unwrap_or(NowPlaying::Idle)
+    }
+}
+
+fn activity(reading: &Reading) -> PlaybackActivity {
+    match reading {
+        Reading::Snapshot(snapshot) => match snapshot.status {
+            PlaybackStatus::Playing if snapshot.track.is_some() && snapshot.position.is_some() => {
+                PlaybackActivity::Playing
+            }
+            PlaybackStatus::Playing => PlaybackActivity::PlayingWithoutTiming,
+            PlaybackStatus::Paused if snapshot.track.is_some() => PlaybackActivity::Paused,
+            PlaybackStatus::Paused | PlaybackStatus::Stopped => PlaybackActivity::Idle,
+        },
+        Reading::Unavailable {
+            playing: Some(true),
+            ..
+        } => PlaybackActivity::PlayingWithoutTiming,
+        Reading::Unavailable { .. } => PlaybackActivity::Unknown,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Instant;
+
+    use super::*;
+    use crate::model::{Capabilities, Track};
+
+    fn info(id: &str, service: Service) -> PlayerInfo {
+        PlayerInfo {
+            id: PlayerId::new(id),
+            name: id.into(),
+            service,
+            web: false,
+        }
+    }
+
+    fn track(title: &str) -> Track {
+        Track {
+            key: format!("key-{title}"),
+            source_id: None,
+            title: title.into(),
+            artist: "Artist".into(),
+            album: None,
+            duration: Some(200.0),
+            artwork_url: None,
+        }
+    }
+
+    fn reading(id: &str, service: Service, status: PlaybackStatus, title: Option<&str>) -> Reading {
+        Reading::Snapshot(PlayerSnapshot {
+            player: info(id, service),
+            status,
+            track: title.map(track),
+            position: Some(5.0),
+            sampled_at: Instant::now(),
+            rate: 1.0,
+            capabilities: Capabilities::default(),
+        })
+    }
+
+    fn title(now: &NowPlaying) -> Option<&str> {
+        match now {
+            NowPlaying::Track(snapshot) => snapshot.track.as_ref().map(|t| t.title.as_str()),
+            _ => None,
+        }
+    }
+
+    #[test]
+    fn follows_the_playing_service() {
+        let mut engine = Engine::default();
+        let now = engine.choose(vec![
+            reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Paused,
+                Some("Old"),
+            ),
+            reading(
+                "music",
+                Service::AppleMusic,
+                PlaybackStatus::Playing,
+                Some("New"),
+            ),
+        ]);
+        assert_eq!(title(&now), Some("New"));
+        assert_eq!(engine.current(), Some(&PlayerId::new("music")));
+    }
+
+    #[test]
+    fn other_players_are_ignored_unless_allowed() {
+        let browser = || {
+            vec![reading(
+                "firefox",
+                Service::Other,
+                PlaybackStatus::Playing,
+                Some("Video"),
+            )]
+        };
+        assert_eq!(
+            Engine::new(SourcePreference::Automatic, false).choose(browser()),
+            NowPlaying::Idle
+        );
+        assert_eq!(
+            title(&Engine::new(SourcePreference::Automatic, true).choose(browser())),
+            Some("Video")
+        );
+    }
+
+    #[test]
+    fn a_fixed_source_ignores_the_rest() {
+        let mut engine = Engine::new(SourcePreference::Spotify, true);
+        let now = engine.choose(vec![
+            reading(
+                "music",
+                Service::AppleMusic,
+                PlaybackStatus::Playing,
+                Some("Music"),
+            ),
+            reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Paused,
+                Some("Spotify"),
+            ),
+        ]);
+        assert_eq!(title(&now), Some("Spotify"));
+    }
+
+    #[test]
+    fn stopped_and_empty_players_are_idle() {
+        let mut engine = Engine::default();
+        assert_eq!(
+            engine.choose(vec![reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Stopped,
+                Some("T")
+            )]),
+            NowPlaying::Idle
+        );
+        assert_eq!(
+            engine.choose(vec![reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Paused,
+                None
+            )]),
+            NowPlaying::Idle
+        );
+        assert_eq!(engine.choose(Vec::new()), NowPlaying::Idle);
+    }
+
+    #[test]
+    fn problems_are_reported_when_nothing_plays() {
+        let denied = Reading::Unavailable {
+            player: info("music", Service::AppleMusic),
+            problem: Problem::PermissionDenied,
+            playing: None,
+        };
+        let mut engine = Engine::default();
+        assert!(matches!(
+            engine.choose(vec![denied.clone()]),
+            NowPlaying::Problem {
+                problem: Problem::PermissionDenied,
+                ..
+            }
+        ));
+        let now = engine.choose(vec![
+            denied,
+            reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Playing,
+                Some("Song"),
+            ),
+        ]);
+        assert_eq!(
+            title(&now),
+            Some("Song"),
+            "a readable player wins over a problem"
+        );
+    }
+
+    #[test]
+    fn a_player_without_timing_still_counts_as_playing() {
+        let blocked = Reading::Unavailable {
+            player: info("music", Service::AppleMusic),
+            problem: Problem::NoTrackData,
+            playing: Some(true),
+        };
+        let mut engine = Engine::default();
+        let now = engine.choose(vec![
+            blocked,
+            reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Paused,
+                Some("Paused"),
+            ),
+        ]);
+        assert!(matches!(
+            now,
+            NowPlaying::Problem {
+                problem: Problem::NoTrackData,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn changing_the_preference_starts_over() {
+        let mut engine = Engine::default();
+        engine.choose(vec![reading(
+            "spotify",
+            Service::Spotify,
+            PlaybackStatus::Playing,
+            Some("A"),
+        )]);
+        engine.set_preference(SourcePreference::AppleMusic, false);
+        assert_eq!(engine.current(), None);
+        assert_eq!(engine.preference(), SourcePreference::AppleMusic);
+    }
+}

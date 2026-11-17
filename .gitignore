@@ -1,11 +1,27 @@
-# SwiftPM build artifacts
-.build/
-.swiftpm/
+# Rust and the desktop app
+/target/
+apps/desktop/src-tauri/gen/schemas/
+apps/desktop/src-tauri/target/
 
-# Locally built application
-Lyrics Overlay.app/
+# Node
+node_modules/
 dist/
 
-# macOS and editor files
+# macOS app (SwiftPM)
+.build/
+.swiftpm/
+Lyrics Overlay.app/
+
+# Logs and test artifacts
+*.log
+/test-results/
+/playwright-report/
+
+# System and editor files
 .DS_Store
+Thumbs.db
 *.xcuserstate
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp

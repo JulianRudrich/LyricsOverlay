@@ -1,0 +1,236 @@
+//! Everything the app keeps about songs, in one SQLite file: your own lyrics,
+//! per-song timing corrections and the cache of online results.
+
+use std::path::Path;
+
+use lyrics_core::{lrc, LyricLine};
+use rusqlite::{params, Connection, OptionalExtension};
+use serde::{de::DeserializeOwned, Serialize};
+use thiserror::Error;
+
+/// The largest lyrics file accepted for one track, in UTF-8 bytes.
+pub const MAX_LYRICS_BYTES: usize = 512 * 1_024;
+
+/// How many online results are kept; the least recently used go first.
+const CACHE_CAPACITY: i64 = 2_000;
+
+/// The schema version this code writes.
+const SCHEMA_VERSION: i32 = 1;
+
+#[derive(Debug, Error)]
+pub enum StoreError {
+    #[error("the song database is not available: {0}")]
+    Database(#[from] rusqlite::Error),
+    #[error("the song database was written by a newer version of Lyrics Overlay")]
+    NewerSchema,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+pub enum ImportError {
+    #[error("the lyrics contain no line with an LRC timestamp")]
+    MissingTimedLyrics,
+    #[error("the lyrics are larger than 512 KB")]
+    TooLarge,
+    #[error("the lyrics could not be saved: {0}")]
+    Storage(String),
+}
+
+pub struct Store {
+    connection: Connection,
+}
+
+impl Store {
+    pub fn open(path: &Path) -> Result<Self, StoreError> {
+        if let Some(directory) = path.parent() {
+            // A missing directory surfaces as an open error below.
+            let _ = std::fs::create_dir_all(directory);
+        }
+        Self::prepare(Connection::open(path)?)
+    }
+
+    pub fn open_in_memory() -> Result<Self, StoreError> {
+        Self::prepare(Connection::open_in_memory()?)
+    }
+
+    fn prepare(connection: Connection) -> Result<Self, StoreError> {
+        connection.busy_timeout(std::time::Duration::from_secs(2))?;
+        connection.pragma_update(None, "journal_mode", "WAL")?;
+        let version: i32 = connection.pragma_query_value(None, "user_version", |row| row.get(0))?;
+        if version > SCHEMA_VERSION {
+            return Err(StoreError::NewerSchema);
+        }
+        connection.execute_batch(
+            "CREATE TABLE IF NOT EXISTS track_settings (
+                 track_key TEXT PRIMARY KEY,
+                 timing_offset REAL NOT NULL,
+                 updated_at INTEGER NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS local_lyrics (
+                 track_key TEXT PRIMARY KEY,
+                 lrc TEXT NOT NULL,
+                 updated_at INTEGER NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS lyrics_cache (
+                 query_key TEXT PRIMARY KEY,
+                 result TEXT NOT NULL,
+                 expires_at INTEGER NOT NULL,
+                 last_used INTEGER NOT NULL
+             );
+             CREATE INDEX IF NOT EXISTS lyrics_cache_last_used ON lyrics_cache (last_used);",
+        )?;
+        connection.pragma_update(None, "user_version", SCHEMA_VERSION)?;
+        Ok(Self { connection })
+    }
+
+    /// Seconds the lyrics of this track are moved; positive shows them earlier.
+    pub fn timing_offset(&self, track_key: &str) -> f64 {
+        self.connection
+            .query_row(
+                "SELECT timing_offset FROM track_settings WHERE track_key = ?1",
+                params![track_key],
+                |row| row.get::<_, f64>(0),
+            )
+            .optional()
+            .ok()
+            .flatten()
+            .filter(|offset| offset.is_finite())
+            .unwrap_or(0.0)
+    }
+
+    /// Stores a correction for one track. Zero removes it.
+    pub fn set_timing_offset(&self, track_key: &str, offset: f64) -> Result<(), StoreError> {
+        if !offset.is_finite() {
+            return Ok(());
+        }
+        if offset == 0.0 {
+            self.connection.execute(
+                "DELETE FROM track_settings WHERE track_key = ?1",
+                params![track_key],
+            )?;
+        } else {
+            self.connection.execute(
+                "INSERT INTO track_settings (track_key, timing_offset, updated_at) VALUES (?1, ?2, ?3)
+                 ON CONFLICT (track_key) DO UPDATE SET timing_offset = excluded.timing_offset, updated_at = excluded.updated_at",
+                params![track_key, offset, unix_now()],
+            )?;
+        }
+        Ok(())
+    }
+
+    /// Your own lyrics for this track, as LRC text.
+    pub fn local_lyrics(&self, track_key: &str) -> Option<String> {
+        self.connection
+            .query_row(
+                "SELECT lrc FROM local_lyrics WHERE track_key = ?1",
+                params![track_key],
+                |row| row.get(0),
+            )
+            .optional()
+            .ok()
+            .flatten()
+    }
+
+    /// Saves your own LRC lyrics for a track. A failed import keeps the lyrics
+    /// the track had before.
+    pub fn import_lyrics(
+        &self,
+        track_key: &str,
+        text: &str,
+    ) -> Result<Vec<LyricLine>, ImportError> {
+        if text.len() > MAX_LYRICS_BYTES {
+            return Err(ImportError::TooLarge);
+        }
+        let lines = lrc::parse(text);
+        if !lines.iter().any(|line| !line.is_break()) {
+            return Err(ImportError::MissingTimedLyrics);
+        }
+        self.connection
+            .execute(
+                "INSERT INTO local_lyrics (track_key, lrc, updated_at) VALUES (?1, ?2, ?3)
+                 ON CONFLICT (track_key) DO UPDATE SET lrc = excluded.lrc, updated_at = excluded.updated_at",
+                params![track_key, text, unix_now()],
+            )
+            .map_err(|error| ImportError::Storage(error.to_string()))?;
+        Ok(lines)
+    }
+
+    /// Removes your own lyrics for a track. Removing nothing is not an error.
+    pub fn remove_local_lyrics(&self, track_key: &str) -> Result<(), StoreError> {
+        self.connection.execute(
+            "DELETE FROM local_lyrics WHERE track_key = ?1",
+            params![track_key],
+        )?;
+        Ok(())
+    }
+
+    /// A cached online result that has not expired at `now` (Unix seconds).
+    pub fn cached<T: DeserializeOwned>(&self, query_key: &str, now: i64) -> Option<T> {
+        let json: String = self
+            .connection
+            .query_row(
+                "SELECT result FROM lyrics_cache WHERE query_key = ?1 AND expires_at > ?2",
+                params![query_key, now],
+                |row| row.get(0),
+            )
+            .optional()
+            .ok()
+            .flatten()?;
+        let _ = self.connection.execute(
+            "UPDATE lyrics_cache SET last_used = ?2 WHERE query_key = ?1",
+            params![query_key, now],
+        );
+        serde_json::from_str(&json).ok()
+    }
+
+    /// Caches an online result until `expires_at` and trims the cache to its capacity.
+    pub fn store_cached<T: Serialize>(
+        &self,
+        query_key: &str,
+        result: &T,
+        now: i64,
+        expires_at: i64,
+    ) -> Result<(), StoreError> {
+        let json = serde_json::to_string(result)
+            .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
+        self.connection.execute(
+            "INSERT INTO lyrics_cache (query_key, result, expires_at, last_used) VALUES (?1, ?2, ?3, ?4)
+             ON CONFLICT (query_key) DO UPDATE SET result = excluded.result, expires_at = excluded.expires_at, last_used = excluded.last_used",
+            params![query_key, json, expires_at, now],
+        )?;
+        self.connection.execute(
+            "DELETE FROM lyrics_cache WHERE expires_at <= ?1 OR query_key IN (
+                 SELECT query_key FROM lyrics_cache ORDER BY last_used DESC, query_key LIMIT -1 OFFSET ?2
+             )",
+            params![now, CACHE_CAPACITY],
+        )?;
+        Ok(())
+    }
+
+    /// Forgets one cached result, for "search again".
+    pub fn forget_cached(&self, query_key: &str) -> Result<(), StoreError> {
+        self.connection.execute(
+            "DELETE FROM lyrics_cache WHERE query_key = ?1",
+            params![query_key],
+        )?;
+        Ok(())
+    }
+
+    pub fn clear_cache(&self) -> Result<(), StoreError> {
+        self.connection.execute("DELETE FROM lyrics_cache", [])?;
+        Ok(())
+    }
+
+    pub fn cache_len(&self) -> usize {
+        self.connection
+            .query_row("SELECT COUNT(*) FROM lyrics_cache", [], |row| {
+                row.get::<_, i64>(0)
+            })
+            .map_or(0, |count| count.max(0) as usize)
+    }
+}
+
+pub(crate) fn unix_now() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |elapsed| elapsed.as_secs() as i64)
+}

@@ -1,0 +1,11 @@
+{
+  "name": "lyrics-overlay-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm --filter lyrics-overlay-desktop tauri dev",
+    "build": "pnpm --filter lyrics-overlay-desktop tauri build",
+    "check": "pnpm --filter lyrics-overlay-desktop check",
+    "test": "pnpm --filter lyrics-overlay-desktop test"
+  }
+}

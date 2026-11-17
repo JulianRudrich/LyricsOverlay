@@ -157,16 +157,13 @@
 >
   <header>
     <button class="settings" onclick={() => api.openSettings()} title={t("overlay.openSettings")} aria-label={t("overlay.openSettings")}>
-      <Icon name="waveform" size={14} />
+      <Icon name="note" size={15} />
     </button>
-    <div class="track">
-      {#if track}
-        <span class="title">{track.title}</span>
-        <span class="artist">{[track.artist, playerName].filter(Boolean).join(" · ")}</span>
-      {:else}
-        <span class="title">{t("app.name")}</span>
-      {/if}
-    </div>
+    {#if track}
+      <span class="track" title={playerName}>{[track.title, track.artist].filter(Boolean).join("  ·  ")}</span>
+    {:else}
+      <span class="track idle">{t("app.name")}</span>
+    {/if}
     {#if lyrics?.sync === "unsynced"}
       <span class="tag">{t("overlay.notSynced")}</span>
     {/if}
@@ -181,7 +178,7 @@
   <section class="lines" class:caption={layout === "caption"} aria-live="polite">
     {#if showLyrics}
       {#if layout === "context" && active !== null && active > 0}
-        <p class="previous" style:font-size="{Math.max(11, fontSize * 0.55)}px">{lineText(lines[active - 1])}</p>
+        <p class="previous" style:font-size="{Math.max(12, fontSize * 0.8)}px">{lineText(lines[active - 1])}</p>
       {/if}
       {#key active}
         <p
@@ -200,7 +197,7 @@
         </p>
       {/key}
       {#if layout !== "caption" && lines[(active ?? -1) + 1]}
-        <p class="next" style:font-size="{Math.max(12, fontSize * 0.63)}px">{lineText(lines[(active ?? -1) + 1])}</p>
+        <p class="next" style:font-size="{Math.max(12, fontSize * 0.8)}px">{lineText(lines[(active ?? -1) + 1])}</p>
       {/if}
     {:else}
       <div class="status">
@@ -220,18 +217,16 @@
 </main>
 
 <style>
+  /* The look of the first version: black and see-through, white lyrics, no colour. */
   .overlay {
-    --accent: #7af2d4;
-    --base: 14 19 24;
     box-sizing: border-box;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 17px;
-    border-radius: 18px;
-    background: rgb(var(--base) / var(--background-opacity));
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / calc(var(--background-opacity) * 0.15));
+    gap: 10px;
+    padding: 14px 18px 16px;
+    border-radius: 16px;
+    background: rgb(0 0 0 / var(--background-opacity));
     color: #fff;
     overflow: hidden;
     cursor: default;
@@ -242,10 +237,11 @@
   header {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 6px;
     min-height: 28px;
     font-size: 11px;
     font-weight: 600;
+    color: rgb(255 255 255 / 0.62);
   }
 
   button {
@@ -264,56 +260,37 @@
     width: 28px;
     height: 28px;
     border-radius: 7px;
-    color: var(--accent);
-    background: rgb(122 242 212 / 0.13);
   }
 
   .settings:hover,
   .settings:focus-visible {
-    background: rgb(122 242 212 / 0.24);
+    color: #fff;
+    background: rgb(255 255 255 / 0.1);
   }
 
   .track {
     flex: 1;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .title,
-  .artist {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
-  .title {
-    font-size: 12px;
-  }
-
-  .artist {
-    font-size: 10px;
-    font-weight: 500;
-    color: rgb(255 255 255 / 0.69);
+  .idle {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .tag {
     flex: none;
     font-size: 10px;
     font-weight: 500;
-    color: rgb(255 255 255 / 0.6);
   }
 
   .badge {
     flex: none;
     display: grid;
     place-items: center;
-    color: var(--accent);
-  }
-
-  .badge.muted {
-    color: rgb(255 255 255 / 0.75);
   }
 
   .lines {
@@ -322,8 +299,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.75));
+    gap: 8px;
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.6));
   }
 
   .lines p {
@@ -334,21 +311,15 @@
   .previous,
   .next {
     font-weight: 500;
+    color: rgb(255 255 255 / 0.4);
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
-  .previous {
-    color: rgb(255 255 255 / 0.5);
-  }
-
-  .next {
-    color: rgb(255 255 255 / 0.7);
-  }
-
   .current {
-    font-weight: 650;
+    font-weight: 700;
     line-height: 1.18;
+    color: #fff;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -357,7 +328,7 @@
   }
 
   .word {
-    background: linear-gradient(90deg, #fff var(--fill), rgb(255 255 255 / 0.42) var(--fill));
+    background: linear-gradient(90deg, #fff var(--fill), rgb(255 255 255 / 0.4) var(--fill));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -371,10 +342,10 @@
   }
 
   .status p {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     line-height: 1.3;
-    color: rgb(255 255 255 / 0.84);
+    color: rgb(255 255 255 / 0.8);
   }
 
   .retry {
@@ -383,7 +354,12 @@
     place-items: center;
     width: 26px;
     height: 26px;
-    color: var(--accent);
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .retry:hover,
+  .retry:focus-visible {
+    color: #fff;
   }
 
   .progress {
@@ -396,7 +372,7 @@
 
   .progress div {
     height: 100%;
-    background: var(--accent);
+    background: rgb(255 255 255 / 0.7);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -133,8 +133,9 @@ pub fn player_command(state: State<'_, AppState>, command: Command) {
     state.request(Request::Command(command));
 }
 
+/// Async, because building a window inside a synchronous command deadlocks on Windows.
 #[tauri::command]
-pub fn open_settings(app: AppHandle) {
+pub async fn open_settings(app: AppHandle) {
     windows::open_settings(&app);
 }
 

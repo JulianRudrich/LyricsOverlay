@@ -197,8 +197,11 @@ pub fn set_editor_title(app: &AppHandle, title: &str) {
 }
 
 /// Opening the app again makes the overlay reachable: visible, clickable, with settings open.
+/// A launch while the first instance is still starting is ignored.
 pub fn reopen(app: &AppHandle) {
-    let state = app.state::<AppState>();
+    let Some(state) = app.try_state::<AppState>() else {
+        return;
+    };
     state.update_settings(app, |settings| {
         settings.click_through = false;
         settings.overlay_visible = true;

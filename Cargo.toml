@@ -1,0 +1,35 @@
+[workspace]
+resolver = "2"
+members = ["crates/lyrics-core"]
+
+[workspace.package]
+version = "0.3.0-alpha.0"
+edition = "2021"
+rust-version = "1.85"
+license = "GPL-3.0-or-later"
+authors = ["Julian Rudrich"]
+repository = "https://github.com/JulianRudrich/LyricsOverlay"
+publish = false
+
+[workspace.dependencies]
+lyrics-core = { path = "crates/lyrics-core" }
+media-session = { path = "crates/media-session" }
+lyrics-providers = { path = "crates/lyrics-providers" }
+
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml_ng = "0.10"
+thiserror = "2"
+unicode-normalization = "0.1"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
+strip = "debuginfo"

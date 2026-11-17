@@ -69,7 +69,8 @@ jobs:
   desktop:
     name: ${{ matrix.name }} build
     needs: linux
-    if: (github.event_name == 'workflow_dispatch' && inputs.desktop) || startsWith(github.ref, 'refs/tags/v')
+    # Test builds for every push to next, on request, and for version tags.
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/next') || (github.event_name == 'workflow_dispatch' && inputs.desktop) || startsWith(github.ref, 'refs/tags/v')
     strategy:
       fail-fast: false
       matrix:

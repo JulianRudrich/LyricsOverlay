@@ -2,7 +2,7 @@
 
 Synced lyrics in a small window above your other apps, for Windows, macOS and Linux, with Spotify, Apple Music and Amazon Music.
 
-> **Status: early development (phase 0).** Nothing here is released yet. The released app is the macOS-only Swift version in [JulianRudrich/LyricsOverlay](https://github.com/JulianRudrich/LyricsOverlay). This codebase is its cross-platform successor.
+> **Status: early development (phase 0).** Nothing on this branch is released yet. The released app is the macOS-only Swift version on [`main`](https://github.com/JulianRudrich/LyricsOverlay/tree/main). This branch, `next`, is its cross-platform successor.
 
 ## What works today
 

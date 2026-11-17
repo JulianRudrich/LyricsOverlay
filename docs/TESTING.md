@@ -4,7 +4,7 @@ Ein Durchgang dauert pro System etwa zehn Minuten. Schick mir danach die Ausgabe
 
 ## Builds holen
 
-1. Im GitHub-Repo: **Actions → CI → Run workflow** (Häkchen „Also build the Windows and macOS apps“ bleibt an).
+1. Im GitHub-Repo unter **Actions → CI** den neuesten Lauf auf dem Branch `next` öffnen. CI baut die Testversionen bei jedem Push auf `next`; einen neuen Lauf startest du mit **Run workflow** (Branch `next` wählen).
 2. Wenn der Lauf fertig ist, unten bei **Artifacts** herunterladen:
    - `lyrics-overlay-macOS`: `.dmg` und `lyrics-overlay-watch-macos.tar.gz`
    - `lyrics-overlay-Windows`: Installer `…-setup.exe` (oder `.msi`) und `lyrics-overlay-watch.exe`

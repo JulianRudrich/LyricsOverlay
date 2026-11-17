@@ -1,0 +1,29 @@
+[package]
+name = "lyrics-overlay"
+description = "Synced lyrics above your other windows, for Spotify, Apple Music and Amazon Music."
+version = "0.3.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+default-run = "lyrics-overlay"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+lyrics-core.workspace = true
+lyrics-providers.workspace = true
+media-session.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sys-locale = "0.3"
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
+tauri-plugin-autostart = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-single-instance = "2"
+
+[lints]
+workspace = true

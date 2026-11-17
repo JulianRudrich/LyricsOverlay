@@ -4,7 +4,7 @@
 
 ## Build from source
 
-Clone or download this repository, then run the following from the project directory:
+Clone or download this repository, then run the following from the `apps/macos` folder:
 
 ```sh
 bash build-app.sh

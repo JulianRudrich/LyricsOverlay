@@ -1,4 +1,4 @@
-name: macOS build
+name: macOS app (Swift)
 
 on:
   push:
@@ -11,6 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/macos
     steps:
       - uses: actions/checkout@v4
       - name: Read version
@@ -35,5 +38,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Lyrics-Overlay-${{ env.VERSION }}-universal
-          path: dist/Lyrics-Overlay-${{ env.VERSION }}-universal.zip
+          path: apps/macos/dist/Lyrics-Overlay-${{ env.VERSION }}-universal.zip
           if-no-files-found: error

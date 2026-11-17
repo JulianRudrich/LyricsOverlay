@@ -28,7 +28,8 @@ Mike (MikeLeonFox) hat [JulianRudrich/LyricsOverlay#1](https://github.com/Julian
 - [x] LRCLIB-Suche, Cache, eigene Lyrics, Korrektur pro Song (SQLite)
 - [x] App: Overlay, Einstellungen, Tray, Shortcut, Demo-Modus
 - [x] Linux-Gesamttest in CI mit Screenshot
-- [ ] Messungen A, B, C ([SPIKES.md](SPIKES.md)): brauchen Julians Mac und Windows-PC
+- [x] Messung C: LRCLIB liefert für 8 von 10 bekannten Songs Wortzeiten ([SPIKES.md](SPIKES.md))
+- [ ] Messungen A und B: brauchen Julians Mac und Windows-PC
 - [ ] Privates GitHub-Repo, damit CI die Mac- und Windows-Builds erzeugt
 
 **Phase 1: Dein 0.2 auf drei Systemen (erste Alpha).** LRC-Import und Editor mit Zeitstempel-Taste, automatisches Ausblenden, frei belegbarer Shortcut, automatische Updates, Installer, Feinschliff aus den Messungen (zum Beispiel Overlay über Vollbild-Apps auf macOS).

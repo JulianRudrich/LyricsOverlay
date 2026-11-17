@@ -374,3 +374,43 @@ async fn service_prefers_own_lyrics_and_caches_online_results() {
         .await;
     assert_eq!(offline, LyricsOutcome::LocalOnly);
 }
+
+#[tokio::test]
+async fn word_timing_wins_a_tie() {
+    // Found on the real LRCLIB: a version without word timing 4 s off is listed
+    // before one with word timing 5 s off. With the bonus both score 4.
+    let server = MockServer::start().await;
+    not_found(&server).await;
+    let words = "version: '1.0'\nlines:\n  - text: 'Glow'\n    start_ms: 1000\n    words:\n      - {text: 'Glow', start_ms: 1000}\n";
+    let mut word_record = record(
+        "Paper Lanterns",
+        "Compilation",
+        217.0,
+        Some("[00:01.00] Glow"),
+        None,
+    );
+    word_record["lyricsfile"] = json!(words);
+    Mock::given(method("GET"))
+        .and(path("/api/search"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!([
+            record(
+                "Paper Lanterns",
+                "Bonus Edition",
+                218.0,
+                Some("[00:01.00] Glow"),
+                None
+            ),
+            word_record,
+        ])))
+        .mount(&server)
+        .await;
+
+    let result = client(&server)
+        .find(&query("Paper Lanterns", None, 222.0))
+        .await
+        .expect("lookup works");
+    let LookupResult::Found { lyrics } = result else {
+        panic!("expected lyrics, got {result:?}");
+    };
+    assert_eq!(lyrics.sync, SyncLevel::Word);
+}

@@ -36,10 +36,26 @@ Drei Fragen, deren Antworten den Bau der nächsten Phasen bestimmen. Anleitung f
 
 **Frage:** Liefert LRCLIB Wortzeiten (`lyricsfile` mit `words`), und für wie viele Songs?
 
-**Bekannt:** Andere Projekte berichten von einem Feld `lyricsfile` im Lyricsfile-Format ([Spezifikation](https://github.com/tranxuanthang/lyricsfile)). Die App liest es als Text oder als Objekt und bevorzugt Wortzeiten; ein unlesbares Feld verhindert keine Lyrics.
+**Ergebnis (17.11.2026, zehn bekannte Songs, je 20 Suchtreffer):**
 
-**Ergebnis:** offen. In dieser Entwicklungsumgebung ist `lrclib.net` gesperrt. Auf deinem Rechner prüft dieser Befehl einen Song:
+- Jeder Treffer hat ein Feld `lyricsfile` (YAML als Text) und ein Kennzeichen `hasWordSync`. Alle 200 Dokumente ließen sich lesen.
+- **88 von 200** Treffern haben Wortzeiten; **8 von 10 Songs** haben mindestens eine Fassung mit Wortzeiten.
+- Der Anteil schwankt stark: „As It Was“ 19/20, „Levitating“ 17/20, „Haus am See“ 17/20, „Blinding Lights“ 16/20, „Sonne“ 13/20, „Espresso“ 4/20, „BIRDS OF A FEATHER“ 1/20, „Shape of You“ 1/20, „Cruel Summer“ 0/20, „Bohemian Rhapsody“ 0/20.
 
-```bash
-curl -s "https://lrclib.net/api/search?track_name=Blinding%20Lights&artist_name=The%20Weeknd" | python3 -c "import json,sys; r=json.load(sys.stdin); print(len(r), 'Treffer;', sum(1 for x in r if x.get('lyricsfile')), 'mit lyricsfile')"
-```
+Die Suche der App mit dem echten LRCLIB (`cargo run -p lyrics-providers --example lookup`):
+
+| Song | Ergebnis |
+|---|---|
+| The Weeknd – Blinding Lights | Wort für Wort, 35 Zeilen |
+| Harry Styles – As It Was | Wort für Wort, 37 Zeilen |
+| Rammstein – Sonne | Wort für Wort, 40 Zeilen |
+| Peter Fox – Haus am See (216 s) | Wort für Wort, 50 Zeilen |
+| Taylor Swift – Cruel Summer | zeilenweise (keine Wortdaten vorhanden) |
+| Queen – Bohemian Rhapsody | zeilenweise (keine Wortdaten vorhanden) |
+
+**Folgen:**
+
+- Echtes Wort-für-Wort ist für einen großen Teil bekannter Songs sofort verfügbar. Für den Rest braucht es die geschätzte Hervorhebung aus Phase 2.
+- Ein exakter Treffer (Dauer ±2,5 s) gewinnt immer, auch ohne Wortzeiten: Eine Fassung mit anderer Dauer hat oft ein verschobenes Timing. Beispiel: „Haus am See“ mit 222 s trifft eine exakte Fassung ohne Wortzeiten; die Fassungen mit Wortzeiten sind 216 s lang.
+- Bei Gleichstand in der Suche gewinnen jetzt Wortzeiten; das fiel beim Test mit echten Daten auf und ist behoben.
+- Idee für später: Hat der exakte Treffer keine Wortzeiten, eine Fassung mit Wortzeiten und fast gleicher Dauer (±1 s) aus der Suche nehmen.

@@ -306,16 +306,17 @@ fn best_synced<'a>(
                     .is_some_and(|lyrics| lyrics.sync == SyncLevel::Word);
             let score =
                 (record.duration - duration).abs() - if word { WORD_SYNC_BONUS } else { 0.0 };
-            (score, record)
+            (score, word, record)
         })
+        // On equal scores word timing wins; otherwise the first listed result stays.
         .reduce(|best, candidate| {
-            if candidate.0 < best.0 {
+            if candidate.0 < best.0 || (candidate.0 == best.0 && candidate.1 && !best.1) {
                 candidate
             } else {
                 best
             }
         })
-        .map(|(_, record)| record)
+        .map(|(_, _, record)| record)
 }
 
 fn same_album(record: &LyricsRecord, album: Option<&str>) -> bool {

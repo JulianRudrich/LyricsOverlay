@@ -156,7 +156,7 @@ fn launched_again(app: &AppHandle, arguments: &[String]) {
 
 fn user_agent(app: &AppHandle) -> String {
     format!(
-        "Singline/{} (https://github.com/JulianRudrich/LyricsOverlay)",
+        "Singline/{} (https://github.com/JulianRudrich/Singline)",
         app.package_info().version
     )
 }

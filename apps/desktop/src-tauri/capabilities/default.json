@@ -9,8 +9,8 @@
     {
       "identifier": "opener:allow-open-url",
       "allow": [
-        { "url": "https://github.com/JulianRudrich/LyricsOverlay" },
-        { "url": "https://github.com/JulianRudrich/LyricsOverlay/*" },
+        { "url": "https://github.com/JulianRudrich/Singline" },
+        { "url": "https://github.com/JulianRudrich/Singline/*" },
         { "url": "https://lrclib.net/*" }
       ]
     }

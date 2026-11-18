@@ -34,7 +34,7 @@ final class PlayerModel: ObservableObject {
     private var observers: [NSObjectProtocol] = []
     private let service: LyricsService = {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
-        return LyricsService(userAgent: "Lyrics Overlay/\(version) (https://github.com/JulianRudrich/LyricsOverlay)")
+        return LyricsService(userAgent: "Lyrics Overlay/\(version) (https://github.com/JulianRudrich/Singline)")
     }()
 
     func start() {

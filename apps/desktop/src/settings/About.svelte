@@ -12,13 +12,13 @@
   // Opened in the browser by the opener plugin; capabilities/default.json allows exactly these.
   const links = $derived<{ href: string; icon: GlyphName; title: string; hint: string }[]>([
     {
-      href: "https://github.com/JulianRudrich/LyricsOverlay",
+      href: "https://github.com/JulianRudrich/Singline",
       icon: "code",
       title: t("about.project"),
-      hint: "github.com/JulianRudrich/LyricsOverlay",
+      hint: "github.com/JulianRudrich/Singline",
     },
     {
-      href: "https://github.com/JulianRudrich/LyricsOverlay/blob/main/LICENSE",
+      href: "https://github.com/JulianRudrich/Singline/blob/main/LICENSE",
       icon: "license",
       title: t("about.license"),
       hint: "GPL-3.0-or-later",

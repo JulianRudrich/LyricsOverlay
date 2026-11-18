@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Singline – synced lyrics above everything else</title>
+  <meta name="description" content="Singline shows synced lyrics for Spotify, Apple Music, Amazon Music and YouTube Music in a small window above your other apps. Free and open source for Windows, macOS and Linux.">
+  <meta property="og:title" content="Singline">
+  <meta property="og:description" content="Synced lyrics in a small window above everything else. Free and open source for Windows, macOS and Linux.">
+  <meta property="og:image" content="https://julianrudrich.github.io/Singline/images/social-preview.png">
+  <meta property="og:url" content="https://julianrudrich.github.io/Singline/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="images/app-icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #000;
+      --text: #fff;
+      --muted: rgb(255 255 255 / 0.62);
+      --faint: rgb(255 255 255 / 0.4);
+      --card: rgb(255 255 255 / 0.05);
+      --line: rgb(255 255 255 / 0.09);
+      --ease: cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); color-scheme: dark; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 700px at 70% -10%, rgb(255 255 255 / 0.09), transparent 70%),
+        var(--bg);
+      font: 17px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; align-items: center; gap: 12px; padding: 22px 0; }
+    nav img { width: 32px; height: 32px; }
+    nav strong { font-size: 18px; }
+    nav .spacer { flex: 1; }
+    nav a.link { color: var(--muted); text-decoration: none; font-size: 15px; margin-left: 18px; }
+    nav a.link:hover { color: var(--text); }
+    header { text-align: center; padding: 56px 0 24px; }
+    h1 { font-size: clamp(44px, 7vw, 76px); line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 18px; }
+    .lead { font-size: clamp(18px, 2.2vw, 22px); color: var(--muted); max-width: 640px; margin: 0 auto 30px; }
+    .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .button {
+      display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 12px;
+      font-weight: 600; text-decoration: none; transition: transform 140ms var(--ease), background 200ms var(--ease);
+    }
+    .button:active { transform: scale(0.97); }
+    .primary { background: #fff; color: #000; }
+    .primary:hover { background: rgb(255 255 255 / 0.88); }
+    .secondary { background: var(--card); border: 1px solid var(--line); }
+    .secondary:hover { background: rgb(255 255 255 / 0.1); }
+    .note { color: var(--faint); font-size: 14px; margin-top: 14px; }
+    .demo { display: block; width: min(770px, 100%); margin: 48px auto 0; border-radius: 22px; box-shadow: 0 40px 120px rgb(0 0 0 / 0.7); }
+    section { padding: 88px 0 0; }
+    h2 { font-size: clamp(28px, 3.6vw, 38px); letter-spacing: -0.02em; margin: 0 0 10px; }
+    .sub { color: var(--muted); margin: 0 0 34px; max-width: 680px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+    .card h3 { margin: 0 0 6px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .shot { width: 100%; border-radius: 16px; display: block; }
+    .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+    .caption { color: var(--faint); font-size: 14px; margin-top: 8px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; }
+    td:first-child { font-weight: 600; }
+    .table { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+    footer { padding: 96px 0 48px; color: var(--faint); font-size: 14px; text-align: center; }
+    footer a { color: var(--muted); }
+    .reveal { opacity: 0; transform: translateY(8px); filter: blur(6px); transition: opacity 550ms var(--ease), transform 550ms var(--ease), filter 550ms var(--ease); }
+    .reveal.shown { opacity: 1; transform: none; filter: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { transform: none; filter: none; transition: opacity 300ms; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <img src="images/app-icon.svg" alt="">
+      <strong>Singline</strong>
+      <span class="spacer"></span>
+      <a class="link" href="#features">Features</a>
+      <a class="link" href="#players">Players</a>
+      <a class="link" href="https://github.com/JulianRudrich/Singline">GitHub</a>
+    </nav>
+
+    <header>
+      <h1>Sing along to<br>every song.</h1>
+      <p class="lead">Singline shows synced lyrics in a small window above everything else. Word by word, for Spotify, Apple Music, Amazon Music and YouTube Music.</p>
+      <div class="actions">
+        <a class="button primary" id="download" href="https://github.com/JulianRudrich/Singline/releases/latest">Download Singline</a>
+        <a class="button secondary" href="https://github.com/JulianRudrich/Singline">View on GitHub</a>
+      </div>
+      <p class="note" id="download-note">Free and open source · Windows, macOS and Linux</p>
+      <img class="demo" src="images/demo.gif" width="770" height="434" alt="Singline playing a song: the lines scroll up, each word lights up as it is sung, and the mini-player appears on hover">
+    </header>
+
+    <section id="features" class="reveal">
+      <h2>Made for listening.</h2>
+      <p class="sub">Everything you need to follow a song, and nothing that gets in the way.</p>
+      <div class="grid">
+        <div class="card"><h3>Word by word</h3><p>Every word lights up as it is sung, from real word timing where the lyrics have it.</p></div>
+        <div class="card"><h3>Always on top</h3><p>A small window above every app, on every desktop. It never takes the focus and can let clicks through.</p></div>
+        <div class="card"><h3>A mini-player</h3><p>Previous, play and next, a seek bar and chorus markers appear when you move the pointer over it.</p></div>
+        <div class="card"><h3>Music in your browser</h3><p>YouTube Music, YouTube and other web players, even in a background tab, with the Singline extension.</p></div>
+        <div class="card"><h3>Your own lyrics</h3><p>Import an LRC file or set each line's timestamp with a key press while the song plays.</p></div>
+        <div class="card"><h3>Your music</h3><p>Listening time, streaks, a listening clock and your top songs and artists, kept on your device.</p></div>
+        <div class="card"><h3>True Shuffle</h3><p>Connect Spotify for an honest random order in which nothing repeats until everything has played.</p></div>
+        <div class="card"><h3>Private</h3><p>No account, no tracking. Only the song's title, artist, album and duration are used to find its lyrics.</p></div>
+      </div>
+    </section>
+
+    <section class="reveal">
+      <h2>Yours to arrange.</h2>
+      <p class="sub">One line, a focus on the current line, or the lines around it. Font size, transparency and size are up to you.</p>
+      <div class="shots">
+        <div><img class="shot" src="images/overlay-caption.png" alt="One line layout" loading="lazy"><div class="caption">One line</div></div>
+        <div><img class="shot" src="images/overlay-focus.png" alt="Focus layout" loading="lazy"><div class="caption">Focus</div></div>
+        <div><img class="shot" src="images/overlay-context.png" alt="Context layout" loading="lazy"><div class="caption">Context</div></div>
+      </div>
+      <img class="shot" style="margin-top:14px" src="images/settings.png" alt="The settings with the panes General, Appearance, Song &amp; timing and About" loading="lazy">
+    </section>
+
+    <section id="players" class="reveal">
+      <h2>Works with your player.</h2>
+      <p class="sub">Singline reads what your music app is playing. It never needs your password and never starts a player by itself.</p>
+      <div class="table">
+        <table>
+          <tr><th></th><th>Windows</th><th>macOS</th><th>Linux</th></tr>
+          <tr><td>Spotify</td><td>Desktop app</td><td>Desktop app</td><td>Desktop app</td></tr>
+          <tr><td>Apple Music</td><td>Apple Music app</td><td>Music app</td><td>Web player</td></tr>
+          <tr><td>Amazon Music</td><td>Desktop app</td><td>Web player</td><td>Web player</td></tr>
+          <tr><td>YouTube Music</td><td>Web app or browser</td><td>Browser</td><td>Browser</td></tr>
+          <tr><td>Other players</td><td>System media controls</td><td>Browser</td><td>Any MPRIS player</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="reveal" style="text-align:center">
+      <h2>Free and open source.</h2>
+      <p class="sub" style="margin-left:auto;margin-right:auto">Singline is licensed under the GPL and built in the open. Lyrics come from LRCLIB, the open lyrics database.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/JulianRudrich/Singline/releases/latest">Download</a>
+        <a class="button secondary" href="https://github.com/JulianRudrich/Singline">Source code</a>
+      </div>
+    </section>
+
+    <footer>
+      Made by <a href="https://github.com/JulianRudrich">Julian Rudrich</a> · Lyrics from <a href="https://lrclib.net">LRCLIB</a> · <a href="https://github.com/JulianRudrich/Singline/blob/main/LICENSE">GPL-3.0-or-later</a><br>
+      Not affiliated with Spotify, Apple, Amazon, Google or LRCLIB.
+    </footer>
+  </div>
+
+  <script>
+    // Point the download button at the installer for this system, if a release has one.
+    const platform = (navigator.userAgentData?.platform || navigator.platform || navigator.userAgent).toLowerCase();
+    const system = platform.includes("win") ? "Windows" : platform.includes("mac") ? "macOS" : platform.includes("linux") ? "Linux" : null;
+    const patterns = { Windows: /x64-setup\.exe$/, macOS: /\.dmg$/, Linux: /\.AppImage$/ };
+    if (system) {
+      fetch("https://api.github.com/repos/JulianRudrich/Singline/releases/latest")
+        .then((response) => (response.ok ? response.json() : null))
+        .then((release) => {
+          const asset = release?.assets?.find((item) => patterns[system].test(item.name));
+          if (!asset) return;
+          const button = document.getElementById("download");
+          button.href = asset.browser_download_url;
+          button.textContent = `Download for ${system}`;
+          document.getElementById("download-note").textContent = `Version ${release.tag_name.replace(/^v/, "")} · Free and open source · Other systems on GitHub`;
+        })
+        .catch(() => {});
+    }
+
+    // Sections fade in as they scroll into view.
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("shown");
+          observer.unobserve(entry.target);
+        }
+      }
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+  </script>
+</body>
+</html>

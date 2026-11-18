@@ -1,0 +1,39 @@
+name: Website
+
+# Publishes site/ to GitHub Pages, with the pictures from docs/images.
+# Runs by hand and for every release until Pages is switched on in the repository settings.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Publish the website
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Put the site together
+        run: |
+          mkdir -p _site/images
+          cp -r site/. _site/
+          cp docs/images/demo.gif docs/images/settings.png docs/images/social-preview.png _site/images/
+          cp apps/desktop/design/app-icon.svg _site/images/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

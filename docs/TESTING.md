@@ -1,6 +1,6 @@
 # Testing on Windows and macOS
 
-Linux is tested automatically in CI. Windows and macOS need a real device. One pass takes about ten minutes per system. Please report the results in an [issue](https://github.com/JulianRudrich/LyricsOverlay/issues/new) with the output of `singline-watch`; screenshots help with anything that looks wrong.
+Linux is tested automatically in CI. Windows and macOS need a real device. One pass takes about ten minutes per system. Please report the results in an [issue](https://github.com/JulianRudrich/Singline/issues/new) with the output of `singline-watch`; screenshots help with anything that looks wrong.
 
 ## Get the builds
 

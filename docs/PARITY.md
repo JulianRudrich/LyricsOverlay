@@ -1,6 +1,6 @@
 # Feature parity
 
-Before its first release, Singline must offer every feature of the native macOS app (Linory 0.3.1, contributed in [#1](https://github.com/JulianRudrich/LyricsOverlay/pull/1)) on every system. Before that release, this list is compared again with the latest version of Linory.
+Before its first release, Singline must offer every feature of the native macOS app (Linory 0.3.1, contributed in [#1](https://github.com/JulianRudrich/Singline/pull/1)) on every system. Before that release, this list is compared again with the latest version of Linory.
 
 **Legend:** ✅ built and tested · 🧪 built, not yet tested on a device · ⬜ open · — not available on this system
 

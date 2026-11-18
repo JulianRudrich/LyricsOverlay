@@ -7,7 +7,7 @@
 **Synced lyrics in a small window above everything else.**<br>
 For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and Linux.
 
-[![CI](https://github.com/JulianRudrich/LyricsOverlay/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JulianRudrich/LyricsOverlay/actions/workflows/ci.yml)
+[![CI](https://github.com/JulianRudrich/Singline/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JulianRudrich/Singline/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-111111)](LICENSE)
 ![Windows, macOS and Linux](https://img.shields.io/badge/platforms-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-111111)
 

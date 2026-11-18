@@ -7,9 +7,12 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use windows::Media::Control::{
     GlobalSystemMediaTransportControlsSession as Session,
     GlobalSystemMediaTransportControlsSessionManager as Manager,
+    GlobalSystemMediaTransportControlsSessionMediaProperties as MediaProperties,
     GlobalSystemMediaTransportControlsSessionPlaybackStatus as WindowsStatus,
 };
+use windows::Storage::Streams::DataReader;
 
+use crate::artwork;
 use crate::backend::{Backend, CommandError};
 use crate::model::{
     Capabilities, Command, PlaybackStatus, PlayerId, PlayerInfo, PlayerSnapshot, Reading, Service,
@@ -27,6 +30,9 @@ const MAX_EXTRAPOLATION: f64 = 6.0 * 60.0 * 60.0;
 pub struct SmtcBackend {
     manager: Option<Manager>,
     last_error: Option<String>,
+    /// Cover art per player, with the key of the track it belongs to, so the
+    /// picture is read once per song rather than on every poll.
+    artwork: HashMap<PlayerId, (String, String)>,
 }
 
 impl SmtcBackend {
@@ -73,9 +79,11 @@ impl Backend for SmtcBackend {
         match self.sessions() {
             Ok(sessions) => {
                 self.last_error = None;
+                self.artwork
+                    .retain(|player, _| sessions.iter().any(|(id, _)| id == player));
                 sessions
                     .into_iter()
-                    .filter_map(|(id, session)| read_session(id, &session).ok())
+                    .filter_map(|(id, session)| read_session(id, &session, &mut self.artwork).ok())
                     .collect()
             }
             Err(error) => {
@@ -124,7 +132,11 @@ impl Backend for SmtcBackend {
     }
 }
 
-fn read_session(id: PlayerId, session: &Session) -> windows::core::Result<Reading> {
+fn read_session(
+    id: PlayerId,
+    session: &Session,
+    artwork: &mut HashMap<PlayerId, (String, String)>,
+) -> windows::core::Result<Reading> {
     let app_id = session.SourceAppUserModelId()?.to_string_lossy();
     let (service, name, web) = identify_smtc(&app_id);
     let info = session.GetPlaybackInfo()?;
@@ -182,14 +194,18 @@ fn read_session(id: PlayerId, session: &Session) -> windows::core::Result<Readin
     let reports_position = capabilities.seek || position_ticks > 0 || duration.is_some();
 
     let title = title.trim().to_owned();
-    let track = (!title.is_empty()).then(|| Track {
-        key: track_key(&title, &artist, album.as_deref()),
-        source_id: None,
-        title,
-        artist,
-        album,
-        duration,
-        artwork_url: None,
+    let track = (!title.is_empty()).then(|| {
+        let key = track_key(&title, &artist, album.as_deref());
+        let artwork_url = cover_art(&id, &key, &properties, artwork);
+        Track {
+            key,
+            source_id: None,
+            title,
+            artist,
+            album,
+            duration,
+            artwork_url,
+        }
     });
     let position = (track.is_some() && reports_position).then(|| {
         let reported = (position_ticks - start).max(0) as f64 / TICKS_PER_SECOND;
@@ -210,6 +226,44 @@ fn read_session(id: PlayerId, session: &Session) -> windows::core::Result<Readin
         rate,
         capabilities,
     }))
+}
+
+/// The cover art of the track `key` as a `data:` URL. A picture found once is
+/// kept for the rest of the track; until then every poll looks again, because
+/// players often add it a moment after the title.
+fn cover_art(
+    player: &PlayerId,
+    key: &str,
+    properties: &MediaProperties,
+    cache: &mut HashMap<PlayerId, (String, String)>,
+) -> Option<String> {
+    if let Some((cached_key, url)) = cache.get(player) {
+        if cached_key == key {
+            return Some(url.clone());
+        }
+    }
+    cache.remove(player);
+    let url = thumbnail(properties)?;
+    cache.insert(player.clone(), (key.to_owned(), url.clone()));
+    Some(url)
+}
+
+fn thumbnail(properties: &MediaProperties) -> Option<String> {
+    let stream = properties
+        .Thumbnail()
+        .ok()?
+        .OpenReadAsync()
+        .ok()?
+        .join()
+        .ok()?;
+    let size = u32::try_from(stream.Size().ok()?)
+        .ok()
+        .filter(|size| (1..=artwork::MAX_BYTES as u32).contains(size))?;
+    let reader = DataReader::CreateDataReader(&stream).ok()?;
+    let loaded = reader.LoadAsync(size).ok()?.join().ok()?;
+    let mut bytes = vec![0; loaded as usize];
+    reader.ReadBytes(&mut bytes).ok()?;
+    artwork::image_data_url(&bytes)
 }
 
 /// Seconds of playback since the player last updated its timeline. Players such

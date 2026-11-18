@@ -20,7 +20,7 @@ thiserror.workspace = true
 zbus = "5"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.62", features = ["Media_Control", "Foundation", "Foundation_Collections"] }
+windows = { version = "0.62", features = ["Media_Control", "Foundation", "Foundation_Collections", "Storage_Streams"] }
 
 [lints]
 workspace = true

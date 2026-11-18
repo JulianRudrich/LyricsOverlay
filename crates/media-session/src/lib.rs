@@ -12,6 +12,8 @@
 //! the overlay follows, and [`DemoBackend`] plays a built-in song for previews.
 
 pub mod applescript;
+#[cfg(any(windows, test))]
+mod artwork;
 mod backend;
 mod demo;
 mod engine;

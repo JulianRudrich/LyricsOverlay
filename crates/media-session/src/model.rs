@@ -13,6 +13,8 @@ pub enum Service {
     AppleMusic,
     AmazonMusic,
     YouTubeMusic,
+    /// Someone singing into the microphone, for Sing to find.
+    Microphone,
     Other,
 }
 
@@ -31,6 +33,7 @@ impl Service {
             Service::AppleMusic => "Apple Music",
             Service::AmazonMusic => "Amazon Music",
             Service::YouTubeMusic => "YouTube Music",
+            Service::Microphone => "Microphone",
             Service::Other => "Other player",
         }
     }

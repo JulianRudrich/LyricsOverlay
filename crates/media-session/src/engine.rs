@@ -32,6 +32,9 @@ impl SourcePreference {
     }
 
     fn accepts(self, player: &PlayerInfo, include_other: bool) -> bool {
+        if player.service == Service::Microphone {
+            return true;
+        }
         match self.service() {
             Some(service) => player.service == service,
             None => player.service != Service::Other || include_other,
@@ -86,12 +89,21 @@ impl Engine {
         self.selection.current()
     }
 
+    /// While Sing to find listens, the microphone is followed and nothing else.
     pub fn choose(&mut self, readings: Vec<Reading>) -> NowPlaying {
-        let accepted: Vec<Reading> = crate::bridge::without_duplicate_tabs(readings)
+        let readings = crate::bridge::without_duplicate_tabs(readings);
+        let singing = readings
+            .iter()
+            .any(|reading| reading.player().service == Service::Microphone);
+        let accepted: Vec<Reading> = readings
             .into_iter()
             .filter(|reading| {
-                self.preference
-                    .accepts(reading.player(), self.include_other)
+                let player = reading.player();
+                if singing {
+                    player.service == Service::Microphone
+                } else {
+                    self.preference.accepts(player, self.include_other)
+                }
             })
             .collect();
         let activity: Vec<(PlayerId, PlaybackActivity)> = accepted
@@ -368,6 +380,50 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn the_microphone_takes_over_while_it_listens() {
+        let spotify = || {
+            reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Playing,
+                Some("Spotify"),
+            )
+        };
+        let microphone = |title: Option<&str>| {
+            let mut reading = reading(
+                crate::MICROPHONE_PLAYER_ID,
+                Service::Microphone,
+                PlaybackStatus::Playing,
+                title,
+            );
+            if title.is_none() {
+                if let Reading::Snapshot(snapshot) = &mut reading {
+                    snapshot.position = None;
+                }
+            }
+            reading
+        };
+        // Even a fixed source gives way to Sing to find.
+        let mut engine = Engine::new(SourcePreference::Spotify, false);
+        assert_eq!(title(&engine.choose(vec![spotify()])), Some("Spotify"));
+        assert_eq!(
+            engine.choose(vec![spotify(), microphone(None)]),
+            NowPlaying::Idle,
+            "listening, before a song is found"
+        );
+        assert_eq!(
+            title(&engine.choose(vec![spotify(), microphone(Some("Sung"))])),
+            Some("Sung")
+        );
+        assert_eq!(
+            engine.current(),
+            Some(&PlayerId::new(crate::MICROPHONE_PLAYER_ID))
+        );
+        // Stopping returns to the player that kept playing.
+        assert_eq!(title(&engine.choose(vec![spotify()])), Some("Spotify"));
     }
 
     #[test]

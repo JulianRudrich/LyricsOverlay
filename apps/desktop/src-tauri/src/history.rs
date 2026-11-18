@@ -150,6 +150,7 @@ fn service_name(service: Service) -> &'static str {
         Service::AppleMusic => "appleMusic",
         Service::AmazonMusic => "amazonMusic",
         Service::YouTubeMusic => "youTubeMusic",
+        Service::Microphone => "microphone",
         Service::Other => "other",
     }
 }
@@ -211,6 +212,7 @@ mod tests {
             Service::Spotify,
             Service::AppleMusic,
             Service::AmazonMusic,
+            Service::Microphone,
             Service::Other,
         ] {
             assert_eq!(

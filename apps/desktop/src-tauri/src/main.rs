@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod autohide;
+mod browser_bridge;
 mod commands;
 mod history;
 mod i18n;
@@ -202,6 +203,18 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     app.manage(autohide::AutoHideState::new(settings.overlay_visible));
     app.manage(sleep::SleepState::default());
     app.manage(history::History::default());
+    let bridge_store = handle
+        .state::<AppState>()
+        .settings_path
+        .as_deref()
+        .and_then(std::path::Path::parent)
+        .map(|directory| directory.join("browser-bridge.json"));
+    app.manage(browser_bridge::BrowserBridge::start(
+        bridge_store,
+        &handle.package_info().version.to_string(),
+        demo,
+        handle.state::<AppState>().debug,
+    ));
 
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
@@ -266,6 +279,8 @@ fn main() {
             commands::report_line,
             history::listening_stats,
             history::clear_history,
+            browser_bridge::browser_bridge,
+            browser_bridge::forget_browser,
         ])
         .setup(move |app| setup(app, demo))
         .build(tauri::generate_context!())

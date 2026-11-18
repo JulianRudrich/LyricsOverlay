@@ -183,5 +183,12 @@
   "sync.unsynced": "nicht synchron",
   "unit.points": "{value} pt",
   "unit.percent": "{value} %",
-  "unit.seconds": "{value} s"
+  "unit.seconds": "{value} s",
+  "bridge.title": "Browser-Erweiterung",
+  "bridge.hint": "Lyrics für YouTube, YouTube Music und andere Web-Player, auch in einem Tab im Hintergrund. Gib diesen Code einmal in der Singline-Erweiterung ein, um sie zu koppeln.",
+  "bridge.unavailable": "Die Erweiterung kann sich gerade nicht verbinden, weil eine andere App ihren Port belegt. Singline versucht es gleich noch einmal.",
+  "bridge.codeLabel": "Kopplungscode",
+  "bridge.connected": "Verbunden",
+  "bridge.idle": "Gekoppelt, gerade nicht verbunden",
+  "bridge.remove": "Entfernen"
 }

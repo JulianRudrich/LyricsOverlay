@@ -6,6 +6,7 @@
   import Row from "../lib/ui/Row.svelte";
   import Select from "../lib/ui/Select.svelte";
   import Toggle from "../lib/ui/Toggle.svelte";
+  import BrowserBridge from "./BrowserBridge.svelte";
   import type { PaneContext } from "./panes";
 
   let { ctx }: { ctx: PaneContext } = $props();
@@ -36,6 +37,8 @@
     onchange={(includeOtherPlayers) => ctx.update({ includeOtherPlayers })}
   />
 </Row>
+
+<BrowserBridge />
 
 <Row icon="eyeOff" title={t("settings.autoHide")} hint={t("settings.autoHideHint")}>
   <Toggle label={t("settings.autoHide")} checked={settings.autoHide} onchange={(autoHide) => ctx.update({ autoHide })} />

@@ -202,6 +202,13 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
     } else {
         default_backends()
     };
+    // Browser tabs the Singline extension reports, next to the system's players.
+    if let Some(bridge) = app
+        .state::<crate::browser_bridge::BrowserBridge>()
+        .backend()
+    {
+        backends.push(Box::new(bridge));
+    }
     let interval = backends
         .iter()
         .map(|backend| backend.poll_interval())

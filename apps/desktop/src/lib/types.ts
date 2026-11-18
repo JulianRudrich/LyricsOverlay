@@ -150,3 +150,25 @@ export interface Snapshot {
   lyrics: LyricsView;
   app: AppInfo;
 }
+
+/** A browser that paired with Singline through the extension. */
+export interface PairedBrowser {
+  id: string;
+  name: string;
+  /** Seconds since 1970. */
+  pairedAt: number;
+  connected: boolean;
+  /** Tabs it reports right now. */
+  tabs: number;
+}
+
+/** The connection to the Singline browser extension, as the settings show it. */
+export interface BridgeView {
+  /** False in the demo. */
+  available: boolean;
+  port: number | null;
+  error: string | null;
+  /** Six digits to enter in the extension; valid while the settings show it. */
+  pairingCode: string | null;
+  browsers: PairedBrowser[];
+}

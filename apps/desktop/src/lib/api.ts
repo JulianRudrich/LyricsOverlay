@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { AppInfo, Corner, EditorState, LyricsView, Playback, Settings, Snapshot, StampEdit } from "./types";
+import type { AppInfo, BridgeView, Corner, EditorState, LyricsView, Playback, Settings, Snapshot, StampEdit } from "./types";
 
 export type PlayerCommand =
   | { kind: "playPause" }
@@ -24,6 +24,9 @@ export const api = {
   importLyricsFile: (trackKey: string, title: string) => invoke<boolean>("import_lyrics_file", { trackKey, title }),
   removeLocalLyrics: (trackKey: string) => invoke<void>("remove_local_lyrics", { trackKey }),
   playerCommand: (command: PlayerCommand) => invoke<void>("player_command", { command }),
+  // The browser extension. Asking for the state keeps pairing open while the code is shown.
+  browserBridge: () => invoke<BridgeView>("browser_bridge"),
+  forgetBrowser: (id: string) => invoke<BridgeView>("forget_browser", { id }),
   openSettings: () => invoke<void>("open_settings"),
   moveOverlay: (corner: Corner) => invoke<void>("move_overlay", { corner }),
   setLaunchAtLogin: (enabled: boolean) => invoke<boolean>("set_launch_at_login", { enabled }),

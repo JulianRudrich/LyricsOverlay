@@ -183,5 +183,12 @@
   "sync.unsynced": "not synced",
   "unit.points": "{value} pt",
   "unit.percent": "{value} %",
-  "unit.seconds": "{value} s"
+  "unit.seconds": "{value} s",
+  "bridge.title": "Browser extension",
+  "bridge.hint": "Lyrics for YouTube, YouTube Music and other web players, also in a background tab. Enter this code once in the Singline extension to pair it.",
+  "bridge.unavailable": "The extension cannot connect right now because another app uses its port. Singline tries again shortly.",
+  "bridge.codeLabel": "Pairing code",
+  "bridge.connected": "Connected",
+  "bridge.idle": "Paired, not connected right now",
+  "bridge.remove": "Remove"
 }

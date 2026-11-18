@@ -5,7 +5,7 @@
 # Singline
 
 **Synced lyrics in a small window above everything else.**<br>
-For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, macOS and Linux.
+For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and Linux.
 
 [![CI](https://github.com/JulianRudrich/LyricsOverlay/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JulianRudrich/LyricsOverlay/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-111111)](LICENSE)
@@ -25,6 +25,7 @@ For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, ma
 ## Features
 
 - **Follows what you play.** Singline reads the song and the playback position from your music app. It needs no login and no API key, and it never starts a player by itself. Let it follow whichever player is playing, or pick one.
+- **Music in your browser.** YouTube Music, YouTube and other web players, even in a background tab, through the Singline extension for Chrome, Edge and Firefox. Music videos become clean song titles, so the right lyrics turn up.
 - **Word by word.** Every word lights up as it is sung, from real word timing where the lyrics have it and estimated from the line timing otherwise. Between two readings of the player the position keeps running, so the highlight moves smoothly.
 - **Lyrics in motion.** The lines scroll up as the song goes on, the next line grows into place, and breaks show three breathing dots. A new song fades in with its cover, title and artist.
 - **A mini-player on hover.** Previous, play/pause and next, a seek bar with elapsed and remaining time, and markers for the chorus. Click any line to jump there.
@@ -52,17 +53,18 @@ For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, ma
 | | Windows | macOS | Linux |
 |---|---|---|---|
 | **Spotify** | Desktop app | Desktop app | Desktop app |
-| **Apple Music** | Apple Music app | Music app | Web player ¹ |
-| **Amazon Music** | Desktop app ² | Planned ³ | Web player ¹ |
-| **YouTube Music, YouTube and other web players** | Any browser ⁴ | Planned ³ | Any browser ⁴ |
+| **Apple Music** | Apple Music app | Music app | Web player ¹ ³ |
+| **Amazon Music** | Desktop app ² | Web player ³ | Web player ¹ ³ |
+| **YouTube Music** | Web app, or a browser tab ³ | Browser tab ³ | Browser tab ¹ ³ |
+| **YouTube and other web players** | Browser tab ³ ⁴ | Browser tab ³ ⁴ | Browser tab ³ ⁴ |
 | **Other media players** | Players that report to the system media controls ⁴ | – | Any MPRIS player, such as VLC ⁴ |
 
-1. Recognised as Apple Music or Amazon Music when the browser shares the page address, as Firefox does. In other browsers the tab counts as a browser player (see ⁴).
+1. On Linux, Singline recognises these sites even without the extension when the browser shares the page address, as Firefox does.
 2. Some versions of Amazon Music for Windows report only part of the song information.
-3. macOS offers no public way to read these players. A browser extension that covers web players on every system is on the [roadmap](#roadmap).
-4. Turn on **Also follow other players** in Settings → General. A tab keeps working in the background.
+3. With the [Singline browser extension](extensions/browser) for Chrome, Edge and Firefox. A tab keeps working in the background.
+4. Turn on **Also follow other players** in Settings → General. Singline turns a video's title into song and artist: "Artist - Song (Official Video)" becomes "Song" by "Artist".
 
-On Linux, Singline reads players through MPRIS, on Windows through the system media controls, and on macOS through AppleScript.
+On Linux, Singline reads players through MPRIS, on Windows through the system media controls, on macOS through AppleScript, and in the browser through its extension.
 
 ## Install
 
@@ -77,6 +79,15 @@ On Linux, Singline reads players through MPRIS, on Windows through the system me
 ### Linux
 
 Build Singline from source as described [below](#building-from-source). Packages (AppImage, .deb, Flatpak) are planned.
+
+### Browser extension
+
+The extension lets Singline follow YouTube Music, YouTube and other web players in Chrome, Edge and Firefox, even in a background tab. Until it is in the browser stores, load it from [`extensions/browser`](extensions/browser):
+
+- **Chrome and Edge:** open `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, click **Load unpacked** and choose `extensions/browser`.
+- **Firefox 128 or later:** open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…** and choose `extensions/browser/manifest.json`.
+
+Then pair it once: Settings → General → **Browser extension** shows a six-digit code; type it into the extension's popup and click **Pair**. The [extension's README](extensions/browser/README.md) has the details.
 
 ### The native macOS app
 
@@ -96,6 +107,7 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Fix the timing of all songs | Settings → Song & timing → **Global timing correction** |
 | Choose the player to follow | Tray menu → **Playback source**, or Settings → General |
 | Follow browsers and other players | Settings → General → **Also follow other players** |
+| Pair the browser extension | Type the code from Settings → General → **Browser extension** into the extension's popup |
 | Control the player | Move the pointer over the overlay for previous, play/pause, next and the seek bar |
 | Jump to a line or the chorus | Click the line, or a chorus marker on the seek bar |
 | Add your own lyrics | Settings → Song & timing → **Import LRC…** or **Edit lyrics…** |
@@ -120,6 +132,7 @@ How often word timing is available varies by song. In a sample of ten popular so
 
 - Singline has no account, no telemetry and no analytics.
 - The only network requests go to LRCLIB, sending the title, artist, album and duration of the song you are playing. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
+- The browser extension talks only to Singline on your own computer (`127.0.0.1`), and only after you paired it. Web pages and other programs without the pairing are refused.
 - Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
 - Your settings are stored in `settings.json`. The cache, your timing corrections, your own lyrics and your listening history are stored in `singline.sqlite`. Deleting these files resets Singline.
 
@@ -212,7 +225,15 @@ cargo test --workspace
 ```
 
 ```bash
+node --test "extensions/browser/test/*.test.js"
+```
+
+```bash
 bash apps/desktop/e2e/linux-smoke.sh
+```
+
+```bash
+bash apps/desktop/e2e/linux-youtube.sh
 ```
 
 `cargo test --workspace` needs the built interface (`pnpm --filter singline-desktop build`); a plain `cargo test` covers the crates only. The end-to-end check starts the app on a virtual display with a simulated Spotify and a simulated LRCLIB, and compares every line the overlay shows with the playback time.
@@ -233,6 +254,7 @@ bash apps/desktop/e2e/linux-smoke.sh
 | [`crates/media-session`](crates/media-session) | Reading and controlling players through MPRIS, the Windows media controls and AppleScript, plus `singline-watch` |
 | [`crates/lyrics-providers`](crates/lyrics-providers) | The LRCLIB client and the SQLite store for your own lyrics, corrections and the cache |
 | [`apps/desktop`](apps/desktop) | The Singline app: Tauri and Rust in `src-tauri`, the Svelte interface in `src`, the end-to-end test in `e2e` |
+| [`extensions/browser`](extensions/browser) | The browser extension for web players, for Chrome, Edge and Firefox |
 | [`apps/macos`](apps/macos) | The native macOS app in Swift |
 | [`docs`](docs) | Roadmap, feature parity, test guide and measurements |
 
@@ -244,11 +266,12 @@ bash apps/desktop/e2e/linux-smoke.sh
 - The mini-player with seek bar, chorus markers and jumping to a line, cover art, scrolling lines and an estimated word highlight
 - Sleep timer, hiding the overlay while nothing plays, and listening statistics
 - Settings in the glass design of the native macOS app, with a sidebar
+- YouTube Music and other web players on every system through the browser extension
 
 **In progress**
 
 - Spotify connection for True Shuffle, liking songs and your top lists (requires Spotify Premium)
-- Web players on every system, including YouTube Music in a background tab on macOS
+- The browser extension in the Chrome Web Store and on Firefox Add-ons
 
 **Later**
 

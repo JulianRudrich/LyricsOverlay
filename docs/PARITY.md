@@ -54,9 +54,11 @@ Before its first release, Singline must offer every feature of the native macOS 
 |---|:-:|:-:|:-:|---|
 | Spotify (desktop app) | ✅ | 🧪 | 🧪 | Linux tested with a simulated player |
 | Apple Music | 🧪 | 🧪 | 🧪 | Windows: the combined "Artist — Album" field is split; Linux: web player |
-| Amazon Music | 🧪 | 🧪 | ⬜ | Windows: measurement B; Linux: web player; macOS: browser extension |
+| YouTube Music | ✅ | 🧪 | 🧪 | Browser tabs through the extension; Windows also the web app; Linux also without the extension |
+| Amazon Music | 🧪 | 🧪 | 🧪 | Windows: measurement B; Linux and macOS: web player |
 | Automatic or fixed source | ✅ | ✅ | ✅ | |
-| Other players (browsers, VLC and more) | ✅ | 🧪 | ⬜ | macOS: browser extension |
+| Other players (browsers, VLC and more) | ✅ | 🧪 | 🧪 | macOS: web players through the browser extension |
+| Browser extension (Chrome, Edge, Firefox) | ✅ | 🧪 | 🧪 | Linux tested with a simulated extension; not yet in the browser stores |
 
 ## More features
 

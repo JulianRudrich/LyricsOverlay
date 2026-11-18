@@ -8,6 +8,9 @@
 //! | Windows | System Media Transport Controls (`smtc`)             |
 //! | macOS   | AppleScript for Spotify and Music ([`applescript`])  |
 //!
+//! On every system, [`bridge`] adds the browser tabs that the Singline browser
+//! extension reports, and [`youtube`] turns a YouTube video into a song.
+//!
 //! All backends produce the same [`Reading`]s. [`Engine`] decides which player
 //! the overlay follows, and [`DemoBackend`] plays a built-in song for previews.
 

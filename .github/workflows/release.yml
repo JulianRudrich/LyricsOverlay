@@ -1,0 +1,197 @@
+name: Release
+
+# Run by hand from the Actions tab: sets the version, writes CHANGELOG.md, tags the
+# release, builds the installers for every system and publishes them on GitHub.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, without the v (for example 0.4.0)
+        required: true
+        type: string
+      dry_run:
+        description: Only build and write the release notes; do not commit, tag or publish
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  VERSION: ${{ inputs.version }}
+
+jobs:
+  prepare:
+    name: Prepare ${{ inputs.version }}
+    runs-on: ubuntu-24.04
+    outputs:
+      ref: ${{ steps.commit.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the version
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::'$VERSION' is not a version like 0.4.0"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$VERSION" > /dev/null; then
+            echo "::error::v$VERSION already exists"
+            exit 1
+          fi
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Set the version
+        run: |
+          sed -i "0,/^version = \".*\"/s//version = \"$VERSION\"/" Cargo.toml apps/desktop/src-tauri/Cargo.toml
+          sed -i "s/^  \"version\": \".*\",/  \"version\": \"$VERSION\",/" apps/desktop/package.json apps/desktop/src-tauri/tauri.conf.json
+          cargo metadata --format-version 1 > /dev/null
+          git diff --stat
+      - name: Write the changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag v${{ inputs.version }}
+        env:
+          OUTPUT: CHANGELOG.md
+      - name: Write the release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag v${{ inputs.version }} --unreleased --strip header
+        env:
+          OUTPUT: RELEASE_NOTES.md
+      - name: Commit and tag
+        id: commit
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "ref=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "Julian Rudrich"
+          git config user.email "75446138+JulianRudrich@users.noreply.github.com"
+          git add Cargo.toml Cargo.lock apps/desktop/src-tauri/Cargo.toml apps/desktop/package.json apps/desktop/src-tauri/tauri.conf.json CHANGELOG.md
+          git commit -m "chore(release): $VERSION"
+          git tag "v$VERSION"
+          git push origin "HEAD:${{ github.ref_name }}" "v$VERSION"
+          echo "ref=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Create the draft release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "v$VERSION" --draft --title "Singline $VERSION" --notes-file RELEASE_NOTES.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: |
+            RELEASE_NOTES.md
+            CHANGELOG.md
+
+  build:
+    name: ${{ matrix.name }}
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            targets: ""
+            tauri-args: ""
+          - name: macOS
+            os: macos-latest
+            targets: aarch64-apple-darwin,x86_64-apple-darwin
+            tauri-args: --target universal-apple-darwin
+          # The oldest supported Ubuntu, so the packages run on as many distributions as possible.
+          - name: Linux
+            os: ubuntu-22.04
+            targets: ""
+            tauri-args: --bundles deb,appimage
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.targets }}
+      - uses: Swatinem/rust-cache@v2
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install system libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev patchelf libfuse2
+      - name: Build singline-watch
+        run: |
+          mkdir -p dist
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            cargo build --release -p media-session --bin singline-watch --target aarch64-apple-darwin
+            cargo build --release -p media-session --bin singline-watch --target x86_64-apple-darwin
+            lipo -create -output dist/singline-watch \
+              target/aarch64-apple-darwin/release/singline-watch target/x86_64-apple-darwin/release/singline-watch
+            tar -czf dist/singline-watch-macos.tar.gz -C dist singline-watch
+            rm dist/singline-watch
+          elif [ "${{ runner.os }}" = "Windows" ]; then
+            cargo build --release -p media-session --bin singline-watch
+            cp target/release/singline-watch.exe dist/
+          else
+            cargo build --release -p media-session --bin singline-watch
+            tar -czf dist/singline-watch-linux.tar.gz -C target/release singline-watch
+          fi
+      - name: Build the app
+        env:
+          SECRET_APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          SECRET_APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          SECRET_APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          SECRET_APPLE_ID: ${{ secrets.APPLE_ID }}
+          SECRET_APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          SECRET_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          SINGLINE_GENIUS_TOKEN: ${{ secrets.SINGLINE_GENIUS_TOKEN }}
+        run: |
+          # macOS signing and notarization start as soon as the secrets exist.
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            value="SECRET_$name"
+            if [ -n "${!value}" ]; then export "$name=${!value}"; fi
+          done
+          pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }}
+      - name: Collect the installers
+        run: |
+          find target -path '*/release/bundle/*' \( -name '*.dmg' -o -name '*-setup.exe' -o -name '*.msi' -o -name '*.deb' -o -name '*.AppImage' \) -exec cp {} dist/ \;
+          ls -la dist
+      - name: Upload to the release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "v$VERSION" dist/* --clobber
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.dry_run }}
+        with:
+          name: singline-${{ matrix.name }}
+          path: dist
+          if-no-files-found: error
+
+  publish:
+    name: Publish
+    needs: build
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft=false --latest

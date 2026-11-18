@@ -2379,6 +2379,8 @@ dependencies = [
 name = "media-session"
 version = "0.3.0-alpha.0"
 dependencies = [
+ "getrandom 0.3.4",
+ "httparse",
  "lyrics-core",
  "serde",
  "serde_json",

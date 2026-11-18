@@ -15,6 +15,7 @@ pub mod applescript;
 #[cfg(any(windows, test))]
 mod artwork;
 mod backend;
+pub mod bridge;
 mod demo;
 mod engine;
 mod model;

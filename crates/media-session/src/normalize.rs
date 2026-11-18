@@ -193,8 +193,8 @@ pub fn browser_media(url: Option<&str>, title: &str, artist: &str) -> BrowserMed
     let mut title = title.trim().to_owned();
     let mut artist = artist.trim().to_owned();
     let mut site = url.and_then(site_from_url);
-    if site.is_none() {
-        if let Some((found, rest)) = site_from_title(&title) {
+    if let Some((found, rest)) = site_from_title(&title) {
+        if site.is_none() || site == Some(found) {
             site = Some(found);
             title = rest;
         }
@@ -202,7 +202,7 @@ pub fn browser_media(url: Option<&str>, title: &str, artist: &str) -> BrowserMed
     let video = match site {
         Some(Site::YouTube) => true,
         Some(Site::YouTubeMusic) => false,
-        None => youtube::looks_like_video(&title, &artist),
+        None => url.is_none() && youtube::looks_like_video(&title, &artist),
     };
     if video {
         let song = youtube::song_from_video(&title, &artist);
@@ -692,6 +692,16 @@ mod tests {
             ),
             (None, "Song", "Artist"),
             "without an address, a video is recognized by how it looks"
+        );
+        let spotify = browser_media(
+            Some("https://open.spotify.com/track/1"),
+            "Song (Official Video)",
+            "ArtistVEVO",
+        );
+        assert_eq!(
+            (spotify.title.as_str(), spotify.artist.as_str()),
+            ("Song (Official Video)", "ArtistVEVO"),
+            "another known site is never taken for YouTube"
         );
         let clean = browser_media(None, "Song - Remastered 2011", "Artist");
         assert_eq!(

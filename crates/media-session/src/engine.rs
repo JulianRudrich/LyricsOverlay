@@ -87,7 +87,7 @@ impl Engine {
     }
 
     pub fn choose(&mut self, readings: Vec<Reading>) -> NowPlaying {
-        let accepted: Vec<Reading> = readings
+        let accepted: Vec<Reading> = crate::bridge::without_duplicate_tabs(readings)
             .into_iter()
             .filter(|reading| {
                 self.preference

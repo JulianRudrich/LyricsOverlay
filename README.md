@@ -20,7 +20,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 
 ## Contents
 
-[Features](#features) · [Supported players](#supported-players) · [Install](#install) · [Using Singline](#using-singline) · [Where the lyrics come from](#where-the-lyrics-come-from) · [Privacy](#privacy) · [Troubleshooting](#troubleshooting) · [Building from source](#building-from-source) · [Roadmap](#roadmap) · [Credits](#credits) · [License](#license)
+[Features](#features) · [Supported players](#supported-players) · [Install](#install) · [Using Singline](#using-singline) · [Where the lyrics come from](#where-the-lyrics-come-from) · [Privacy](#privacy) · [Troubleshooting](#troubleshooting) · [Building from source](#building-from-source) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Credits](#credits) · [License](#license)
 
 ## Features
 
@@ -296,6 +296,10 @@ bash apps/desktop/e2e/linux-youtube.sh
 - A delay per audio output, translations, themes and a mode for streaming with OBS
 
 The detailed plan is in [docs/ROADMAP.md](docs/ROADMAP.md), and [docs/PARITY.md](docs/PARITY.md) tracks every feature on every system.
+
+## Contributing
+
+Bug reports, translations and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to get started, and the [code of conduct](CODE_OF_CONDUCT.md) applies to everyone. Please report security problems privately, as described in [SECURITY.md](SECURITY.md).
 
 ## Credits
 

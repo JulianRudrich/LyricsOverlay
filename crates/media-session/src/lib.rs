@@ -19,6 +19,7 @@ mod demo;
 mod engine;
 mod model;
 pub mod normalize;
+pub mod youtube;
 
 #[cfg(target_os = "linux")]
 #[doc(hidden)]

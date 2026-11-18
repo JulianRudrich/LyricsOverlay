@@ -6,6 +6,7 @@
 use sha2::{Digest, Sha256};
 
 use crate::model::Service;
+use crate::youtube;
 
 /// A key for per-song settings that is the same in every player.
 ///
@@ -183,9 +184,14 @@ impl BrowserMedia {
 }
 
 /// Recognizes the site of a browser tab from its address, when the browser
-/// tells it, or from a title such as "Song - YouTube Music".
+/// tells it, or from a title such as "Song - YouTube Music", and turns a
+/// YouTube video into the song it plays. Without an address, a tab that looks
+/// like a YouTube video, such as "Artist - Song (Official Video)" on
+/// "ArtistVEVO", is cleaned up too. YouTube Music reports songs cleanly and
+/// stays as it is.
 pub fn browser_media(url: Option<&str>, title: &str, artist: &str) -> BrowserMedia {
     let mut title = title.trim().to_owned();
+    let mut artist = artist.trim().to_owned();
     let mut site = url.and_then(site_from_url);
     if site.is_none() {
         if let Some((found, rest)) = site_from_title(&title) {
@@ -193,10 +199,20 @@ pub fn browser_media(url: Option<&str>, title: &str, artist: &str) -> BrowserMed
             title = rest;
         }
     }
+    let video = match site {
+        Some(Site::YouTube) => true,
+        Some(Site::YouTubeMusic) => false,
+        None => youtube::looks_like_video(&title, &artist),
+    };
+    if video {
+        let song = youtube::song_from_video(&title, &artist);
+        title = song.title;
+        artist = song.artist;
+    }
     BrowserMedia {
         site,
         title,
-        artist: artist.trim().to_owned(),
+        artist,
     }
 }
 
@@ -637,6 +653,56 @@ mod tests {
             identify_smtc("Chrome._crx_aghbiahbpaijignceidepookljebhfak").0,
             Service::Other,
             "other installed web apps stay unknown"
+        );
+    }
+
+    #[test]
+    fn only_youtube_videos_are_cleaned_up() {
+        let video = browser_media(
+            Some("https://www.youtube.com/watch?v=1"),
+            "Example Artist - Paper Lanterns (Official Video)",
+            "Example ArtistVEVO",
+        );
+        assert_eq!(
+            (video.site, video.title.as_str(), video.artist.as_str()),
+            (Some(Site::YouTube), "Paper Lanterns", "Example Artist")
+        );
+        let uploaded = browser_media(Some("https://youtu.be/1"), "Artist - Song", "Label");
+        assert_eq!(
+            (uploaded.title.as_str(), uploaded.artist.as_str()),
+            ("Song", "Artist"),
+            "the address is enough"
+        );
+        let music = browser_media(
+            Some("https://music.youtube.com/watch?v=1"),
+            "Song (Official Video)",
+            "Artist - Topic",
+        );
+        assert_eq!(
+            (music.title.as_str(), music.artist.as_str()),
+            ("Song (Official Video)", "Artist - Topic"),
+            "YouTube Music stays as it reports"
+        );
+        let unknown = browser_media(None, "Artist - Song (Official Video)", "ArtistVEVO");
+        assert_eq!(
+            (
+                unknown.site,
+                unknown.title.as_str(),
+                unknown.artist.as_str()
+            ),
+            (None, "Song", "Artist"),
+            "without an address, a video is recognized by how it looks"
+        );
+        let clean = browser_media(None, "Song - Remastered 2011", "Artist");
+        assert_eq!(
+            (clean.title.as_str(), clean.artist.as_str()),
+            ("Song - Remastered 2011", "Artist"),
+            "a song from another site stays"
+        );
+        let titled = browser_media(None, "(2) Artist - Song (Lyrics) - YouTube", "");
+        assert_eq!(
+            (titled.site, titled.title.as_str(), titled.artist.as_str()),
+            (Some(Site::YouTube), "Song", "Artist")
         );
     }
 }

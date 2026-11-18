@@ -210,3 +210,71 @@ fn reports_a_missing_bus_instead_of_failing() {
         .last_error()
         .is_some_and(|error| error.starts_with("D-Bus")));
 }
+
+#[test]
+fn youtube_tabs_are_read_as_songs() {
+    let Some(bus) = PrivateBus::start() else {
+        eprintln!("dbus-daemon is not available; skipping");
+        return;
+    };
+    let video = FakeTrack {
+        track_id: "/org/chromium/MediaPlayer2/TrackList/Track1".into(),
+        title: "Example Artist - Paper Lanterns (Official Video)".into(),
+        artists: vec!["Example ArtistVEVO".into()],
+        album: String::new(),
+        length: Duration::from_secs(200),
+    };
+    let chromium = FakePlayer::spawn(
+        Some(&bus.address),
+        "chromium.instance42",
+        "Chromium",
+        video,
+        true,
+    )
+    .expect("fake Chromium registers");
+    chromium.set_url(Some("https://www.youtube.com/watch?v=abc".into()));
+    let song = FakeTrack {
+        track_id: "/org/mozilla/firefox/TrackList/1".into(),
+        title: "Paper Lanterns".into(),
+        artists: vec!["Example Artist".into()],
+        album: "Example Album".into(),
+        length: Duration::from_secs(200),
+    };
+    let firefox = FakePlayer::spawn(
+        Some(&bus.address),
+        "firefox.instance_1_2",
+        "Mozilla Firefox",
+        song,
+        false,
+    )
+    .expect("fake Firefox registers");
+    firefox.set_url(Some("https://music.youtube.com/watch?v=abc".into()));
+
+    let readings = MprisBackend::with_address(&bus.address).poll();
+    let tab = snapshot_of(
+        &readings,
+        "mpris:org.mpris.MediaPlayer2.chromium.instance42",
+    );
+    assert_eq!((tab.player.service, tab.player.web), (Service::Other, true));
+    let track = tab.track.expect("track metadata");
+    assert_eq!(
+        (track.title.as_str(), track.artist.as_str()),
+        ("Paper Lanterns", "Example Artist"),
+        "the video's title and channel become the song's"
+    );
+    assert_eq!(track.album, None);
+
+    let music = snapshot_of(
+        &readings,
+        "mpris:org.mpris.MediaPlayer2.firefox.instance_1_2",
+    );
+    assert_eq!(music.player.service, Service::YouTubeMusic);
+    assert_eq!(
+        music.track.expect("track metadata").key,
+        media_session::normalize::track_key(
+            "Paper Lanterns",
+            "Example Artist",
+            Some("Example Album")
+        )
+    );
+}

@@ -1,0 +1,71 @@
+{
+  "extensionName": {
+    "message": "Singline"
+  },
+  "extensionDescription": {
+    "message": "Shows synced lyrics in the Singline app for what you play on YouTube, YouTube Music and other web players, even in a background tab."
+  },
+  "popupConnected": {
+    "message": "Connected to Singline"
+  },
+  "popupConnectedHint": {
+    "message": "Port $1 on this computer"
+  },
+  "popupNotPaired": {
+    "message": "Not paired yet"
+  },
+  "popupNotPairedHint": {
+    "message": "Pair once with the code from Singline."
+  },
+  "popupUnreachable": {
+    "message": "Singline is not running"
+  },
+  "popupUnreachableHint": {
+    "message": "Open Singline on this computer. The lyrics appear as soon as it runs."
+  },
+  "popupProblem": {
+    "message": "Singline did not answer as expected"
+  },
+  "popupProblemHint": {
+    "message": "Restart Singline if this does not go away."
+  },
+  "popupPairTitle": {
+    "message": "Pair with Singline"
+  },
+  "popupPairHint": {
+    "message": "Open the Singline settings, find “Browser extension” and enter the code shown there."
+  },
+  "popupCodeLabel": {
+    "message": "Pairing code"
+  },
+  "popupPair": {
+    "message": "Pair"
+  },
+  "popupUnpair": {
+    "message": "Unpair this browser"
+  },
+  "popupSharing": {
+    "message": "Playing in this browser"
+  },
+  "popupNothing": {
+    "message": "Play something on YouTube, YouTube Music, Spotify, Apple Music or Amazon Music."
+  },
+  "popupPaused": {
+    "message": "paused"
+  },
+  "errorInvalidCode": {
+    "message": "Enter the six digits Singline shows."
+  },
+  "errorWrongCode": {
+    "message": "That code did not match. Check the code in Singline and try again."
+  },
+  "errorPairingClosed": {
+    "message": "Open the Singline settings so the code is shown, then try again."
+  },
+  "errorNotRunning": {
+    "message": "Singline is not running on this computer."
+  },
+  "errorFailed": {
+    "message": "Pairing did not work. Try again."
+  }
+}

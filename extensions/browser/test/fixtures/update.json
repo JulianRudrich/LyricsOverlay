@@ -1,0 +1,26 @@
+{
+  "tabs": [
+    {
+      "tabId": 12,
+      "url": "https://www.youtube.com/watch?v=abc",
+      "title": "Example Artist - Paper Lanterns (Official Video)",
+      "artist": "Example ArtistVEVO",
+      "album": "",
+      "artwork": "https://i.ytimg.com/vi/abc/maxresdefault.jpg",
+      "pageTitle": "Example Artist - Paper Lanterns (Official Video) - YouTube",
+      "currentTime": 30.5,
+      "duration": 200,
+      "playbackRate": 1,
+      "paused": false,
+      "ended": false,
+      "sampledAt": 1794986234669,
+      "controls": {
+        "playPause": true,
+        "next": true,
+        "previous": false,
+        "seek": true
+      }
+    }
+  ],
+  "closed": [7]
+}

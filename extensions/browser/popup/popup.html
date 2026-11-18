@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Singline</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="../icons/icon-32.png" width="20" height="20" alt="" />
+        <h1>Singline</h1>
+      </header>
+
+      <section class="card" aria-live="polite">
+        <div class="row">
+          <span class="icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+              <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+            </svg>
+          </span>
+          <div class="text">
+            <span class="title" id="state"></span>
+            <span class="hint" id="state-hint"></span>
+          </div>
+          <span class="dot" id="dot" aria-hidden="true"></span>
+        </div>
+      </section>
+
+      <section class="card" id="pairing" hidden>
+        <div class="text">
+          <span class="title" data-message="popupPairTitle"></span>
+          <span class="hint" data-message="popupPairHint"></span>
+        </div>
+        <form id="pair-form" class="pair">
+          <input
+            id="code"
+            name="code"
+            inputmode="numeric"
+            autocomplete="off"
+            maxlength="7"
+            placeholder="123 456"
+            data-label="popupCodeLabel"
+          />
+          <button type="submit" id="pair-button" data-message="popupPair"></button>
+        </form>
+        <p class="message" id="pair-error" role="alert" hidden></p>
+      </section>
+
+      <section class="card" id="tabs" hidden>
+        <span class="title" data-message="popupSharing"></span>
+        <ul id="tab-list"></ul>
+        <span class="hint" id="no-tabs" data-message="popupNothing"></span>
+      </section>
+
+      <footer id="paired-footer" hidden>
+        <button type="button" id="unpair" class="quiet" data-message="popupUnpair"></button>
+      </footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

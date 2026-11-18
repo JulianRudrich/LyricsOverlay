@@ -1,0 +1,71 @@
+{
+  "extensionName": {
+    "message": "Singline"
+  },
+  "extensionDescription": {
+    "message": "Zeigt in der Singline-App synchrone Lyrics zu dem, was du auf YouTube, YouTube Music und anderen Web-Playern hörst, auch in einem Tab im Hintergrund."
+  },
+  "popupConnected": {
+    "message": "Mit Singline verbunden"
+  },
+  "popupConnectedHint": {
+    "message": "Port $1 auf diesem Computer"
+  },
+  "popupNotPaired": {
+    "message": "Noch nicht gekoppelt"
+  },
+  "popupNotPairedHint": {
+    "message": "Kopple einmal mit dem Code aus Singline."
+  },
+  "popupUnreachable": {
+    "message": "Singline läuft nicht"
+  },
+  "popupUnreachableHint": {
+    "message": "Öffne Singline auf diesem Computer. Die Lyrics erscheinen, sobald es läuft."
+  },
+  "popupProblem": {
+    "message": "Singline hat unerwartet geantwortet"
+  },
+  "popupProblemHint": {
+    "message": "Starte Singline neu, wenn das so bleibt."
+  },
+  "popupPairTitle": {
+    "message": "Mit Singline koppeln"
+  },
+  "popupPairHint": {
+    "message": "Öffne die Einstellungen von Singline, such „Browser-Erweiterung“ und gib den Code ein, der dort steht."
+  },
+  "popupCodeLabel": {
+    "message": "Kopplungscode"
+  },
+  "popupPair": {
+    "message": "Koppeln"
+  },
+  "popupUnpair": {
+    "message": "Diesen Browser entkoppeln"
+  },
+  "popupSharing": {
+    "message": "Läuft in diesem Browser"
+  },
+  "popupNothing": {
+    "message": "Spiel etwas auf YouTube, YouTube Music, Spotify, Apple Music oder Amazon Music ab."
+  },
+  "popupPaused": {
+    "message": "pausiert"
+  },
+  "errorInvalidCode": {
+    "message": "Gib die sechs Ziffern ein, die Singline zeigt."
+  },
+  "errorWrongCode": {
+    "message": "Der Code passt nicht. Prüf den Code in Singline und versuch es noch einmal."
+  },
+  "errorPairingClosed": {
+    "message": "Öffne die Einstellungen von Singline, damit der Code angezeigt wird, und versuch es dann noch einmal."
+  },
+  "errorNotRunning": {
+    "message": "Singline läuft nicht auf diesem Computer."
+  },
+  "errorFailed": {
+    "message": "Das Koppeln hat nicht geklappt. Versuch es noch einmal."
+  }
+}

@@ -48,6 +48,8 @@ jobs:
           pnpm --filter singline-desktop check
           pnpm --filter singline-desktop test
           pnpm --filter singline-desktop build
+      - name: Test the browser extension
+        run: node --test "extensions/browser/test/*.test.js"
       - name: Rust formatting
         run: cargo fmt --all --check
       - name: Rust lints

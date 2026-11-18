@@ -1,0 +1,99 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extensionName__",
+  "short_name": "Singline",
+  "description": "__MSG_extensionDescription__",
+  "version": "0.1.0",
+  "default_locale": "en",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "Singline",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["lib/protocol.js", "lib/client.js", "background.js"]
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "https://music.youtube.com/*",
+    "https://www.youtube.com/*",
+    "https://music.apple.com/*",
+    "https://open.spotify.com/*",
+    "https://music.amazon.com/*",
+    "https://music.amazon.ca/*",
+    "https://music.amazon.co.uk/*",
+    "https://music.amazon.de/*",
+    "https://music.amazon.fr/*",
+    "https://music.amazon.it/*",
+    "https://music.amazon.es/*",
+    "https://music.amazon.co.jp/*",
+    "https://music.amazon.com.au/*",
+    "https://music.amazon.com.br/*",
+    "https://music.amazon.com.mx/*",
+    "https://music.amazon.in/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://music.youtube.com/*",
+        "https://www.youtube.com/*",
+        "https://music.apple.com/*",
+        "https://open.spotify.com/*",
+        "https://music.amazon.com/*",
+        "https://music.amazon.ca/*",
+        "https://music.amazon.co.uk/*",
+        "https://music.amazon.de/*",
+        "https://music.amazon.fr/*",
+        "https://music.amazon.it/*",
+        "https://music.amazon.es/*",
+        "https://music.amazon.co.jp/*",
+        "https://music.amazon.com.au/*",
+        "https://music.amazon.com.br/*",
+        "https://music.amazon.com.mx/*",
+        "https://music.amazon.in/*"
+      ],
+      "js": ["content/page.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://music.youtube.com/*",
+        "https://www.youtube.com/*",
+        "https://music.apple.com/*",
+        "https://open.spotify.com/*",
+        "https://music.amazon.com/*",
+        "https://music.amazon.ca/*",
+        "https://music.amazon.co.uk/*",
+        "https://music.amazon.de/*",
+        "https://music.amazon.fr/*",
+        "https://music.amazon.it/*",
+        "https://music.amazon.es/*",
+        "https://music.amazon.co.jp/*",
+        "https://music.amazon.com.au/*",
+        "https://music.amazon.com.br/*",
+        "https://music.amazon.com.mx/*",
+        "https://music.amazon.in/*"
+      ],
+      "js": ["content/relay.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "singline@julianrudrich.github.io",
+      "strict_min_version": "128.0"
+    }
+  }
+}

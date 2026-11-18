@@ -8,8 +8,7 @@
 
   // Self-contained: shows the code that pairs the Singline browser extension and the
   // browsers that paired, so it fits into any pane. While it is shown, pairing stays open.
-  const PUZZLE =
-    "M10 4.5a2 2 0 1 1 4 0V6h4v4h-1.5a2 2 0 1 0 0 4H18v4h-4v-1.5a2 2 0 1 0-4 0V18H6v-4h1.5a2 2 0 1 0 0-4H6V6h4z";
+  const PUZZLE = "M4 4h6a2 2 0 1 1 4 0h6v6a2 2 0 1 1 0 4v6H4z";
   const WINDOW = "M4 5h16v14H4zM4 9h16M7 7h.01M10 7h.01";
 
   let app = $state<AppInfo | null>(null);

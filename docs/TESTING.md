@@ -1,64 +1,71 @@
-# Testen auf Mac und Windows
+# Testing on Windows and macOS
 
-Ein Durchgang dauert pro System etwa zehn Minuten. Schick mir danach die Ausgabe von `singline-watch` und deine Notizen; Screenshots helfen bei allem, was komisch aussieht.
+Linux is tested automatically in CI. Windows and macOS need a real device. One pass takes about ten minutes per system. Please report the results in an [issue](https://github.com/JulianRudrich/LyricsOverlay/issues/new) with the output of `singline-watch`; screenshots help with anything that looks wrong.
 
-## Builds holen
+## Get the builds
 
-1. Im GitHub-Repo unter **Actions → CI** den neuesten Lauf auf `main` öffnen. CI baut die Testversionen bei jedem Push auf `main`; einen neuen Lauf startest du mit **Run workflow**.
-2. Wenn der Lauf fertig ist, unten bei **Artifacts** herunterladen:
-   - `singline-macOS`: `.dmg` und `singline-watch-macos.tar.gz`
-   - `singline-Windows`: Installer `…-setup.exe` (oder `.msi`) und `singline-watch.exe`
+1. In the repository, open **Actions → CI** and choose the newest successful run on `main`. Every commit on `main` produces test builds; **Run workflow** starts a new run.
+2. When the run has finished, download from **Artifacts**:
+   - `singline-macOS`: the `.dmg` and `singline-watch-macos.tar.gz`
+   - `singline-Windows`: the installer `…-setup.exe` (or `.msi`) and `singline-watch.exe`
 
-Die Builds sind nicht signiert:
+The builds are not signed yet:
 
-- **macOS:** Die App aus der `.dmg` in „Programme“ ziehen, dann einmal mit Rechtsklick → Öffnen starten und bestätigen. Für das Werkzeug: `tar -xzf singline-watch-macos.tar.gz` und `xattr -d com.apple.quarantine singline-watch`.
-- **Windows:** Bei der SmartScreen-Warnung auf „Weitere Informationen“ → „Trotzdem ausführen“.
+- **macOS:** drag the app from the `.dmg` into Applications. If macOS refuses to open it, go to **System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14 and earlier, right-click the app and choose **Open**). For the tool, run `tar -xzf singline-watch-macos.tar.gz` and `xattr -d com.apple.quarantine singline-watch`.
+- **Windows:** if SmartScreen appears, choose **More info** → **Run anyway**.
 
-## 1. Was melden die Player? (Messung B)
+## 1. What the players report (measurement B)
 
-Spiele nacheinander in **Spotify**, **Apple Music** und **Amazon Music** einen Song ab (was auf dem System verfügbar ist) und lass dabei das Werkzeug laufen:
+Play a song in **Spotify**, **Apple Music** and **Amazon Music**, one after another, whichever is available on the system, and keep the tool running:
 
 - macOS (Terminal): `./singline-watch`
-- Windows (PowerShell, im Download-Ordner): `.\singline-watch.exe`
+- Windows (PowerShell, in the download folder): `.\singline-watch.exe`
 
-macOS fragt beim ersten Mal, ob das Terminal Spotify bzw. Musik steuern darf: erlauben.
+The first time, macOS asks whether Terminal may control Spotify or Music: allow it.
 
-Lass es pro Player etwa 20 Sekunden laufen, spule einmal im Player und pausiere einmal. Kopiere die Ausgabe in eine Textdatei. Wichtig sind: Titel, Künstler und Album korrekt? Läuft die Position mit (`drift` nahe 0)? Welche `controls` stehen da?
+Let it run for about 20 seconds per player, seek once in the player and pause once. Copy the output into a text file. What matters: are title, artist and album correct? Does the position keep up (`drift` close to 0)? Which `controls` are listed?
 
-Zusätzlich auf Windows: einen Song im **Browser** abspielen (zum Beispiel Amazon Music Web) und schauen, ob er erscheint.
+On Windows, also play a song in a **browser**, for example YouTube Music or Amazon Music on the web, and check whether it appears.
 
-Befehle testen, während ein Player läuft:
+While a player is running, test the commands:
 
 ```bash
 ./singline-watch --command playpause
+```
+
+```bash
 ./singline-watch --command seek=60
+```
+
+```bash
 ./singline-watch --command next
 ```
 
-## 2. Die App
+## 2. The app
 
-Nach dem Start erscheint das Overlay oben rechts und ein Symbol im Tray (macOS: Menüleiste).
+After starting, the overlay appears in the top right corner and an icon appears in the tray (the menu bar on macOS).
 
-- [ ] Ein Spotify-Song: Erscheinen die Lyrics, und passt die hervorgehobene Zeile zum Gesang?
-- [ ] Wenn der Song Wortzeiten hat: Leuchten die Wörter einzeln auf?
-- [ ] Pause, Spulen und Songwechsel im Player: Folgt das Overlay innerhalb einer Sekunde?
-- [ ] Dasselbe mit Apple Music (und Amazon Music, falls es in Teil 1 Daten geliefert hat).
-- [ ] Bleibt das Overlay über anderen Fenstern, auch über einem Vollbild-Video und auf einem anderen Schreibtisch? (Messung A)
-- [ ] Klick in eine andere App: Behält diese den Fokus?
-- [ ] Overlay ziehen; App beenden und neu starten: Ist die Position gemerkt?
-- [ ] Tray: Ausblenden/Einblenden, Klicks durchlassen, Ecken, Wiedergabequelle.
-- [ ] Alt+Shift+L (macOS: ⌥⇧L) blendet das Overlay aus und ein.
-- [ ] Einstellungen (Symbol im Overlay oder Tray): Layouts, Schriftgröße, Deckkraft, Breite und Höhe wirken sofort.
-- [ ] Song & Timing: ±0,25 s ändert das Timing hörbar; nach einem Songwechsel und zurück ist der Wert noch da.
-- [ ] Sprache Deutsch/Englisch umschalten: Overlay, Einstellungen und Tray wechseln.
-- [ ] Bei Anmeldung öffnen: einschalten, abmelden und wieder anmelden.
-- [ ] App ein zweites Mal öffnen, während sie läuft: Öffnen sich die Einstellungen, und ist „Klicks durchlassen“ aus?
+- [ ] Play a Spotify song: do the lyrics appear, and does the highlighted line match the singing?
+- [ ] If the song has word timing: do the words light up one by one?
+- [ ] Pause, seek and change the song in the player: does the overlay follow within a second?
+- [ ] The same with Apple Music, and with Amazon Music if it reported data in part 1.
+- [ ] Does the overlay stay above other windows, including a full-screen video and on another desktop? (measurement A)
+- [ ] Click into another app: does that app keep the focus?
+- [ ] Drag the overlay, quit and restart the app: is the position remembered?
+- [ ] Tray menu: hide and show, click-through, corners, playback source.
+- [ ] Alt+Shift+L (⌥⇧L on macOS) hides and shows the overlay.
+- [ ] Settings (the button in the overlay or the tray menu): layouts, font size, opacity, width and height take effect immediately.
+- [ ] Song & timing: ±0.25 s changes the timing audibly; after switching to another song and back, the value is still there.
+- [ ] Own lyrics: import an `.lrc` file, then open the editor, stamp a few lines with Ctrl+Shift+T (⌘⇧T on macOS) and save. Does the overlay show them at once? Remove them again.
+- [ ] Switch the language between English and German: do the overlay, settings and tray menu change?
+- [ ] Open at login: turn it on, log out and log back in.
+- [ ] Open the app a second time while it is running: do the settings open, and is click-through off?
 
-Notiere zu jedem Punkt ✅ oder was passiert ist.
+Note ✅ for each item, or what happened instead.
 
-## Demo ohne Player
+## Demo without a player
 
-`--demo` spielt einen eingebauten Song mit Wortzeiten:
+`--demo` plays a built-in song with word timing:
 
 - macOS: `/Applications/Singline.app/Contents/MacOS/singline --demo`
-- Windows: `"%LOCALAPPDATA%\Singline\singline.exe" --demo` (bei der `.msi`: `"C:\Program Files\Singline\singline.exe"`)
+- Windows: `"%LOCALAPPDATA%\Singline\singline.exe" --demo` (after installing the `.msi`: `"C:\Program Files\Singline\singline.exe" --demo`)

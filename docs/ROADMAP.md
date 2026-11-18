@@ -1,49 +1,62 @@
 # Roadmap
 
-Singline (bisher „Lyrics Overlay“) wird plattformübergreifend neu gebaut: eine Codebasis für Windows, macOS und Linux, mit Spotify, Apple Music und Amazon Music. Die Swift-App bleibt bis zur Funktionsgleichheit die macOS-Version.
+Singline is the cross-platform successor of Lyrics Overlay: one code base for Windows, macOS and Linux that works with Spotify, Apple Music, Amazon Music and web players. Until Singline has every feature of the native macOS app in [`apps/macos`](../apps/macos), that app remains available for macOS.
 
-## Entscheidungen
+## Principles
 
-| Thema | Entscheidung |
+| Topic | Decision |
 |---|---|
-| Technik | Tauri 2, Rust-Kern, Oberfläche in Svelte 5 + TypeScript |
-| Lizenz | GPL-3.0-or-later für den Neubau; `apps/macos` (mit Mikes Beitrag) bleibt MIT |
-| Entwicklung | ein Projekt im Original-Repo auf `main`: der Neubau im Hauptordner, die bisherige macOS-App in `apps/macos`, bis der Neubau sie ablöst |
-| Tests | Mac und Windows-PC durch Julian; Linux automatisiert in CI |
-| Umfang | jede Linory-Funktion ist Pflicht, dazu mehr ([PARITY.md](PARITY.md)) |
-| Name | **Singline** (singen + Zeile). Verworfen, weil schon vergeben oder zu ähnlich: Lyrify (iPhone-Lyrics-App und Firefox-Add-on), Lyricify, Overline (Entwickler-Tool), Linelight (Spiel). Vor Version 1.0 eine richtige Markenrecherche machen. |
-| Branding | eigenes Logo und eigene Bilder; weder Linory noch Mikes Icon |
-| 0.2-Funktionen | LRC-Editor, Korrektur pro Song und drei Layouts kommen nur in den Neubau (Phase 1) |
+| Technology | Tauri 2 with a Rust core and a Svelte 5 and TypeScript interface |
+| License | GPL-3.0-or-later; the native macOS app in `apps/macos` stays under MIT |
+| Repository | One project on `main`: Singline at the top level, the native macOS app in `apps/macos` |
+| Testing | Linux automatically in CI (virtual display, simulated player and lyrics server); Windows and macOS on real devices with [TESTING.md](TESTING.md) |
+| Scope | Every feature of the native macOS app, including those contributed from Linory, on every system, and more; tracked in [PARITY.md](PARITY.md) |
+| Design | Black and see-through with white lyrics; layout and motion follow the native macOS app |
+| Name | Singline (to sing + line). A trademark search follows before version 1.0. |
 
-## Neu: Mike gibt Linory zurück (17.11.2026)
+## Milestones
 
-Mike (MikeLeonFox) hat [JulianRudrich/LyricsOverlay#1](https://github.com/JulianRudrich/LyricsOverlay/pull/1) geöffnet: alle Linory-Funktionen in einem Commit, unter Julians Namen, Bundle-ID und Links, weiter unter MIT. Folgen:
+### Foundation (done)
 
-- Linorys Swift-Code ist damit die offizielle Vorlage für Phase 2. Wir portieren seine Funktionen statt sie nachzubauen und nennen Mike als Mitautor.
-- Gegen `main` ist der PR konfliktfrei. Gegen `preview/lyrics-overlay-0.2` gibt es Konflikte in 11 Dateien; Mike bietet an, beim Zusammenführen zu helfen.
-- Erledigt: Der PR ist gemergt, damit das Original-Repo wieder alles hat; die Swift-App liegt jetzt in `apps/macos`. Julians 0.2-Funktionen kommen nicht in die Swift-App, sondern in Phase 1 des Neubaus. Name, Logo und Bilder werden neu gestaltet.
-- Aus Mikes Beitrag portierter Code bleibt unter MIT nutzbar; im Neubau steht er unter GPL-3.0-or-later, mit Mike als Mitautor.
+- [x] Lyrics core in Rust, with every check of the Swift app
+- [x] Reading players through MPRIS, the Windows media controls and AppleScript, and the `singline-watch` diagnostic tool
+- [x] LRCLIB search, local cache, own lyrics and per-song timing in SQLite
+- [x] The app: overlay, settings, tray menu, shortcut and demo mode
+- [x] Linux end-to-end test in CI; Windows and macOS test builds for every commit on `main`
+- [x] Measurement C: word timing on LRCLIB ([SPIKES.md](SPIKES.md))
+- [ ] Measurements A and B on real Windows and macOS devices
 
-## Phasen
+### First alpha
 
-**Phase 0: Fundament und Messungen.** Fast fertig.
-- [x] Kern in Rust mit allen Prüfungen der Swift-App
-- [x] Player-Erkennung: MPRIS, SMTC, AppleScript; Diagnose-Werkzeug `singline-watch`
-- [x] LRCLIB-Suche, Cache, eigene Lyrics, Korrektur pro Song (SQLite)
-- [x] App: Overlay, Einstellungen, Tray, Shortcut, Demo-Modus
-- [x] Linux-Gesamttest in CI mit Screenshot
-- [x] Messung C: LRCLIB liefert für 8 von 10 bekannten Songs Wortzeiten ([SPIKES.md](SPIKES.md))
-- [ ] Messungen A und B: brauchen Julians Mac und Windows-PC
-- [x] Ein Projekt auf `main`; CI baut bei jedem Push Testversionen für Mac und Windows
+- [x] Own lyrics: LRC import and an editor with a timestamp key
+- [ ] Hiding the overlay while nothing plays
+- [ ] A configurable shortcut
+- [ ] Installers with automatic updates
+- [ ] Fixes from measurements A and B, for example keeping the overlay above full-screen apps on macOS
 
-**Phase 1: Dein 0.2 auf drei Systemen (erste Alpha).** LRC-Import und Editor mit Zeitstempel-Taste, automatisches Ausblenden, frei belegbarer Shortcut, automatische Updates, Installer, Feinschliff aus den Messungen (zum Beispiel Overlay über Vollbild-Apps auf macOS).
+### Everything the native macOS app can do
 
-**Phase 2: Alles, was Linory kann.** Aus Mikes Swift-Code portiert: Mini-Player mit Spul-Leiste, Klick auf eine Zeile springt dorthin, Refrain-Punkte, Cover, geschätztes Wort-Highlight für zeilenweise Lyrics, lange Zeilen teilen, Glas-Menü, Sleep-Timer, „Deine Musik“, Spotify-Verbindung mit True Shuffle, ♥ und Toplisten, Homebrew.
+Ported from the Swift code contributed from Linory:
 
-**Phase 3: Jeder Player.** Browser-Erweiterung für Amazon Music, Apple Music Web, Spotify Web, YouTube Music, Tidal und Deezer; Amazon-Music-Desktop-Apps, soweit Messung B es hergibt; beliebige Player mit Erlauben- und Ignorieren-Liste; Linux-Feinschliff (Wayland, Paketformate).
+- [ ] Mini-player with a seek bar, jumping to a line by clicking it, chorus markers and cover art
+- [ ] Estimated word highlight for line-synced lyrics, splitting long lines, scrolling lines and smooth song changes
+- [ ] Glass menu panel, sleep timer and listening statistics
+- [ ] Spotify connection with True Shuffle, liking songs and top lists
+- [ ] Homebrew
 
-**Erstes Release des Neubaus** nach Phase 3; dann löst er die macOS-App in `apps/macos` ab.
+### Every player
 
-**Phase 4: Noch mehr.** Weitere Lyrics-Quellen und Versionswahl, Editor mit Wort-Timing, Veröffentlichen bei LRCLIB, Verzögerung je Audioausgang, Übersetzung, Themes, Barrierefreiheit, OBS-Modus.
+- [ ] A browser extension for Amazon Music, Apple Music, Spotify, YouTube Music, Tidal and Deezer on the web
+- [ ] The Amazon Music desktop apps, as far as measurement B allows
+- [ ] Any player, with allow and ignore lists
+- [ ] Linux: Wayland support through the layer shell, and packages
 
-**Phase 5: Version 1.0.** Name und Marke, Website, Signierung, winget, Flathub, AUR.
+The first release follows this milestone. Singline then replaces the native macOS app.
+
+### More
+
+More lyrics sources and a choice between versions, an editor for word timing, publishing lyrics to LRCLIB, a delay per audio output, translations, themes, accessibility, and a mode for streaming with OBS.
+
+### Version 1.0
+
+Trademark, website, code signing, and packages for winget, Flathub and the AUR.

@@ -1,73 +1,73 @@
-# Abnahmeliste gegen Linory
+# Feature parity
 
-Jede Funktion von Linory 0.3.1 (jetzt in [JulianRudrich/LyricsOverlay#1](https://github.com/JulianRudrich/LyricsOverlay/pull/1)) muss die neue App haben. Veröffentlicht wird erst, wenn jede Zeile für alle drei Systeme erledigt ist. Vor der Veröffentlichung wird die Liste mit dem dann aktuellen Linory-Stand abgeglichen.
+Before its first release, Singline must offer every feature of the native macOS app (Linory 0.3.1, contributed in [#1](https://github.com/JulianRudrich/LyricsOverlay/pull/1)) on every system. Before that release, this list is compared again with the latest version of Linory.
 
-**Zeichen:** ✅ gebaut und getestet · 🧪 gebaut, Test auf dem Gerät fehlt · ⬜ offen · — gibt es auf diesem System nicht
+**Legend:** ✅ built and tested · 🧪 built, not yet tested on a device · ⬜ open · — not available on this system
 
-Spalten: **Lin** Linux · **Win** Windows · **Mac** macOS. Linux ist automatisiert getestet (virtueller Bildschirm, nachgebauter Player).
+**Columns:** Lin = Linux, Win = Windows, Mac = macOS. Linux is tested automatically on a virtual display with a simulated player.
 
 ## Overlay
 
-| Funktion | Lin | Win | Mac | Anmerkung |
+| Feature | Lin | Win | Mac | Notes |
 |---|:-:|:-:|:-:|---|
-| Schwebt über anderen Fenstern, auf allen Arbeitsflächen | ✅ | 🧪 | 🧪 | macOS über Vollbild-Apps: Messung A |
-| Nimmt anderen Apps nie den Fokus | 🧪 | 🧪 | 🧪 | |
-| Ziehen, vier Ecken, Position gemerkt, mehrere Bildschirme | 🧪 | 🧪 | 🧪 | |
-| Klicks durchlassen, gemerkt; erneutes Öffnen hebt es auf | 🧪 | 🧪 | 🧪 | |
-| Shortcut zum Ein- und Ausblenden | 🧪 | 🧪 | 🧪 | Linux nur X11; Wayland in Phase 3 |
-| Drei Layouts, Schrift, Deckkraft, Größe | ✅ | 🧪 | 🧪 | Linory hat ein festes Layout |
-| Wort-für-Wort-Highlight mit echten Wortzeiten | ✅ | 🧪 | 🧪 | Linory schätzt meist nur |
-| Geschätztes Wort-Highlight für zeilenweise Lyrics | ⬜ | ⬜ | ⬜ | Phase 2 |
-| Scrollende Zeilen, weicher Songwechsel | ⬜ | ⬜ | ⬜ | heute: Einblenden der neuen Zeile |
-| Lange Zeilen teilen | ⬜ | ⬜ | ⬜ | Phase 2 |
-| Cover | ⬜ | ⬜ | ⬜ | Bild-URL wird schon gelesen |
-| Ausblenden, wenn nichts läuft | ⬜ | ⬜ | ⬜ | Phase 1 |
+| Floats above other windows on every desktop | ✅ | 🧪 | 🧪 | macOS above full-screen apps: measurement A |
+| Never takes the focus from other apps | 🧪 | 🧪 | 🧪 | |
+| Dragging, four corners, remembered position, several displays | 🧪 | 🧪 | 🧪 | |
+| Click-through, remembered; opening the app again turns it off | 🧪 | 🧪 | 🧪 | |
+| Shortcut to show and hide | 🧪 | 🧪 | 🧪 | Linux: X11 only for now |
+| Three layouts, font size, opacity and size | ✅ | 🧪 | 🧪 | Linory has one fixed layout |
+| Word-by-word highlight from real word timing | ✅ | 🧪 | 🧪 | Linory mostly estimates |
+| Estimated word highlight for line-synced lyrics | ⬜ | ⬜ | ⬜ | In progress |
+| Scrolling lines and smooth song changes | ⬜ | ⬜ | ⬜ | In progress |
+| Splitting long lines | ⬜ | ⬜ | ⬜ | |
+| Cover art | ⬜ | ⬜ | ⬜ | In progress |
+| Hiding while nothing plays | ⬜ | ⬜ | ⬜ | In progress |
 
-## Mini-Player
+## Mini-player
 
-| Funktion | Lin | Win | Mac | Anmerkung |
+| Feature | Lin | Win | Mac | Notes |
 |---|:-:|:-:|:-:|---|
-| Play/Pause, Vor, Zurück, Spulen (Technik) | ✅ | 🧪 | 🧪 | Befehle sind gebaut, die Oberfläche fehlt |
-| Bedienleiste, Spul-Leiste mit Zeiten | ⬜ | ⬜ | ⬜ | Phase 2 |
-| Klick auf eine Zeile springt dorthin | ⬜ | ⬜ | ⬜ | Phase 2 |
-| Refrain-Punkte | ⬜ | ⬜ | ⬜ | Phase 2 |
-| ♥ (Spotify) | ⬜ | ⬜ | ⬜ | braucht die Spotify-Verbindung |
-| In Spotify öffnen | ⬜ | ⬜ | ⬜ | |
+| Play/pause, next, previous and seeking (commands) | ✅ | 🧪 | 🧪 | The controls in the overlay are in progress |
+| Controls and a seek bar with times | ⬜ | ⬜ | ⬜ | In progress |
+| Jumping to a line by clicking it | ⬜ | ⬜ | ⬜ | In progress |
+| Chorus markers | ⬜ | ⬜ | ⬜ | In progress |
+| ♥ (Spotify) | ⬜ | ⬜ | ⬜ | Needs the Spotify connection |
+| Open in Spotify | ⬜ | ⬜ | ⬜ | |
 
-## Sync und Lyrics
+## Sync and lyrics
 
-| Funktion | Lin | Win | Mac | Anmerkung |
+| Feature | Lin | Win | Mac | Notes |
 |---|:-:|:-:|:-:|---|
-| Position zwischen Abfragen fortschreiben, Ruckeln glätten | ✅ | 🧪 | 🧪 | Zeilenwechsel ~10 ms nach dem Zeitstempel |
-| Sofortige Reaktion auf Songwechsel per Systemmeldung | ⬜ | ⬜ | ⬜ | heute 0,5 s (Mac 0,8 s) Abfrage |
-| Korrektur pro Song und global | ✅ | 🧪 | 🧪 | Linory: nur global |
-| LRCLIB exakt, dann Suche, gleiches Album bevorzugt | ✅ | ✅ | ✅ | systemunabhängig getestet |
-| Lokaler Cache | ✅ | ✅ | ✅ | |
-| Klartext-Lyrics, als „nicht synchron“ markiert | ✅ | ✅ | ✅ | Zeiten nach Zeilenlänge statt gleichmäßig |
-| Instrumental erkannt | ✅ | ✅ | ✅ | |
-| Eigene Lyrics: Speicher | ✅ | ✅ | ✅ | |
-| Eigene Lyrics: LRC-Import und Editor | ⬜ | ⬜ | ⬜ | Phase 1; aus Julians 0.2 |
+| Position carried forward between readings, jitter smoothed | ✅ | 🧪 | 🧪 | Lines change about 10 ms after their timestamp |
+| Immediate reaction to song changes through system notifications | ⬜ | ⬜ | ⬜ | Today the players are read every 0.5 s (macOS 0.8 s) |
+| Timing correction per song and globally | ✅ | 🧪 | 🧪 | Linory: global only |
+| LRCLIB exact match, then a search that prefers the same album | ✅ | ✅ | ✅ | Tested independently of the system |
+| Local cache | ✅ | ✅ | ✅ | |
+| Plain lyrics, marked as not synced | ✅ | ✅ | ✅ | Timing follows the line length instead of even spacing |
+| Instrumentals recognised | ✅ | ✅ | ✅ | |
+| Own lyrics: storage | ✅ | ✅ | ✅ | |
+| Own lyrics: LRC import and editor | ✅ | 🧪 | 🧪 | From the 0.2 preview |
 
-## Player
+## Players
 
-| Dienst | Lin | Win | Mac | Anmerkung |
+| Player | Lin | Win | Mac | Notes |
 |---|:-:|:-:|:-:|---|
-| Spotify (Desktop-App) | ✅ | 🧪 | 🧪 | Linux mit nachgebautem Player getestet |
-| Apple Music | ⬜ | 🧪 | 🧪 | Windows: „Künstler — Album“ wird getrennt; Linux nur Web (Phase 3) |
-| Amazon Music | ⬜ | 🧪 | ⬜ | Windows: Messung B; sonst Browser-Erweiterung (Phase 3) |
-| Auswahl Automatisch / fest | ✅ | ✅ | ✅ | |
-| Andere Player (Browser, VLC …) | ✅ | 🧪 | — | macOS: Messung B |
+| Spotify (desktop app) | ✅ | 🧪 | 🧪 | Linux tested with a simulated player |
+| Apple Music | 🧪 | 🧪 | 🧪 | Windows: the combined "Artist — Album" field is split; Linux: web player |
+| Amazon Music | 🧪 | 🧪 | ⬜ | Windows: measurement B; Linux: web player; macOS: browser extension |
+| Automatic or fixed source | ✅ | ✅ | ✅ | |
+| Other players (browsers, VLC and more) | ✅ | 🧪 | ⬜ | macOS: browser extension |
 
-## Weitere Funktionen
+## More features
 
-| Funktion | Lin | Win | Mac | Anmerkung |
+| Feature | Lin | Win | Mac | Notes |
 |---|:-:|:-:|:-:|---|
-| Deutsch und Englisch, Systemsprache | ✅ | 🧪 | 🧪 | |
-| Bei Anmeldung starten | 🧪 | 🧪 | 🧪 | |
-| Tray-Menü | 🧪 | 🧪 | 🧪 | Linory: Glas-Panel mit laufendem Titel (Phase 2) |
-| Sleep-Timer | ⬜ | ⬜ | ⬜ | Phase 2 |
-| „Deine Musik“ (Statistiken) | ⬜ | ⬜ | ⬜ | Phase 2; für jeden Player |
-| Spotify-Verbindung, True Shuffle, Toplisten | ⬜ | ⬜ | ⬜ | Phase 2 |
-| Installer | ⬜ | 🧪 | 🧪 | CI baut .exe/.msi und .dmg |
-| Homebrew | — | — | ⬜ | Phase 2 |
-| Automatische Updates | ⬜ | ⬜ | ⬜ | Phase 1 |
+| English and German, following the system language | ✅ | 🧪 | 🧪 | |
+| Open at login | 🧪 | 🧪 | 🧪 | |
+| Tray menu | 🧪 | 🧪 | 🧪 | Linory: glass panel with the current song (planned) |
+| Sleep timer | ⬜ | ⬜ | ⬜ | In progress |
+| Listening statistics | ⬜ | ⬜ | ⬜ | In progress; for every player |
+| Spotify connection, True Shuffle and top lists | ⬜ | ⬜ | ⬜ | In progress |
+| Installers | ⬜ | 🧪 | 🧪 | CI builds .exe, .msi and .dmg |
+| Homebrew | — | — | ⬜ | |
+| Automatic updates | ⬜ | ⬜ | ⬜ | |

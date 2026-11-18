@@ -1,61 +1,63 @@
-# Messungen
+# Measurements
 
-Drei Fragen, deren Antworten den Bau der nächsten Phasen bestimmen. Anleitung für A und B: [TESTING.md](TESTING.md).
+Three questions whose answers shape the next milestones. The steps for A and B are in [TESTING.md](TESTING.md).
 
-## A: Overlay-Verhalten je System
+## A: Overlay behaviour on each system
 
-**Frage:** Bleibt das Overlay über allen Fenstern (auch Vollbild), auf allen Arbeitsflächen, ohne Fokus zu stehlen, mit funktionierendem Klick-Durchlass?
+**Question:** does the overlay stay above every window, including full-screen apps, on every desktop, without taking the focus, and with working click-through?
 
-**Bekannt:**
-- Linux X11: funktioniert im automatischen Test. Ohne Compositor (virtueller Bildschirm) sind die runden Ecken schwarz statt durchsichtig; auf echten Desktops nicht.
-- Linux Wayland: „immer oben“ setzt der Compositor nicht für normale Fenster; GNOME braucht XWayland, KDE und wlroots können Layer-Shell ([tauri#3117](https://github.com/tauri-apps/tauri/issues/3117)).
-- macOS: Über Vollbild-Apps braucht es das Fensterverhalten `fullScreenAuxiliary`, das Tauri nicht direkt anbietet. Die Swift-App hatte es.
+**Known so far:**
 
-**Ergebnis:** offen (Julian)
+- Linux on X11: works in the automated test. Without a compositor (as on the virtual display) the rounded corners are black instead of transparent; on real desktops they are not.
+- Linux on Wayland: the compositor does not keep normal windows on top. GNOME needs XWayland; KDE and wlroots-based desktops support the layer shell ([tauri#3117](https://github.com/tauri-apps/tauri/issues/3117)).
+- macOS: staying above full-screen apps needs the `fullScreenAuxiliary` window behaviour, which Tauri does not offer directly. The Swift app has it.
 
-## B: Was die Player melden
+**Result:** open
 
-**Frage:** Liefern Spotify, Apple Music und Amazon Music auf Windows und macOS Titel, Künstler, Album, Position und Steuerung?
+## B: What the players report
 
-**Bekannt aus der Recherche:**
-- Windows meldet die Position nur zum Zeitpunkt der letzten Änderung; die App rechnet ab dort weiter. Spotify aktualisiert sie nur bei Play, Pause und Spulen.
-- Apple Music für Windows schreibt „Künstler — Album“ ins Künstlerfeld und lässt das Album leer; die App trennt das ([Bericht](https://github.com/marcimastro98/Xenon/issues/128)).
-- Amazon Music für Windows liefert laut einem Projekt nur einen Teil der Daten ([Bridge](https://github.com/GoldenPigeon92/Amazon-Music-SMTC-Bridge)).
-- Amazon Music für macOS hat keine AppleScript-Schnittstelle. Andere Player sind dort nur über eine inoffizielle Systemschnittstelle erreichbar ([mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)).
+**Question:** do Spotify, Apple Music and Amazon Music on Windows and macOS report title, artist, album and position, and accept commands?
 
-**Ergebnis:**
+**Known from research:**
+
+- Windows reports the position only as of its last change; Singline moves it forward from there. Spotify updates it only on play, pause and seek.
+- Apple Music for Windows puts "Artist — Album" into the artist field and leaves the album empty; Singline splits it ([report](https://github.com/marcimastro98/Xenon/issues/128)).
+- According to another project, Amazon Music for Windows reports only part of the data ([bridge](https://github.com/GoldenPigeon92/Amazon-Music-SMTC-Bridge)).
+- Amazon Music for macOS has no AppleScript interface. Other players on macOS can only be reached through an unofficial system interface ([mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)).
+
+**Result:**
 
 | Player | Windows | macOS |
 |---|---|---|
-| Spotify | offen | offen |
-| Apple Music | offen | offen |
-| Amazon Music | offen | offen |
-| Browser (Amazon Music Web) | offen | — |
+| Spotify | open | open |
+| Apple Music | open | open |
+| Amazon Music | open | open |
+| Browser (YouTube Music, Amazon Music on the web) | open | — |
 
-## C: Wortzeiten bei LRCLIB
+## C: Word timing on LRCLIB
 
-**Frage:** Liefert LRCLIB Wortzeiten (`lyricsfile` mit `words`), und für wie viele Songs?
+**Question:** does LRCLIB provide word timing (a `lyricsfile` with `words`), and for how many songs?
 
-**Ergebnis (17.11.2026, zehn bekannte Songs, je 20 Suchtreffer):**
+**Result (17 November 2026, ten well-known songs, 20 search results each):**
 
-- Jeder Treffer hat ein Feld `lyricsfile` (YAML als Text) und ein Kennzeichen `hasWordSync`. Alle 200 Dokumente ließen sich lesen.
-- **88 von 200** Treffern haben Wortzeiten; **8 von 10 Songs** haben mindestens eine Fassung mit Wortzeiten.
-- Der Anteil schwankt stark: „As It Was“ 19/20, „Levitating“ 17/20, „Haus am See“ 17/20, „Blinding Lights“ 16/20, „Sonne“ 13/20, „Espresso“ 4/20, „BIRDS OF A FEATHER“ 1/20, „Shape of You“ 1/20, „Cruel Summer“ 0/20, „Bohemian Rhapsody“ 0/20.
+- Every result has a `lyricsfile` field (YAML as text) and a `hasWordSync` flag. All 200 documents could be read.
+- **88 of 200** results have word timing; **8 of 10 songs** have at least one version with word timing.
+- The share varies widely: "As It Was" 19/20, "Levitating" 17/20, "Haus am See" 17/20, "Blinding Lights" 16/20, "Sonne" 13/20, "Espresso" 4/20, "BIRDS OF A FEATHER" 1/20, "Shape of You" 1/20, "Cruel Summer" 0/20, "Bohemian Rhapsody" 0/20.
 
-Die Suche der App mit dem echten LRCLIB (`cargo run -p lyrics-providers --example lookup`):
+What Singline's lookup finds on the real LRCLIB (`cargo run -p lyrics-providers --example lookup`):
 
-| Song | Ergebnis |
+| Song | Result |
 |---|---|
-| The Weeknd – Blinding Lights | Wort für Wort, 35 Zeilen |
-| Harry Styles – As It Was | Wort für Wort, 37 Zeilen |
-| Rammstein – Sonne | Wort für Wort, 40 Zeilen |
-| Peter Fox – Haus am See (216 s) | Wort für Wort, 50 Zeilen |
-| Taylor Swift – Cruel Summer | zeilenweise (keine Wortdaten vorhanden) |
-| Queen – Bohemian Rhapsody | zeilenweise (keine Wortdaten vorhanden) |
+| The Weeknd – Blinding Lights | Word by word, 35 lines |
+| Harry Styles – As It Was | Word by word, 37 lines |
+| Rammstein – Sonne | Word by word, 40 lines |
+| Peter Fox – Haus am See (216 s) | Word by word, 50 lines |
+| Taylor Swift – Cruel Summer | Line by line (no word timing available) |
+| Queen – Bohemian Rhapsody | Line by line (no word timing available) |
 
-**Folgen:**
+**Consequences:**
 
-- Echtes Wort-für-Wort ist für einen großen Teil bekannter Songs sofort verfügbar. Für den Rest braucht es die geschätzte Hervorhebung aus Phase 2.
-- Ein exakter Treffer (Dauer ±2,5 s) gewinnt immer, auch ohne Wortzeiten: Eine Fassung mit anderer Dauer hat oft ein verschobenes Timing. Beispiel: „Haus am See“ mit 222 s trifft eine exakte Fassung ohne Wortzeiten; die Fassungen mit Wortzeiten sind 216 s lang.
-- Bei Gleichstand in der Suche gewinnen jetzt Wortzeiten; das fiel beim Test mit echten Daten auf und ist behoben.
-- Idee für später: Hat der exakte Treffer keine Wortzeiten, eine Fassung mit Wortzeiten und fast gleicher Dauer (±1 s) aus der Suche nehmen.
+- Real word-by-word highlighting is available right away for a large share of well-known songs. The rest needs the estimated highlight.
+- An exact match (duration within ±2.5 s) always wins, even without word timing, because a version with a different duration often has shifted timing. Example: "Haus am See" at 222 s matches an exact version without word timing; the versions with word timing are 216 s long.
+- On a tie in the search, word timing now wins; this showed up in the test with real data and is fixed.
+- Idea for later: if the exact match has no word timing, take a version with word timing and almost the same duration (±1 s) from the search.

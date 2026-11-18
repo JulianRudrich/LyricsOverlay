@@ -86,6 +86,12 @@ pub fn normalized(value: &str) -> String {
 
 /// True when `record` describes the same recording as the playing track.
 pub fn matches(record: &LyricsRecord, title: &str, artist: &str, duration: f64) -> bool {
+    same_song(record, title, artist) && (record.duration - duration).abs() <= DURATION_TOLERANCE
+}
+
+/// True when `record` has this title and artist, in any length. A record may
+/// name more artists after the first, as in "Artist feat. Guest".
+pub fn same_song(record: &LyricsRecord, title: &str, artist: &str) -> bool {
     let title = normalized(title);
     let artist = normalized(artist);
     let candidate_artist = normalized(&record.artist_name);
@@ -96,7 +102,6 @@ pub fn matches(record: &LyricsRecord, title: &str, artist: &str, duration: f64) 
             || candidate_artist
                 .strip_prefix(artist.as_str())
                 .is_some_and(|rest| rest.starts_with(' ')))
-        && (record.duration - duration).abs() <= DURATION_TOLERANCE
 }
 
 /// The matching record with synced lyrics whose duration is closest to the track.

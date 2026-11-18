@@ -14,7 +14,7 @@
   const app = $derived(ctx.app);
   const hotkey = $derived(hotkeyLabel(settings.hotkey, app.platform));
 
-  const sources: SourcePreference[] = ["automatic", "spotify", "appleMusic", "amazonMusic"];
+  const sources: SourcePreference[] = ["automatic", "spotify", "appleMusic", "amazonMusic", "youTubeMusic"];
   const languages: Language[] = ["system", "de", "en"];
 </script>
 

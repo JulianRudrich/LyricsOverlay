@@ -13,7 +13,7 @@ use crate::{windows, AppState};
 
 const TRAY_ID: &str = "main";
 
-const SOURCES: [(SourcePreference, &str, &str); 4] = [
+const SOURCES: [(SourcePreference, &str, &str); 5] = [
     (
         SourcePreference::Automatic,
         "source:automatic",
@@ -33,6 +33,11 @@ const SOURCES: [(SourcePreference, &str, &str); 4] = [
         SourcePreference::AmazonMusic,
         "source:amazonMusic",
         "source.amazonMusic",
+    ),
+    (
+        SourcePreference::YouTubeMusic,
+        "source:youTubeMusic",
+        "source.youTubeMusic",
     ),
 ];
 

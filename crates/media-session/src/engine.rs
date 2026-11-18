@@ -17,6 +17,7 @@ pub enum SourcePreference {
     Spotify,
     AppleMusic,
     AmazonMusic,
+    YouTubeMusic,
 }
 
 impl SourcePreference {
@@ -26,6 +27,7 @@ impl SourcePreference {
             SourcePreference::Spotify => Some(Service::Spotify),
             SourcePreference::AppleMusic => Some(Service::AppleMusic),
             SourcePreference::AmazonMusic => Some(Service::AmazonMusic),
+            SourcePreference::YouTubeMusic => Some(Service::YouTubeMusic),
         }
     }
 
@@ -228,6 +230,42 @@ mod tests {
         assert_eq!(
             title(&Engine::new(SourcePreference::Automatic, true).choose(browser())),
             Some("Video")
+        );
+    }
+
+    #[test]
+    fn youtube_music_is_followed_like_the_music_apps() {
+        let tabs = || {
+            vec![
+                reading(
+                    "youtube-video",
+                    Service::Other,
+                    PlaybackStatus::Paused,
+                    Some("Video"),
+                ),
+                reading(
+                    "youtube-music",
+                    Service::YouTubeMusic,
+                    PlaybackStatus::Playing,
+                    Some("Song"),
+                ),
+            ]
+        };
+        assert_eq!(
+            title(&Engine::new(SourcePreference::Automatic, false).choose(tabs())),
+            Some("Song")
+        );
+        let mut fixed = Engine::new(SourcePreference::YouTubeMusic, false);
+        assert_eq!(title(&fixed.choose(tabs())), Some("Song"));
+        assert_eq!(
+            fixed.choose(vec![reading(
+                "spotify",
+                Service::Spotify,
+                PlaybackStatus::Playing,
+                Some("Other")
+            )]),
+            NowPlaying::Idle,
+            "a fixed YouTube Music source ignores Spotify"
         );
     }
 

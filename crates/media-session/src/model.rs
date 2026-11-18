@@ -12,18 +12,25 @@ pub enum Service {
     Spotify,
     AppleMusic,
     AmazonMusic,
+    YouTubeMusic,
     Other,
 }
 
 impl Service {
     /// The services the overlay follows in automatic mode, in tie-break order.
-    pub const KNOWN: [Service; 3] = [Service::Spotify, Service::AppleMusic, Service::AmazonMusic];
+    pub const KNOWN: [Service; 4] = [
+        Service::Spotify,
+        Service::AppleMusic,
+        Service::AmazonMusic,
+        Service::YouTubeMusic,
+    ];
 
     pub fn title(self) -> &'static str {
         match self {
             Service::Spotify => "Spotify",
             Service::AppleMusic => "Apple Music",
             Service::AmazonMusic => "Amazon Music",
+            Service::YouTubeMusic => "YouTube Music",
             Service::Other => "Other player",
         }
     }

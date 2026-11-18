@@ -14,7 +14,9 @@ use crate::model::{
     Capabilities, Command, PlaybackStatus, PlayerId, PlayerInfo, PlayerSnapshot, Problem, Reading,
     Service, Track,
 };
-use crate::normalize::{identify_mpris, join_artists, spotify_uri_from_mpris, track_key};
+use crate::normalize::{
+    browser_media, identify_mpris, join_artists, spotify_uri_from_mpris, track_key,
+};
 
 pub const BUS_PREFIX: &str = "org.mpris.MediaPlayer2.";
 pub const OBJECT_PATH: &str = "/org/mpris/MediaPlayer2";
@@ -232,6 +234,19 @@ pub(crate) fn snapshot(
     };
     let url = text("xesam:url");
     let (service, name, web) = identify_mpris(bus_name, identity, url.as_deref());
+    let artists = metadata
+        .get("xesam:artist")
+        .map(|value| as_texts(value))
+        .unwrap_or_default();
+    let song = text("xesam:title").map(|title| (title, join_artists(&artists)));
+    // A browser tab may be YouTube Music, which only its address or title tells.
+    let (service, song) = match song {
+        Some((title, artist)) if web => {
+            let media = browser_media(url.as_deref(), &title, &artist);
+            (media.service(service), Some((media.title, media.artist)))
+        }
+        song => (service, song),
+    };
 
     let flag = |key: &str| {
         properties
@@ -259,35 +274,32 @@ pub(crate) fn snapshot(
         seek: controllable && flag("CanSeek"),
     };
 
-    let track = text("xesam:title").map(|title| {
-        let artists = metadata
-            .get("xesam:artist")
-            .map(|value| as_texts(value))
-            .unwrap_or_default();
-        let artist = join_artists(&artists);
-        let album = text("xesam:album");
-        let track_id = text("mpris:trackid").filter(|id| id != NO_TRACK);
-        let source_id = match service {
-            Service::Spotify => track_id
-                .as_deref()
-                .and_then(spotify_uri_from_mpris)
-                .or(track_id),
-            _ => track_id,
-        };
-        Track {
-            key: track_key(&title, &artist, album.as_deref()),
-            source_id,
-            duration: metadata
-                .get("mpris:length")
-                .and_then(|value| as_f64(value))
-                .filter(|us| *us > 0.0)
-                .map(|us| us / 1_000_000.0),
-            artwork_url: text("mpris:artUrl"),
-            title,
-            artist,
-            album,
-        }
-    });
+    let track = song
+        .filter(|(title, _)| !title.is_empty())
+        .map(|(title, artist)| {
+            let album = text("xesam:album");
+            let track_id = text("mpris:trackid").filter(|id| id != NO_TRACK);
+            let source_id = match service {
+                Service::Spotify => track_id
+                    .as_deref()
+                    .and_then(spotify_uri_from_mpris)
+                    .or(track_id),
+                _ => track_id,
+            };
+            Track {
+                key: track_key(&title, &artist, album.as_deref()),
+                source_id,
+                duration: metadata
+                    .get("mpris:length")
+                    .and_then(|value| as_f64(value))
+                    .filter(|us| *us > 0.0)
+                    .map(|us| us / 1_000_000.0),
+                artwork_url: text("mpris:artUrl"),
+                title,
+                artist,
+                album,
+            }
+        });
     let position = track
         .as_ref()
         .and(properties.get("Position").and_then(|value| as_f64(value)))
@@ -462,6 +474,68 @@ mod tests {
         assert_eq!(
             snapshot("org.mpris.MediaPlayer2.x", None, &props, Instant::now()).status,
             PlaybackStatus::Paused
+        );
+    }
+
+    fn browser_tab(title: &str, artist: &str, url: Option<&str>) -> HashMap<String, OwnedValue> {
+        let mut metadata: HashMap<String, OwnedValue> = [
+            ("xesam:title", owned(Value::from(title))),
+            ("xesam:artist", owned(Value::from(vec![artist]))),
+            ("mpris:length", owned(Value::from(200_000_000_i64))),
+        ]
+        .into_iter()
+        .map(|(key, value)| (key.to_owned(), value))
+        .collect();
+        if let Some(url) = url {
+            metadata.insert("xesam:url".into(), owned(Value::from(url)));
+        }
+        properties(vec![
+            ("PlaybackStatus", owned(Value::from("Playing"))),
+            ("Metadata", owned(Value::from(metadata))),
+            ("Position", owned(Value::from(1_000_000_i64))),
+        ])
+    }
+
+    #[test]
+    fn youtube_music_tabs_are_recognized() {
+        let by_url = snapshot(
+            "org.mpris.MediaPlayer2.chromium.instance42",
+            Some("Chromium"),
+            &browser_tab(
+                "Halo",
+                "Beyoncé",
+                Some("https://music.youtube.com/watch?v=1"),
+            ),
+            Instant::now(),
+        );
+        assert_eq!(by_url.player.service, Service::YouTubeMusic);
+        assert!(by_url.player.web);
+        assert_eq!(by_url.track.expect("track").title, "Halo");
+
+        let by_title = snapshot(
+            "org.mpris.MediaPlayer2.firefox.instance_1_7",
+            Some("Mozilla Firefox"),
+            &browser_tab("Halo - YouTube Music", "", None),
+            Instant::now(),
+        );
+        assert_eq!(by_title.player.service, Service::YouTubeMusic);
+        let track = by_title.track.expect("track");
+        assert_eq!(track.title, "Halo");
+        assert_eq!(track.key, track_key("Halo", "", None));
+
+        let other = snapshot(
+            "org.mpris.MediaPlayer2.vlc",
+            Some("VLC media player"),
+            &browser_tab("Clip - YouTube Music", "", None),
+            Instant::now(),
+        );
+        assert_eq!(
+            (
+                other.player.service,
+                other.track.expect("track").title.as_str()
+            ),
+            (Service::Other, "Clip - YouTube Music"),
+            "only browser tabs are looked at"
         );
     }
 }

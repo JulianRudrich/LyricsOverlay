@@ -18,7 +18,7 @@ use crate::model::{
     Capabilities, Command, PlaybackStatus, PlayerId, PlayerInfo, PlayerSnapshot, Reading, Service,
     Track,
 };
-use crate::normalize::{identify_smtc, split_artist_album, track_key};
+use crate::normalize::{browser_media, identify_smtc, split_artist_album, track_key};
 
 /// 100-nanosecond ticks between 1601-01-01 and 1970-01-01.
 const UNIX_EPOCH_TICKS: i64 = 116_444_736_000_000_000;
@@ -193,7 +193,13 @@ fn read_session(
     let duration = (end > start).then(|| (end - start) as f64 / TICKS_PER_SECOND);
     let reports_position = capabilities.seek || position_ticks > 0 || duration.is_some();
 
-    let title = title.trim().to_owned();
+    // Windows does not tell which page a browser plays; its title still may.
+    let (service, title, artist) = if web && service == Service::Other {
+        let media = browser_media(None, &title, &artist);
+        (media.service(service), media.title, media.artist)
+    } else {
+        (service, title.trim().to_owned(), artist)
+    };
     let track = (!title.is_empty()).then(|| {
         let key = track_key(&title, &artist, album.as_deref());
         let artwork_url = cover_art(&id, &key, &properties, artwork);

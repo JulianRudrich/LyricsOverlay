@@ -3,7 +3,7 @@
   import { api, subscribe } from "../lib/api";
   import { translator } from "../lib/i18n";
   import { paneIn } from "../lib/motion";
-  import type { AppInfo, LyricsView, Playback, Settings } from "../lib/types";
+  import type { AppInfo, HotkeyError, LyricsView, Playback, Settings } from "../lib/types";
   import Sidebar from "../lib/ui/Sidebar.svelte";
   import { panes, type PaneContext } from "./panes";
 
@@ -47,6 +47,15 @@
     async update(patch) {
       if (settings) settings = { ...settings, ...patch };
       settings = await api.updateSettings(patch);
+    },
+    async setHotkey(hotkey) {
+      try {
+        settings = await api.setHotkey(hotkey);
+        return null;
+      } catch (error) {
+        const known: HotkeyError[] = ["invalid", "unsupported", "needsModifier", "taken"];
+        return known.find((name) => name === error) ?? "taken";
+      }
     },
     async setLaunchAtLogin(enabled) {
       const actual = await api.setLaunchAtLogin(enabled);

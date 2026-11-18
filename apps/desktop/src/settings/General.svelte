@@ -2,11 +2,11 @@
   import { hotkeyLabel } from "../lib/hotkey";
   import type { MessageKey } from "../lib/i18n";
   import type { Language, SourcePreference } from "../lib/types";
-  import KeyCap from "../lib/ui/KeyCap.svelte";
   import Row from "../lib/ui/Row.svelte";
   import Select from "../lib/ui/Select.svelte";
   import Toggle from "../lib/ui/Toggle.svelte";
   import BrowserBridge from "./BrowserBridge.svelte";
+  import HotkeyField, { type HotkeyStatus } from "./HotkeyField.svelte";
   import type { PaneContext } from "./panes";
 
   let { ctx }: { ctx: PaneContext } = $props();
@@ -14,6 +14,38 @@
   const settings = $derived(ctx.settings);
   const app = $derived(ctx.app);
   const hotkey = $derived(hotkeyLabel(settings.hotkey, app.platform));
+
+  let hotkeyStatus = $state<HotkeyStatus>({ kind: "idle" });
+  const modifiers = $derived(
+    t("settings.hotkeyModifiers", {
+      ctrl: hotkeyLabel("Ctrl", app.platform),
+      alt: hotkeyLabel("Alt", app.platform),
+      super: hotkeyLabel("Super", app.platform),
+    }),
+  );
+  const hotkeyHint = $derived.by(() => {
+    const status = hotkeyStatus;
+    if (status.kind === "recording") {
+      if (status.problem === "needsModifier") return t("settings.hotkeyNeedsModifier", { modifiers });
+      if (status.problem === "unsupported") return t("settings.hotkeyUnsupported");
+      return t("settings.hotkeyRecording");
+    }
+    if (status.kind === "failed") {
+      const tried = hotkeyLabel(status.hotkey, app.platform);
+      if (status.error === "needsModifier") return t("settings.hotkeyNeedsModifier", { modifiers });
+      if (status.error !== "taken") return t("settings.hotkeyUnsupported");
+      // The old shortcut only keeps working if it worked before.
+      return app.hotkeyError
+        ? t("settings.hotkeyError", { hotkey: tried })
+        : t("settings.hotkeyTaken", { hotkey: tried, previous: hotkey });
+    }
+    return app.hotkeyError ? t("settings.hotkeyError", { hotkey }) : t("settings.hotkeyHint");
+  });
+  const hotkeyWarning = $derived(
+    hotkeyStatus.kind === "failed" ||
+      (hotkeyStatus.kind === "recording" && hotkeyStatus.problem !== null) ||
+      (hotkeyStatus.kind === "idle" && app.hotkeyError),
+  );
 
   const sources: SourcePreference[] = ["automatic", "spotify", "appleMusic", "amazonMusic", "youTubeMusic"];
   const languages: Language[] = ["system", "de", "en"];
@@ -57,11 +89,13 @@
   />
 </Row>
 
-<Row
-  icon="keyboard"
-  title={t("settings.hotkey")}
-  hint={app.hotkeyError ? t("settings.hotkeyError", { hotkey }) : t("settings.hotkeyHint")}
-  warning={app.hotkeyError}
->
-  <KeyCap label={hotkey} />
+<Row icon="keyboard" title={t("settings.hotkey")} hint={hotkeyHint} warning={hotkeyWarning}>
+  <HotkeyField
+    hotkey={settings.hotkey}
+    defaultHotkey={app.defaultHotkey}
+    platform={app.platform}
+    {t}
+    onchange={(next) => ctx.setHotkey(next)}
+    bind:status={hotkeyStatus}
+  />
 </Row>

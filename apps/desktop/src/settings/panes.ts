@@ -1,6 +1,6 @@
 import type { Component } from "svelte";
 import type { MessageKey, Translate } from "../lib/i18n";
-import type { AppInfo, LyricsView, Playback, Settings } from "../lib/types";
+import type { AppInfo, HotkeyError, LyricsView, Playback, Settings } from "../lib/types";
 import type { GlyphName } from "../lib/ui/Glyph.svelte";
 import About from "./About.svelte";
 import Appearance from "./Appearance.svelte";
@@ -18,6 +18,8 @@ export interface PaneContext {
   readonly t: Translate;
   update(patch: Partial<Settings>): Promise<void>;
   setLaunchAtLogin(enabled: boolean): Promise<void>;
+  /** Resolves to why the shortcut was not taken, or to null once it works. */
+  setHotkey(hotkey: string): Promise<HotkeyError | null>;
   adjustSongOffset(delta: number): Promise<void>;
   resetSongOffset(): Promise<void>;
 }

@@ -141,8 +141,13 @@ export interface AppInfo {
   /** The language the interface uses after resolving "system". */
   language: "de" | "en";
   hotkeyError: boolean;
+  /** The shortcut "Reset" brings back. */
+  defaultHotkey: string;
   launchAtLogin: boolean;
 }
+
+/** Why the Rust side did not take a shortcut. */
+export type HotkeyError = "invalid" | "unsupported" | "needsModifier" | "taken";
 
 export interface Snapshot {
   settings: Settings;

@@ -1,6 +1,16 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { AppInfo, BridgeView, Corner, EditorState, LyricsView, Playback, Settings, Snapshot, StampEdit } from "./types";
+import type {
+  AppInfo,
+  BridgeView,
+  Corner,
+  EditorState,
+  LyricsView,
+  Playback,
+  Settings,
+  Snapshot,
+  StampEdit,
+} from "./types";
 
 export type PlayerCommand =
   | { kind: "playPause" }
@@ -28,6 +38,8 @@ export const api = {
   browserBridge: () => invoke<BridgeView>("browser_bridge"),
   forgetBrowser: (id: string) => invoke<BridgeView>("forget_browser", { id }),
   openSettings: () => invoke<void>("open_settings"),
+  /** Rejects with a HotkeyError name; the old shortcut then stays. */
+  setHotkey: (hotkey: string) => invoke<Settings>("set_hotkey", { hotkey }),
   moveOverlay: (corner: Corner) => invoke<void>("move_overlay", { corner }),
   setLaunchAtLogin: (enabled: boolean) => invoke<boolean>("set_launch_at_login", { enabled }),
   reportLine: (position: number, text: string) => invoke<void>("report_line", { position, text }),

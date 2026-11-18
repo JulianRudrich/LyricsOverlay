@@ -5,6 +5,7 @@ mod autohide;
 mod browser_bridge;
 mod commands;
 mod history;
+mod hotkey;
 mod i18n;
 mod own_lyrics;
 mod playback;
@@ -24,7 +25,7 @@ use std::time::Duration;
 
 use lyrics_providers::{LrclibClient, LyricsService, Store};
 use tauri::{AppHandle, Manager};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri_plugin_global_shortcut::ShortcutState;
 
 use playback::{LyricsView, PlaybackView, Request};
 use settings::Settings;
@@ -108,9 +109,6 @@ impl AppState {
         if old.lookup_online != new.lookup_online {
             self.request(Request::ReloadLyrics { refresh: false });
         }
-        if old.hotkey != new.hotkey {
-            register_hotkey(app, self, &new.hotkey);
-        }
         if old.language != new.language {
             let title = i18n::Texts::new(i18n::resolve(new.language)).get("settings.title");
             windows::set_settings_title(app, &title);
@@ -139,19 +137,6 @@ impl AppState {
             eprintln!("could not save the settings: {error}");
         }
     }
-}
-
-fn register_hotkey(app: &AppHandle, state: &AppState, hotkey: &str) {
-    let shortcuts = app.global_shortcut();
-    let _ = shortcuts.unregister_all();
-    let failed = match shortcuts.register(hotkey) {
-        Ok(()) => false,
-        Err(error) => {
-            eprintln!("could not register the shortcut {hotkey}: {error}");
-            true
-        }
-    };
-    state.hotkey_error.store(failed, Ordering::SeqCst);
 }
 
 fn user_agent(app: &AppHandle) -> String {
@@ -229,7 +214,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
 
     windows::create_overlay(&handle, &settings)?;
     tray::create(&handle)?;
-    register_hotkey(&handle, &handle.state::<AppState>(), &settings.hotkey);
+    hotkey::register_saved(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
     spotify::restore(&handle);
 
@@ -283,6 +268,7 @@ fn main() {
             own_lyrics::remove_local_lyrics,
             commands::player_command,
             commands::open_settings,
+            commands::set_hotkey,
             commands::move_overlay,
             commands::set_launch_at_login,
             commands::report_line,

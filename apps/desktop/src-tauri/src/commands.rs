@@ -4,12 +4,13 @@ use std::sync::atomic::Ordering;
 
 use media_session::Command;
 use serde::Serialize;
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_autostart::ManagerExt;
 
+use crate::hotkey::HotkeyError;
 use crate::i18n::{resolve, Lang};
 use crate::playback::{LyricsView, PlaybackView, Request};
-use crate::settings::{Corner, Settings};
+use crate::settings::{Corner, Settings, DEFAULT_HOTKEY};
 use crate::{windows, AppState};
 
 /// The largest correction for one song, in seconds.
@@ -24,6 +25,7 @@ pub struct AppInfo {
     pub platform: &'static str,
     pub language: Lang,
     pub hotkey_error: bool,
+    pub default_hotkey: &'static str,
     pub launch_at_login: bool,
 }
 
@@ -52,6 +54,7 @@ pub fn app_info(app: &AppHandle, state: &AppState) -> AppInfo {
         },
         language: resolve(state.settings().language),
         hotkey_error: state.hotkey_error.load(Ordering::SeqCst),
+        default_hotkey: DEFAULT_HOTKEY,
         launch_at_login: app.autolaunch().is_enabled().unwrap_or(false),
     }
 }
@@ -82,8 +85,12 @@ pub fn snapshot(app: AppHandle, state: State<'_, AppState>) -> Snapshot {
 pub fn update_settings(
     app: AppHandle,
     state: State<'_, AppState>,
-    patch: serde_json::Value,
+    mut patch: serde_json::Value,
 ) -> Result<Settings, String> {
+    // The shortcut changes through `set_hotkey`, which first checks it can be registered.
+    if let Some(changes) = patch.as_object_mut() {
+        changes.remove("hotkey");
+    }
     let merged = state.settings().merged(&patch)?;
     state.update_settings(&app, move |settings| *settings = merged);
     Ok(state.settings())
@@ -137,6 +144,16 @@ pub fn player_command(state: State<'_, AppState>, command: Command) {
 #[tauri::command]
 pub async fn open_settings(app: AppHandle) {
     windows::open_settings(&app);
+}
+
+/// Changes the shortcut that shows and hides the overlay. When another app
+/// has the new one, the old one stays. Async, as registering waits for the
+/// main thread.
+#[tauri::command]
+pub async fn set_hotkey(app: AppHandle, hotkey: String) -> Result<Settings, HotkeyError> {
+    let state = app.state::<AppState>();
+    crate::hotkey::change(&app, &state, &hotkey)?;
+    Ok(state.settings())
 }
 
 #[tauri::command]

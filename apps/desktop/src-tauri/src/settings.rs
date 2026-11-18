@@ -151,9 +151,8 @@ impl Settings {
         self.overlay_position = self
             .overlay_position
             .filter(|[x, y]| x.is_finite() && y.is_finite());
-        if self.hotkey.trim().is_empty() {
-            self.hotkey = DEFAULT_HOTKEY.to_owned();
-        }
+        self.hotkey =
+            crate::hotkey::normalize(&self.hotkey).unwrap_or_else(|_| DEFAULT_HOTKEY.to_owned());
         self
     }
 
@@ -212,6 +211,14 @@ mod tests {
             r#"{"width": 9999, "overlayPosition": [1, 2], "hotkey": " "}"#,
         )
         .expect("written");
+        assert_eq!(
+            serde_json::from_str::<Settings>(r#"{"hotkey": "shift+alt+keyk"}"#)
+                .expect("valid")
+                .sanitized()
+                .hotkey,
+            "Alt+Shift+K",
+            "shortcuts are kept in one spelling"
+        );
         let loaded = Settings::load(&path);
         assert_eq!(
             (

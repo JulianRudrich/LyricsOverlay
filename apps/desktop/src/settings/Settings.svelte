@@ -5,6 +5,7 @@
   import { formatNumber, formatOffset, translator, type MessageKey } from "../lib/i18n";
   import type { AppInfo, Language, Layout, LyricsView, Playback, Settings, SourcePreference } from "../lib/types";
   import OwnLyrics from "./OwnLyrics.svelte";
+  import AutoHideSetting from "./AutoHideSetting.svelte";
 
   let settings = $state<Settings | null>(null);
   let playback = $state<Playback | null>(null);
@@ -115,6 +116,8 @@
         </p>
 
         <hr />
+
+        <AutoHideSetting />
 
         <label class="toggle">
           <input type="checkbox" checked={app.launchAtLogin} onchange={(event) => setLaunchAtLogin(event.currentTarget.checked)} />

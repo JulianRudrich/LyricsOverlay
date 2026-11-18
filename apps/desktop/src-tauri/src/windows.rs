@@ -1,7 +1,8 @@
 //! The overlay, settings and lyrics editor windows.
 
+use tauri::window::Color;
 use tauri::{
-    AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindow,
+    AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, Theme, WebviewUrl, WebviewWindow,
     WebviewWindowBuilder, WindowEvent,
 };
 
@@ -11,6 +12,7 @@ use crate::{i18n, tray, AppState};
 pub const OVERLAY: &str = "overlay";
 pub const SETTINGS: &str = "settings";
 pub const EDITOR: &str = "editor";
+pub const STATS: &str = "stats";
 
 /// Distance from the screen edge, in logical pixels.
 const MARGIN: f64 = 16.0;
@@ -149,6 +151,33 @@ pub fn open_settings(app: &AppHandle) {
     .build();
     if let Err(error) = built {
         eprintln!("could not open the settings: {error}");
+    }
+}
+
+/// The "Your music" window. It is always dark, and its own background color
+/// keeps it from flashing white while it loads. The page keeps the title in
+/// the interface language.
+pub fn open_stats(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(STATS) {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+        return;
+    }
+    let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
+        .get("stats.title");
+    let built = WebviewWindowBuilder::new(app, STATS, WebviewUrl::App("index.html#/stats".into()))
+        .title(title)
+        .inner_size(880.0, 740.0)
+        .min_inner_size(560.0, 460.0)
+        .resizable(true)
+        .center()
+        .focused(true)
+        .theme(Some(Theme::Dark))
+        .background_color(Color(17, 17, 19, 255))
+        .build();
+    if let Err(error) = built {
+        eprintln!("could not open your music: {error}");
     }
 }
 

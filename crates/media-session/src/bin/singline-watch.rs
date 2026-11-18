@@ -7,6 +7,7 @@
 //! singline-watch --json          # one JSON object per reading and line
 //! singline-watch --once          # read once and exit
 //! singline-watch --command playpause [--player ID]
+//! singline-watch --command pause
 //! singline-watch --command seek=42.5
 //! ```
 
@@ -47,7 +48,7 @@ fn main() -> ExitCode {
     }
 }
 
-const USAGE: &str = "Usage: singline-watch [--json] [--once] [--interval MS]\n       singline-watch --command playpause|next|previous|seek=SECONDS [--player ID]";
+const USAGE: &str = "Usage: singline-watch [--json] [--once] [--interval MS]\n       singline-watch --command playpause|pause|next|previous|seek=SECONDS [--player ID]";
 
 fn parse_args(args: impl Iterator<Item = String>) -> Result<Options, String> {
     let mut options = Options {
@@ -73,6 +74,7 @@ fn parse_args(args: impl Iterator<Item = String>) -> Result<Options, String> {
                 let value = args.next().ok_or("--command needs a name")?;
                 options.command = Some(match value.as_str() {
                     "playpause" => Command::PlayPause,
+                    "pause" => Command::Pause,
                     "next" => Command::Next,
                     "previous" => Command::Previous,
                     other => match other.strip_prefix("seek=").map(str::parse::<f64>) {

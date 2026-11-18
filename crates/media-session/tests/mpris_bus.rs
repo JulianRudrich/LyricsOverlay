@@ -161,6 +161,48 @@ fn reads_and_controls_players_over_dbus() {
 }
 
 #[test]
+fn pause_only_ever_pauses() {
+    let Some(bus) = PrivateBus::start() else {
+        eprintln!("dbus-daemon is not available; skipping");
+        return;
+    };
+    let spotify = FakePlayer::spawn(
+        Some(&bus.address),
+        "spotify",
+        "Spotify",
+        track("Lullaby", 180),
+        true,
+    )
+    .expect("fake Spotify registers");
+    let id = PlayerId::new("mpris:org.mpris.MediaPlayer2.spotify");
+    let mut backend = MprisBackend::with_address(&bus.address);
+    assert_eq!(
+        snapshot_of(&backend.poll(), id.as_str()).status,
+        PlaybackStatus::Playing
+    );
+
+    backend
+        .send(&id, Command::Pause)
+        .expect("pause is accepted");
+    assert!(eventually(|| !spotify.is_playing()), "the player paused");
+    let paused_at = spotify.position();
+    backend
+        .send(&id, Command::Pause)
+        .expect("pausing a paused player is accepted");
+    thread::sleep(Duration::from_millis(200));
+    assert!(
+        !spotify.is_playing(),
+        "a second pause does not resume, unlike play/pause"
+    );
+    assert_eq!(spotify.position(), paused_at, "the position stays put");
+    assert_eq!(spotify.commands(), ["Pause", "Pause"]);
+    assert_eq!(
+        snapshot_of(&backend.poll(), id.as_str()).status,
+        PlaybackStatus::Paused
+    );
+}
+
+#[test]
 fn reports_a_missing_bus_instead_of_failing() {
     let mut backend = MprisBackend::with_address("unix:path=/nonexistent/singline-test-bus");
     assert!(backend.poll().is_empty());

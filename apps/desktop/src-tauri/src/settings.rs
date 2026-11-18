@@ -46,11 +46,16 @@ pub struct Settings {
     /// Seconds; positive shows the lyrics earlier.
     pub global_offset: f64,
     pub lookup_online: bool,
+    /// Records the songs you hear for "Your music", on this device only.
+    pub keep_history: bool,
     pub source: SourcePreference,
     pub include_other_players: bool,
     pub click_through: bool,
     pub language: Language,
+    /// The listener's own choice; auto-hide only hides on top of it.
     pub overlay_visible: bool,
+    /// Hides the overlay a few seconds after playback stops.
+    pub auto_hide: bool,
     /// Top-left corner in logical pixels, once the overlay was moved.
     pub overlay_position: Option<[f64; 2]>,
     pub hotkey: String,
@@ -69,11 +74,13 @@ impl Default for Settings {
             height: 240.0,
             global_offset: 0.0,
             lookup_online: true,
+            keep_history: true,
             source: SourcePreference::Automatic,
             include_other_players: false,
             click_through: false,
             language: Language::System,
             overlay_visible: true,
+            auto_hide: false,
             overlay_position: None,
             hotkey: DEFAULT_HOTKEY.to_owned(),
         }
@@ -215,5 +222,16 @@ mod tests {
             (800.0, Some([1.0, 2.0]), DEFAULT_HOTKEY)
         );
         let _ = fs::remove_dir_all(directory);
+    }
+
+    #[test]
+    fn files_from_before_a_switch_get_its_default() {
+        let loaded: Settings = serde_json::from_str(r#"{ "fontSize": 30 }"#).expect("valid");
+        assert!(!loaded.auto_hide, "auto-hide starts off");
+        assert!(loaded.keep_history, "the listening history starts on");
+        let changed = loaded
+            .merged(&json!({ "autoHide": true, "keepHistory": false }))
+            .expect("valid change");
+        assert!(changed.auto_hide && !changed.keep_history);
     }
 }

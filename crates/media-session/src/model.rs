@@ -164,6 +164,9 @@ impl Reading {
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Command {
     PlayPause,
+    /// Pauses a playing player. Unlike [`Command::PlayPause`] it never starts
+    /// playback, so the sleep timer can send it without knowing the state.
+    Pause,
     Next,
     Previous,
     /// Jump to this many seconds into the track.

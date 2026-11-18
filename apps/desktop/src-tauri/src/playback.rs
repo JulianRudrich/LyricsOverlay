@@ -200,11 +200,12 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
     let mut current_track: Option<Track> = None;
 
     loop {
-        let readings = backends
+        let readings: Vec<_> = backends
             .iter_mut()
             .flat_map(|backend| backend.poll())
             .collect();
-        let now_playing = engine.choose(readings);
+        let now_playing = engine.choose(readings.clone());
+        crate::history::observe(app, &readings, engine.current());
         let view = PlaybackView::new(&now_playing, Instant::now());
         let track = view.track.clone();
         {
@@ -212,6 +213,8 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
             *state.playback.lock().unwrap_or_else(|p| p.into_inner()) = view.clone();
         }
         let _ = app.emit("playback", &view);
+        crate::autohide::update(app, &view);
+        crate::sleep::tick(app, &view, interval);
         if track.as_ref().map(|t| &t.key) != current_track.as_ref().map(|t| &t.key) {
             current_track = track;
             load_lyrics(app, current_track.clone(), demo, false);

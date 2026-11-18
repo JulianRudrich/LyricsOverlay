@@ -188,6 +188,7 @@ pub fn read_script(players: &[MacPlayer]) -> String {
 pub fn command_script(player: MacPlayer, command: Command) -> String {
     let action = match command {
         Command::PlayPause => "playpause".to_owned(),
+        Command::Pause => "pause".to_owned(),
         Command::Next => "next track".to_owned(),
         Command::Previous => "previous track".to_owned(),
         Command::SeekTo { position } => {
@@ -496,6 +497,11 @@ mod tests {
                 .contains("to 0.000")
         );
         assert!(command_script(MacPlayer::Music, Command::Next).contains("to next track"));
+        assert_eq!(
+            command_script(MacPlayer::Music, Command::Pause),
+            "if application id \"com.apple.Music\" is running then\n\ttell application id \"com.apple.Music\" to pause\nend if\n",
+            "pause, not playpause, so a paused player stays paused"
+        );
     }
 
     #[test]

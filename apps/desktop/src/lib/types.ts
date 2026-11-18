@@ -120,11 +120,13 @@ export interface Settings {
   height: number;
   globalOffset: number;
   lookupOnline: boolean;
+  keepHistory: boolean;
   source: SourcePreference;
   includeOtherPlayers: boolean;
   clickThrough: boolean;
   language: Language;
   overlayVisible: boolean;
+  autoHide: boolean;
   hotkey: string;
 }
 

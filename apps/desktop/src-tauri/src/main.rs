@@ -1,11 +1,14 @@
 //! Singline: synced lyrics above your other windows.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod autohide;
 mod commands;
+mod history;
 mod i18n;
 mod own_lyrics;
 mod playback;
 mod settings;
+mod sleep;
 mod tray;
 mod windows;
 
@@ -90,8 +93,8 @@ impl AppState {
         if old.click_through != new.click_through {
             windows::set_click_through(app, new.click_through);
         }
-        if old.overlay_visible != new.overlay_visible {
-            windows::set_overlay_visible(app, new.overlay_visible);
+        if old.overlay_visible != new.overlay_visible || old.auto_hide != new.auto_hide {
+            autohide::settings_changed(app, &old, &new);
         }
         if (old.source, old.include_other_players) != (new.source, new.include_other_players) {
             self.request(Request::Preference {
@@ -196,6 +199,9 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         hotkey_error: AtomicBool::new(false),
     });
     app.manage(own_lyrics::EditorSession::default());
+    app.manage(autohide::AutoHideState::new(settings.overlay_visible));
+    app.manage(sleep::SleepState::default());
+    app.manage(history::History::default());
 
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
@@ -256,6 +262,8 @@ fn main() {
             commands::move_overlay,
             commands::set_launch_at_login,
             commands::report_line,
+            history::listening_stats,
+            history::clear_history,
         ])
         .setup(move |app| setup(app, demo))
         .build(tauri::generate_context!())
@@ -265,7 +273,10 @@ fn main() {
             tauri::RunEvent::ExitRequested {
                 api, code: None, ..
             } => api.prevent_exit(),
-            tauri::RunEvent::Exit => app.state::<AppState>().save_settings_now(),
+            tauri::RunEvent::Exit => {
+                history::flush(app);
+                app.state::<AppState>().save_settings_now();
+            }
             _ => {}
         });
 }

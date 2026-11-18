@@ -4,13 +4,16 @@
 //! function is deterministic, so the whole crate is covered by plain unit tests.
 
 pub mod clock;
+pub mod listening;
 pub mod lrc;
 pub mod lyricsfile;
 pub mod matching;
 pub mod model;
 pub mod plain;
 pub mod selection;
+pub mod sleep;
 mod text;
+pub mod visibility;
 
 pub use clock::PlaybackClock;
 pub use matching::LyricsRecord;

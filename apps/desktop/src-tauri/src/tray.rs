@@ -120,7 +120,9 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         )
         .item(&sources.build()?)
         .item(&corners.build()?)
+        .item(&crate::sleep::submenu(app, &texts)?)
         .separator()
+        .item(&MenuItemBuilder::with_id("stats", texts.get("tray.stats")).build(app)?)
         .item(
             &MenuItemBuilder::with_id("settings", texts.get("tray.settings"))
                 .accelerator("CmdOrCtrl+,")
@@ -144,11 +146,15 @@ fn handle_event(app: &AppHandle, event: MenuEvent) {
             state.update_settings(app, |settings| settings.click_through = enabled);
         }
         "settings" => windows::open_settings(app),
+        "stats" => windows::open_stats(app),
         "quit" => {
             state.save_settings_now();
             app.exit(0);
         }
         _ => {
+            if crate::sleep::handle_menu_event(app, id) {
+                return;
+            }
             if let Some((source, _, _)) = SOURCES.iter().find(|(_, item, _)| *item == id) {
                 let source = *source;
                 state.update_settings(app, |settings| settings.source = source);

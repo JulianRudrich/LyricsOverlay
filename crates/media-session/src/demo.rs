@@ -126,6 +126,11 @@ impl Backend for DemoBackend {
                     None => Some(self.position(Instant::now())),
                 };
             }
+            Command::Pause => {
+                if self.paused_at.is_none() {
+                    self.paused_at = Some(self.position(Instant::now()));
+                }
+            }
             Command::Next | Command::Previous => self.restart_at(0.0),
             Command::SeekTo { position } => self.restart_at(position),
         }
@@ -178,5 +183,20 @@ mod tests {
             demo.send(&PlayerId::new("other"), Command::Next),
             Err(CommandError::PlayerGone)
         );
+    }
+
+    #[test]
+    fn pause_never_resumes() {
+        let mut demo = DemoBackend::new();
+        let id = PlayerId::new(DEMO_PLAYER_ID);
+        demo.send(&id, Command::Pause)
+            .expect("demo accepts commands");
+        let paused = snapshot(&mut demo);
+        assert_eq!(paused.status, PlaybackStatus::Paused);
+        demo.send(&id, Command::Pause)
+            .expect("demo accepts commands");
+        let still = snapshot(&mut demo);
+        assert_eq!(still.status, PlaybackStatus::Paused, "unlike play/pause");
+        assert_eq!(still.position, paused.position);
     }
 }

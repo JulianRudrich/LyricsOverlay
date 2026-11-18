@@ -1,8 +1,10 @@
 //! Everything the app keeps about songs, in one SQLite file: your own lyrics,
-//! per-song timing corrections and the cache of online results.
+//! per-song timing corrections, the cache of online results and the listening
+//! history. Nothing in it leaves the device.
 
 use std::path::Path;
 
+use lyrics_core::listening::ListenSession;
 use lyrics_core::{lrc, LyricLine};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{de::DeserializeOwned, Serialize};
@@ -14,8 +16,46 @@ pub const MAX_LYRICS_BYTES: usize = 512 * 1_024;
 /// How many online results are kept; the least recently used go first.
 const CACHE_CAPACITY: i64 = 2_000;
 
+/// Each step brings the database from the version before it to its own
+/// version, the step's position counted from one. Steps only add, so what an
+/// older version wrote stays.
+const MIGRATIONS: [&str; 2] = [
+    // 1: your own lyrics, timing corrections and the cache of online results.
+    "CREATE TABLE IF NOT EXISTS track_settings (
+         track_key TEXT PRIMARY KEY,
+         timing_offset REAL NOT NULL,
+         updated_at INTEGER NOT NULL
+     );
+     CREATE TABLE IF NOT EXISTS local_lyrics (
+         track_key TEXT PRIMARY KEY,
+         lrc TEXT NOT NULL,
+         updated_at INTEGER NOT NULL
+     );
+     CREATE TABLE IF NOT EXISTS lyrics_cache (
+         query_key TEXT PRIMARY KEY,
+         result TEXT NOT NULL,
+         expires_at INTEGER NOT NULL,
+         last_used INTEGER NOT NULL
+     );
+     CREATE INDEX IF NOT EXISTS lyrics_cache_last_used ON lyrics_cache (last_used);",
+    // 2: the listening history, one row per song heard.
+    "CREATE TABLE IF NOT EXISTS listens (
+         id INTEGER PRIMARY KEY,
+         track_key TEXT NOT NULL,
+         title TEXT NOT NULL,
+         artist TEXT NOT NULL,
+         album TEXT,
+         service TEXT NOT NULL,
+         started_at INTEGER NOT NULL,
+         duration REAL,
+         listened REAL NOT NULL,
+         synced_lyrics INTEGER NOT NULL
+     );
+     CREATE INDEX IF NOT EXISTS listens_started_at ON listens (started_at);",
+];
+
 /// The schema version this code writes.
-const SCHEMA_VERSION: i32 = 1;
+const SCHEMA_VERSION: i32 = MIGRATIONS.len() as i32;
 
 #[derive(Debug, Error)]
 pub enum StoreError {
@@ -52,33 +92,23 @@ impl Store {
         Self::prepare(Connection::open_in_memory()?)
     }
 
-    fn prepare(connection: Connection) -> Result<Self, StoreError> {
+    fn prepare(mut connection: Connection) -> Result<Self, StoreError> {
         connection.busy_timeout(std::time::Duration::from_secs(2))?;
         connection.pragma_update(None, "journal_mode", "WAL")?;
         let version: i32 = connection.pragma_query_value(None, "user_version", |row| row.get(0))?;
         if version > SCHEMA_VERSION {
             return Err(StoreError::NewerSchema);
         }
-        connection.execute_batch(
-            "CREATE TABLE IF NOT EXISTS track_settings (
-                 track_key TEXT PRIMARY KEY,
-                 timing_offset REAL NOT NULL,
-                 updated_at INTEGER NOT NULL
-             );
-             CREATE TABLE IF NOT EXISTS local_lyrics (
-                 track_key TEXT PRIMARY KEY,
-                 lrc TEXT NOT NULL,
-                 updated_at INTEGER NOT NULL
-             );
-             CREATE TABLE IF NOT EXISTS lyrics_cache (
-                 query_key TEXT PRIMARY KEY,
-                 result TEXT NOT NULL,
-                 expires_at INTEGER NOT NULL,
-                 last_used INTEGER NOT NULL
-             );
-             CREATE INDEX IF NOT EXISTS lyrics_cache_last_used ON lyrics_cache (last_used);",
-        )?;
-        connection.pragma_update(None, "user_version", SCHEMA_VERSION)?;
+        for (step, target) in MIGRATIONS.iter().zip(1..) {
+            if version < target {
+                // One transaction per step, so a failed update leaves the
+                // database as the version before it.
+                let transaction = connection.transaction()?;
+                transaction.execute_batch(step)?;
+                transaction.pragma_update(None, "user_version", target)?;
+                transaction.commit()?;
+            }
+        }
         Ok(Self { connection })
     }
 
@@ -223,6 +253,76 @@ impl Store {
     pub fn cache_len(&self) -> usize {
         self.connection
             .query_row("SELECT COUNT(*) FROM lyrics_cache", [], |row| {
+                row.get::<_, i64>(0)
+            })
+            .map_or(0, |count| count.max(0) as usize)
+    }
+
+    /// Keeps one song of the listening history.
+    pub fn add_listen(&self, session: &ListenSession) -> Result<(), StoreError> {
+        let listened = if session.listened.is_finite() {
+            session.listened.max(0.0)
+        } else {
+            0.0
+        };
+        self.connection.execute(
+            "INSERT INTO listens (track_key, title, artist, album, service, started_at, duration, listened, synced_lyrics)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            params![
+                session.track_key,
+                session.title,
+                session.artist,
+                session.album,
+                session.service,
+                session.started_at,
+                session.duration.filter(|duration| duration.is_finite() && *duration > 0.0),
+                listened,
+                session.synced_lyrics,
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// The listening history from `since` on, in Unix seconds, oldest first;
+    /// all of it for `None`.
+    pub fn listens(&self, since: Option<i64>) -> Result<Vec<ListenSession>, StoreError> {
+        let mut statement = self.connection.prepare_cached(
+            "SELECT track_key, title, artist, album, service, started_at, duration, listened, synced_lyrics
+             FROM listens WHERE started_at >= ?1 ORDER BY started_at, id",
+        )?;
+        let rows = statement.query_map(params![since.unwrap_or(i64::MIN)], |row| {
+            Ok(ListenSession {
+                track_key: row.get(0)?,
+                title: row.get(1)?,
+                artist: row.get(2)?,
+                album: row.get(3)?,
+                service: row.get(4)?,
+                started_at: row.get(5)?,
+                duration: row.get(6)?,
+                listened: row.get(7)?,
+                synced_lyrics: row.get(8)?,
+            })
+        })?;
+        Ok(rows.collect::<Result<Vec<_>, _>>()?)
+    }
+
+    /// Deletes the whole listening history. The rows are overwritten on disk,
+    /// not only marked as free, and the write-ahead log is emptied.
+    pub fn clear_listens(&self) -> Result<(), StoreError> {
+        self.connection.pragma_update(None, "secure_delete", true)?;
+        let deleted = self.connection.execute("DELETE FROM listens", []);
+        let _ = self.connection.pragma_update(None, "secure_delete", false);
+        deleted?;
+        // An in-memory database has no log to empty.
+        let _ = self
+            .connection
+            .query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(()));
+        Ok(())
+    }
+
+    pub fn listen_count(&self) -> usize {
+        self.connection
+            .query_row("SELECT COUNT(*) FROM listens", [], |row| {
                 row.get::<_, i64>(0)
             })
             .map_or(0, |count| count.max(0) as usize)

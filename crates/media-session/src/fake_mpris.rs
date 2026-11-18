@@ -1,5 +1,6 @@
 //! A pretend MPRIS player for tests and the Linux end-to-end check. It plays one
-//! track on a loop in real time and obeys play/pause, seek and skip commands.
+//! track on a loop in real time and obeys play/pause, pause, seek and skip
+//! commands.
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -246,6 +247,14 @@ impl Player {
         state.playing = !state.playing;
         state.set_position(position);
         state.commands.push("PlayPause".into());
+    }
+
+    fn pause(&self) {
+        let mut state = self.state();
+        let position = state.position();
+        state.playing = false;
+        state.set_position(position);
+        state.commands.push("Pause".into());
     }
 
     fn next(&self) {

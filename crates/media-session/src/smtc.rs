@@ -97,6 +97,7 @@ impl Backend for SmtcBackend {
             .ok_or(CommandError::PlayerGone)?;
         let accepted = match command {
             Command::PlayPause => session.TryTogglePlayPauseAsync().and_then(|op| op.join()),
+            Command::Pause => session.TryPauseAsync().and_then(|op| op.join()),
             Command::Next => session.TrySkipNextAsync().and_then(|op| op.join()),
             Command::Previous => session.TrySkipPreviousAsync().and_then(|op| op.join()),
             Command::SeekTo { position } => {

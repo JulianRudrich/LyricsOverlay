@@ -108,6 +108,7 @@ impl Backend for MprisBackend {
             Proxy::new(&connection, bus_name, OBJECT_PATH, PLAYER_INTERFACE).map_err(failed)?;
         let result = match command {
             Command::PlayPause => proxy.call_method("PlayPause", &()),
+            Command::Pause => proxy.call_method("Pause", &()),
             Command::Next => proxy.call_method("Next", &()),
             Command::Previous => proxy.call_method("Previous", &()),
             Command::SeekTo { position } => {

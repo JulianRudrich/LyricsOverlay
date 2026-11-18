@@ -83,7 +83,7 @@
     }
   });
 
-  // With LYRICS_OVERLAY_DEBUG set, every line change is reported for end-to-end checks.
+  // With SINGLINE_DEBUG set, every line change is reported for end-to-end checks.
   let reported: number | null | undefined;
   $effect(() => {
     if (!app?.debug || !showLyrics || active === reported) return;

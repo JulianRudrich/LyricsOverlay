@@ -25,7 +25,7 @@ use settings::Settings;
 
 pub struct AppState {
     pub demo: bool,
-    /// Set by LYRICS_OVERLAY_DEBUG; the overlay then reports each line it shows.
+    /// Set by SINGLINE_DEBUG; the overlay then reports each line it shows.
     pub debug: bool,
     settings: Mutex<Settings>,
     /// `None` in the demo, which never changes the listener's files.
@@ -157,7 +157,7 @@ fn user_agent(app: &AppHandle) -> String {
 
 fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Error>> {
     let handle = app.handle().clone();
-    let override_dir = std::env::var_os("LYRICS_OVERLAY_DATA_DIR").map(PathBuf::from);
+    let override_dir = std::env::var_os("SINGLINE_DATA_DIR").map(PathBuf::from);
     let config_dir = override_dir
         .clone()
         .or_else(|| handle.path().app_config_dir().ok());
@@ -176,14 +176,14 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         _ => Store::open_in_memory()?,
     };
     let store = Arc::new(Mutex::new(store));
-    let lrclib_url = std::env::var("LYRICS_OVERLAY_LRCLIB_URL")
+    let lrclib_url = std::env::var("SINGLINE_LRCLIB_URL")
         .unwrap_or_else(|_| lyrics_providers::lrclib::DEFAULT_BASE_URL.to_owned());
     let client = LrclibClient::with_base_url(&lrclib_url, &user_agent(&handle));
     let (sender, receiver) = mpsc::channel();
 
     app.manage(AppState {
         demo,
-        debug: std::env::var_os("LYRICS_OVERLAY_DEBUG").is_some(),
+        debug: std::env::var_os("SINGLINE_DEBUG").is_some(),
         settings: Mutex::new(settings.clone()),
         settings_path: if demo { None } else { settings_path },
         settings_dirty: AtomicBool::new(false),

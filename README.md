@@ -202,6 +202,14 @@ bash apps/desktop/e2e/linux-smoke.sh
 
 `cargo test --workspace` needs the built interface (`pnpm --filter singline-desktop build`); a plain `cargo test` covers the crates only. The end-to-end check starts the app on a virtual display with a simulated Spotify and a simulated LRCLIB, and compares every line the overlay shows with the playback time.
 
+### Environment variables for development
+
+| Variable | Effect |
+|---|---|
+| `SINGLINE_DATA_DIR` | Keeps settings and data in this folder instead of the system location |
+| `SINGLINE_LRCLIB_URL` | Uses another LRCLIB server, for example a local test server |
+| `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks |
+
 ### Project structure
 
 | Path | Contents |

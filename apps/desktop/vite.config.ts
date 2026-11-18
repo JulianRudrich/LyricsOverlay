@@ -16,5 +16,7 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts"],
+    // The motion test compares styles.css with src/lib/motion.ts.
+    css: { include: [/styles\.css/] },
   },
 });

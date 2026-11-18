@@ -230,6 +230,8 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(
             |app, _arguments, _directory| windows::reopen(app),
         ))
+        // Opens the links in the settings in the browser.
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,

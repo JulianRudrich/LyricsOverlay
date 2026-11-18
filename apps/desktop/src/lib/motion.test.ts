@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { cubicBezier, easeOut, slideIn, smoothstep, songExit, Spring } from "./motion";
+import styles from "../styles.css?raw";
+import {
+  cubicBezier,
+  duration,
+  easeOut,
+  easeOutCss,
+  entranceKeyframes,
+  pressScale,
+  revealBlur,
+  rise,
+  slideIn,
+  smoothstep,
+  songExit,
+  Spring,
+} from "./motion";
 
 const element = {} as Element;
 
@@ -88,5 +102,34 @@ describe("transitions", () => {
   it("slides controls in from the right", () => {
     expect(slideIn(element).css?.(0, 1)).toBe("opacity: 0; transform: translateX(6px)");
     expect(slideIn(element, { reduced: true }).css?.(0, 1)).toBe("opacity: 0");
+  });
+});
+
+/** The value of a custom property in the first (unconditional) `:root` block. */
+function token(name: string): string | undefined {
+  const root = styles.match(/:root\s*{([^}]*)}/)?.[1] ?? "";
+  return root.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1]?.trim();
+}
+
+describe("motion tokens", () => {
+  it("match the CSS custom properties", () => {
+    expect(token("--ease-out")).toBe(easeOutCss);
+    expect(token("--duration-press")).toBe(`${duration.press}ms`);
+    expect(token("--duration-pane")).toBe(`${duration.pane}ms`);
+    expect(token("--duration-reveal")).toBe(`${duration.reveal}ms`);
+    expect(token("--press-scale")).toBe(String(pressScale.regular));
+    expect(token("--press-scale-subtle")).toBe(String(pressScale.subtle));
+    expect(token("--rise-pane")).toBe(`${rise.pane}px`);
+    expect(token("--rise-reveal")).toBe(`${rise.reveal}px`);
+    expect(token("--reveal-blur")).toBe(`${revealBlur}px`);
+  });
+
+  it("only fade with reduced motion", () => {
+    for (const kind of ["pane", "reveal"] as const) {
+      expect(entranceKeyframes(kind, true)).toEqual([{ opacity: 0 }, { opacity: 1 }]);
+      expect(entranceKeyframes(kind, false)[0]).toHaveProperty("transform");
+    }
+    expect(entranceKeyframes("reveal", false)[0]).toMatchObject({ filter: "blur(6px)", transform: "translateY(8px)" });
+    expect(entranceKeyframes("pane", false)[0]).toEqual({ opacity: 0, transform: "translateY(6px)" });
   });
 });

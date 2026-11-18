@@ -1,5 +1,6 @@
 //! The overlay, settings and lyrics editor windows.
 
+use tauri::utils::config::WindowEffectsConfig;
 use tauri::window::Color;
 use tauri::{
     AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, Theme, WebviewUrl, WebviewWindow,
@@ -137,19 +138,42 @@ pub fn open_settings(app: &AppHandle) {
     }
     let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
         .get("settings.title");
-    let built = WebviewWindowBuilder::new(
-        app,
-        SETTINGS,
-        WebviewUrl::App("index.html#/settings".into()),
-    )
-    .title(title)
-    .inner_size(560.0, 620.0)
-    .min_inner_size(480.0, 420.0)
-    .resizable(true)
-    .center()
-    .focused(true)
-    .build();
-    if let Err(error) = built {
+    let glass = glass();
+    // The page matches the window from its first paint: see-through over glass,
+    // and room for the traffic lights where it runs under the title bar.
+    let mut look = Vec::new();
+    if glass.is_some() {
+        look.push("glass");
+    }
+    if cfg!(target_os = "macos") {
+        look.push("titlebar=overlay");
+    }
+    let url = if look.is_empty() {
+        "index.html#/settings".to_owned()
+    } else {
+        format!("index.html?{}#/settings", look.join("&"))
+    };
+    let mut builder = WebviewWindowBuilder::new(app, SETTINGS, WebviewUrl::App(url.into()))
+        .title(title)
+        .inner_size(700.0, 480.0)
+        .resizable(false)
+        .maximizable(false)
+        .theme(Some(Theme::Dark))
+        .center()
+        .focused(true);
+    // As in the macOS app: the glass runs under a transparent title bar with a close button.
+    #[cfg(target_os = "macos")]
+    {
+        builder = builder
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true)
+            .minimizable(false);
+    }
+    builder = match glass {
+        Some(effects) => builder.transparent(true).effects(effects),
+        None => builder.background_color(SOLID_BACKGROUND),
+    };
+    if let Err(error) = builder.build() {
         eprintln!("could not open the settings: {error}");
     }
 }
@@ -179,6 +203,34 @@ pub fn open_stats(app: &AppHandle) {
     if let Err(error) = built {
         eprintln!("could not open your music: {error}");
     }
+}
+
+/// Behind the settings where the system offers no glass; the page paints the same.
+const SOLID_BACKGROUND: Color = Color(22, 22, 24, 255);
+
+/// Real behind-window blur for the settings: the dark HUD material, as in the macOS app.
+#[cfg(target_os = "macos")]
+fn glass() -> Option<WindowEffectsConfig> {
+    use tauri::window::{Effect, EffectState, EffectsBuilder};
+    let effects = EffectsBuilder::new()
+        .effect(Effect::HudWindow)
+        .state(EffectState::Active)
+        .radius(20.0);
+    Some(effects.build())
+}
+
+/// The acrylic system backdrop, which Windows offers from Windows 11 22H2 (build 22523).
+#[cfg(windows)]
+fn glass() -> Option<WindowEffectsConfig> {
+    use tauri::window::{Effect, EffectsBuilder};
+    let supported = windows_version::OsVersion::current().build >= 22_523;
+    supported.then(|| EffectsBuilder::new().effect(Effect::Acrylic).build())
+}
+
+/// No window effects here: the settings get a solid background.
+#[cfg(not(any(target_os = "macos", windows)))]
+fn glass() -> Option<WindowEffectsConfig> {
+    None
 }
 
 pub fn set_settings_title(app: &AppHandle, title: &str) {

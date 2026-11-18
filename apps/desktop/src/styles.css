@@ -8,6 +8,16 @@
   --control-selected: #fff;
   --warning: #b4570b;
   --window: #f4f5f6;
+  /* Motion, mirrored in src/lib/motion.ts. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-press: 140ms;
+  --duration-pane: 240ms;
+  --duration-reveal: 550ms;
+  --press-scale: 0.94;
+  --press-scale-subtle: 0.97;
+  --rise-pane: 6px;
+  --rise-reveal: 8px;
+  --reveal-blur: 6px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, Ubuntu, Cantarell, "Noto Sans", sans-serif;
   font-size: 13px;
   line-height: 1.35;
@@ -28,14 +38,36 @@
   }
 }
 
+/* Reduced motion keeps the fades and drops movement, scaling and blur. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --press-scale: 1;
+    --press-scale-subtle: 1;
+    --rise-pane: 0px;
+    --rise-reveal: 0px;
+    --reveal-blur: 0px;
+  }
+}
+
 html,
 body {
   margin: 0;
   height: 100%;
 }
 
+/* The settings are dark glass. Without a behind-window material (`data-glass`),
+   they sit on a solid near-black instead. */
+html[data-view="settings"] {
+  color-scheme: dark;
+  background: #161618;
+}
+
+html[data-view="settings"][data-glass] {
+  background: transparent;
+}
+
 html[data-view="settings"] body {
-  background: var(--window);
+  overflow: hidden;
 }
 
 html[data-view="overlay"],

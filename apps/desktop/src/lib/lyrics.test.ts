@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { currentIndex, lineText, wordFills } from "./lyrics";
+import { currentIndex, estimatedWords, lineFills, lineText, wordFills } from "./lyrics";
 import type { LyricLine } from "./types";
 
 const lines: LyricLine[] = [
@@ -52,5 +52,86 @@ describe("wordFills", () => {
   it("shows a note for breaks", () => {
     expect(lineText({ time: 1, text: "" })).toBe("♪");
     expect(lineText(undefined)).toBe("");
+  });
+});
+
+describe("estimatedWords", () => {
+  const ends = (line: LyricLine, next: number | null) => estimatedWords(line, next).map((word) => word.end);
+
+  it("gives about 0.07 s to each character, counting one space per word", () => {
+    const words = estimatedWords({ time: 10, text: "abcd efgh" }, 20);
+    expect(words.map((word) => word.text)).toEqual(["abcd ", "efgh"]);
+    expect(words[0]?.start).toBe(10);
+    expect(words[0]?.end).toBeCloseTo(10.35);
+    expect(words[1]?.start).toBeCloseTo(10.35);
+    expect(words[1]?.end).toBeCloseTo(10.7);
+  });
+
+  it("takes at least 0.6 s for a line", () => {
+    expect(ends({ time: 10, text: "Hi" }, 20)[0]).toBeCloseTo(10.6);
+  });
+
+  it("ends within 90 % of the gap to the next line", () => {
+    expect(ends({ time: 10, text: "Hi" }, 10.5)[0]).toBeCloseTo(10.45);
+    const long = { time: 10, text: "a fairly long line that would take many seconds to sing" };
+    expect(ends(long, 12).at(-1)).toBeCloseTo(11.8);
+  });
+
+  it("allows the last line six seconds and respects a known line end", () => {
+    const text = Array(10).fill("abcdefghi").join(" ");
+    expect(ends({ time: 10, text }, null).at(-1)).toBeCloseTo(15.4);
+    expect(ends({ time: 10, end: 11, text }, 30).at(-1)).toBeCloseTo(10.9);
+  });
+
+  it("shares the time out by word length", () => {
+    const [short, long] = estimatedWords({ time: 0, text: "a bbbbbbbb" }, 20);
+    const length = (word: { start: number; end?: number } | undefined) => (word?.end ?? 0) - (word?.start ?? 0);
+    expect(length(long) / length(short)).toBeCloseTo(9 / 2);
+  });
+
+  it("keeps every space of the line", () => {
+    const text = " Hello  bright world ";
+    expect(estimatedWords({ time: 0, text }, 5).map((word) => word.text).join("")).toBe(text);
+  });
+
+  it("has no words for breaks", () => {
+    expect(estimatedWords({ time: 0, text: "" }, 5)).toEqual([]);
+    expect(estimatedWords({ time: 0, text: "   " }, 5)).toEqual([]);
+  });
+});
+
+describe("lineFills", () => {
+  const line: LyricLine = { time: 10, text: "made up words here" };
+  const fills = (position: number, next = 14) => lineFills(line, next, position, "line").map((word) => word.fill);
+
+  it("estimates the words of line-synced lyrics", () => {
+    expect(fills(9)).toEqual([0, 0, 0, 0]);
+    const middle = fills(10.6);
+    expect(middle[0]).toBe(1);
+    expect(middle.at(-1)).toBe(0);
+    expect(middle.every((fill, index) => index === 0 || fill <= (middle[index - 1] ?? 1))).toBe(true);
+    expect(fills(13.9)).toEqual([1, 1, 1, 1]);
+    expect(fills(10.46, 10.5)).toEqual([1, 1, 1, 1]);
+  });
+
+  it("keeps the real word timing", () => {
+    const timed: LyricLine = {
+      time: 10,
+      text: "one two",
+      words: [
+        { start: 10, text: "one " },
+        { start: 11, text: "two" },
+      ],
+    };
+    expect(lineFills(timed, 20, 10.5, "word")).toEqual(wordFills(timed, 20, 10.5));
+    expect(lineFills(timed, 20, 10.5, "line")).toEqual(wordFills(timed, 20, 10.5));
+  });
+
+  it("estimates lines without word timing in word-synced lyrics too", () => {
+    expect(lineFills(line, 14, 10.6, "word")).toEqual(lineFills(line, 14, 10.6, "line"));
+  });
+
+  it("leaves plain lyrics without word highlight", () => {
+    expect(lineFills(line, 14, 10.6, "unsynced")).toEqual([]);
   });
 });

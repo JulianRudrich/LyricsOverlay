@@ -1,13 +1,20 @@
 <script lang="ts">
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import { onMount, untrack } from "svelte";
-  import { fly } from "svelte/transition";
+  import { prefersReducedMotion } from "svelte/motion";
   import { api, subscribe } from "../lib/api";
   import { PlaybackClock } from "../lib/clock";
   import { translator, type MessageKey } from "../lib/i18n";
-  import Icon from "../lib/Icon.svelte";
-  import { currentIndex, lineText, wordFills } from "../lib/lyrics";
+  import { clamp, currentIndex } from "../lib/lyrics";
+  import { lyricMeasure } from "../lib/measure";
+  import { songExit } from "../lib/motion";
+  import { lyricSeekTarget, SeekHold } from "../lib/player";
+  import { splitLongLines } from "../lib/segment";
   import type { AppInfo, LyricLine, LyricsView, Playback, Settings } from "../lib/types";
+  import Header from "./Header.svelte";
+  import LyricLines from "./LyricLines.svelte";
+  import Scrubber from "./Scrubber.svelte";
+  import Status from "./Status.svelte";
 
   let settings = $state<Settings | null>(null);
   let playback = $state<Playback | null>(null);
@@ -24,20 +31,44 @@
       ? lyricsView.lyrics
       : null,
   );
-  const lines: LyricLine[] = $derived(lyrics?.lines ?? []);
   const offset = $derived((settings?.globalOffset ?? 0) + (lyricsView?.songOffset ?? 0));
   const effective = $derived(position + offset);
-  const active = $derived(currentIndex(lines, effective));
-  const activeLine = $derived(active === null ? undefined : lines[active]);
-  const fills = $derived(
-    activeLine && active !== null ? wordFills(activeLine, lines[active + 1]?.time ?? null, effective) : [],
-  );
-  const showLyrics = $derived(lines.length > 0 && playback?.position !== null);
   const layout = $derived(settings?.layout ?? "context");
   const fontSize = $derived(settings?.fontSize ?? 25);
-  const progress = $derived(
-    track?.duration && track.duration > 0 ? Math.min(1, Math.max(0, position / track.duration)) : null,
+
+  // Lines too long for one row are split in two, once, to fit the lyrics area.
+  let areaWidth = $state(0);
+  let areaHeight = $state(0);
+  const measure = $derived(lyricMeasure(fontSize));
+  const lines: LyricLine[] = $derived(
+    lyrics && areaWidth > 0
+      ? splitLongLines(lyrics.lines, track?.duration ?? 0, (areaWidth * 0.97) / 0.6, measure)
+      : (lyrics?.lines ?? []),
   );
+  const active = $derived(currentIndex(lines, effective));
+  const activeLine = $derived(active === null ? undefined : lines[active]);
+  const showLyrics = $derived(lines.length > 0 && playback?.position !== null);
+
+  // The mini-player appears while the pointer is over the overlay.
+  let hovering = $state(false);
+  let scrubbing = $state(false);
+  const seekHold = new SeekHold();
+  const controlsShown = $derived((hovering || scrubbing) && track !== null && !settings?.clickThrough);
+  const capabilities = $derived(playback?.capabilities);
+  const transport = $derived(
+    controlsShown && !!capabilities && (capabilities.previous || capabilities.playPause || capabilities.next),
+  );
+  const canSeek = $derived(track !== null && !!capabilities?.seek && playback?.position !== null);
+  // The estimated times of plain lyrics are too rough to jump to.
+  const jumpable = $derived(canSeek && lyrics !== null && lyrics.sync !== "unsynced");
+  const chorusMarks = $derived(
+    jumpable ? (lyricsView?.chorus ?? []).map((start) => lyricSeekTarget(start, offset)) : [],
+  );
+
+  $effect(() => {
+    // Turning click-through on or hiding the overlay sends no "pointer left".
+    if (settings?.clickThrough || settings?.overlayVisible === false) hovering = false;
+  });
 
   const playerName = $derived(playback?.player?.name ?? "");
   const sourceName = $derived.by(() => {
@@ -82,6 +113,16 @@
         return t("lyrics.loading");
     }
   });
+  const searching = $derived(
+    playback?.state === "track" && (!lyricsView || lyricsView.status === "loading" || lyricsView.status === "idle"),
+  );
+  const statusMark = $derived(
+    playback?.state === "track" && (lyricsView?.status === "notFound" || lyricsView?.status === "instrumental"),
+  );
+  // Changes when the lyrics area shows something new: another song, lyrics arriving, another status.
+  const contentKey = $derived(
+    `${track?.key ?? ""}|${showLyrics ? `lyrics|${lyrics?.lines.length ?? 0}` : `status|${status}`}`,
+  );
 
   // With SINGLINE_DEBUG set, every line change is reported for end-to-end checks.
   let reported: number | null | undefined;
@@ -94,18 +135,37 @@
 
   function applyPlayback(next: Playback) {
     playback = next;
-    clock.update(
-      {
-        position: next.position,
-        playing: next.playing,
-        rate: next.rate,
-        duration: next.track?.duration ?? null,
-        trackKey: next.track?.key ?? null,
-      },
-      performance.now(),
-    );
-    position = clock.positionAt(performance.now());
+    const now = performance.now();
+    const reading = {
+      position: next.position,
+      playing: next.playing,
+      rate: next.rate,
+      duration: next.track?.duration ?? null,
+      trackKey: next.track?.key ?? null,
+    };
+    // Right after a seek, players may still report where they were.
+    if (seekHold.isStale(reading, now)) reading.position = clock.positionAt(now);
+    clock.update(reading, now);
+    position = clock.positionAt(now);
     startTicking();
+  }
+
+  /** Sends the player to `target` seconds and shows the new position at once. */
+  function seekTo(target: number) {
+    if (!playback || !track || !canSeek) return;
+    const duration = track.duration && track.duration > 0 ? track.duration : Infinity;
+    const destination = clamp(target, 0, duration);
+    void api.playerCommand({ kind: "seekTo", position: destination });
+    const now = performance.now();
+    seekHold.start(destination, track.key, playback.rate, now);
+    clock.seek(destination, now);
+    position = clock.positionAt(now);
+    startTicking();
+  }
+
+  /** Jumps so that exactly this line lights up, with the timing corrections applied. */
+  function jumpTo(line: LyricLine) {
+    seekTo(lyricSeekTarget(line.time, offset));
   }
 
   let frame = 0;
@@ -117,9 +177,13 @@
     if (frame === 0 && clock.isPlaying) frame = requestAnimationFrame(tick);
   }
 
-  function drag(event: PointerEvent) {
-    if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
+  function startWindowDrag() {
     void getCurrentWindow().startDragging();
+  }
+
+  function drag(event: PointerEvent) {
+    if (event.button !== 0 || (event.target as HTMLElement).closest("button, [data-no-drag]")) return;
+    startWindowDrag();
   }
 
   onMount(() => {
@@ -154,78 +218,79 @@
   style:--background-opacity={settings?.backgroundOpacity ?? 0.78}
   style:opacity={settings?.overlayOpacity ?? 1}
   onpointerdown={drag}
+  onpointerenter={() => (hovering = true)}
+  onpointermove={() => (hovering = true)}
+  onpointerleave={() => (hovering = false)}
 >
-  <header>
-    <button class="settings" onclick={() => api.openSettings()} title={t("overlay.openSettings")} aria-label={t("overlay.openSettings")}>
-      <Icon name="note" size={15} />
-    </button>
-    {#if track}
-      <span class="track" title={playerName}>{[track.title, track.artist].filter(Boolean).join("  ·  ")}</span>
-    {:else}
-      <span class="track idle">{t("app.name")}</span>
-    {/if}
-    {#if lyrics?.sync === "unsynced"}
-      <span class="tag">{t("overlay.notSynced")}</span>
-    {/if}
-    {#if lyricsView?.origin === "local" && lyrics}
-      <span class="badge" title={t("overlay.ownLyrics")} aria-label={t("overlay.ownLyrics")}><Icon name="document" size={13} /></span>
-    {/if}
-    {#if track && !playback?.playing}
-      <span class="badge muted" title={t("overlay.paused")} aria-label={t("overlay.paused")}><Icon name="pause" size={13} /></span>
-    {/if}
-  </header>
+  <Header
+    {track}
+    {playerName}
+    controls={transport && playback ? playback.capabilities : null}
+    playing={playback?.playing ?? false}
+    notSynced={lyrics?.sync === "unsynced" && showLyrics}
+    ownLyrics={lyricsView?.origin === "local" && lyrics !== null}
+    paused={track !== null && !playback?.playing}
+    {t}
+    onsettings={() => api.openSettings()}
+  />
 
-  <section class="lines" class:caption={layout === "caption"} aria-live="polite">
-    {#if showLyrics}
-      {#if layout === "context" && active !== null && active > 0}
-        <p class="previous" style:font-size="{Math.max(12, fontSize * 0.8)}px">{lineText(lines[active - 1])}</p>
-      {/if}
-      {#key active}
-        <p
-          class="current"
-          style:font-size="{fontSize}px"
-          aria-label={activeLine ? (activeLine.text || t("overlay.instrumentalBreak")) : t("overlay.intro")}
-          in:fly={{ y: 6, duration: 160 }}
-        >
-          {#if activeLine && fills.length > 0}
-            {#each fills as word, index (index)}
-              <span class="word" style:--fill="{(word.fill * 100).toFixed(1)}%">{word.text}</span>
-            {/each}
-          {:else}
-            {activeLine ? lineText(activeLine) : "♪"}
-          {/if}
-        </p>
-      {/key}
-      {#if layout !== "caption" && lines[(active ?? -1) + 1]}
-        <p class="next" style:font-size="{Math.max(12, fontSize * 0.8)}px">{lineText(lines[(active ?? -1) + 1])}</p>
-      {/if}
-    {:else}
-      <div class="status">
-        <p>{status}</p>
-        {#if lyricsView?.canRetry && playback?.state === "track"}
-          <button class="retry" onclick={() => api.reloadLyrics()} title={t("overlay.retry")} aria-label={t("overlay.retry")}>
-            <Icon name="retry" size={15} />
-          </button>
+  <div class="area" bind:clientWidth={areaWidth} bind:clientHeight={areaHeight}>
+    {#key contentKey}
+      <div class="content" out:songExit={{ reduced: prefersReducedMotion.current }}>
+        {#if showLyrics && lyrics}
+          <LyricLines
+            {lines}
+            current={active ?? -1}
+            position={effective}
+            sync={lyrics.sync}
+            {layout}
+            {fontSize}
+            width={areaWidth}
+            height={areaHeight}
+            playing={playback?.playing ?? false}
+            {measure}
+            onjump={jumpable ? jumpTo : null}
+            onwindowdrag={startWindowDrag}
+            {t}
+          />
+        {:else}
+          <Status
+            text={status}
+            mark={statusMark}
+            playing={playback?.playing ?? false}
+            delay={searching ? 0.35 : 0.1}
+            onretry={lyricsView?.canRetry && playback?.state === "track" ? () => api.reloadLyrics() : null}
+            {t}
+          />
         {/if}
       </div>
-    {/if}
-  </section>
+    {/key}
+  </div>
 
-  {#if progress !== null}
-    <div class="progress" aria-hidden="true"><div style:width="{progress * 100}%"></div></div>
+  {#if track?.duration && track.duration > 0}
+    <Scrubber
+      {position}
+      duration={track.duration}
+      expanded={controlsShown}
+      seekable={canSeek}
+      marks={chorusMarks}
+      {t}
+      onseek={seekTo}
+      onscrub={(held) => (scrubbing = held)}
+    />
   {/if}
 </main>
 
 <style>
-  /* The look of the first version: black and see-through, white lyrics, no colour. */
+  /* Black and see-through at the background setting, white text, no colour. */
   .overlay {
     box-sizing: border-box;
     height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 14px 18px 16px;
-    border-radius: 16px;
+    padding: 16px;
+    border-radius: 22px;
     background: rgb(0 0 0 / var(--background-opacity));
     color: #fff;
     overflow: hidden;
@@ -234,151 +299,42 @@
     -webkit-user-select: none;
   }
 
-  header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 28px;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgb(255 255 255 / 0.62);
-  }
-
-  button {
-    border: 0;
-    padding: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .settings {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-  }
-
-  .settings:hover,
-  .settings:focus-visible {
-    color: #fff;
-    background: rgb(255 255 255 / 0.1);
-  }
-
-  .track {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .idle {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .tag {
-    flex: none;
-    font-size: 10px;
-    font-weight: 500;
-  }
-
-  .badge {
-    flex: none;
-    display: grid;
-    place-items: center;
-  }
-
-  .lines {
+  /* Old and new content share the area while one leaves and the other arrives. */
+  .area {
     flex: 1;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 8px;
-    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.6));
-  }
-
-  .lines p {
-    margin: 0;
-    overflow: hidden;
-  }
-
-  .previous,
-  .next {
-    font-weight: 500;
-    color: rgb(255 255 255 / 0.4);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .current {
-    font-weight: 700;
-    line-height: 1.18;
-    color: #fff;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow-wrap: anywhere;
-  }
-
-  .word {
-    background: linear-gradient(90deg, #fff var(--fill), rgb(255 255 255 / 0.4) var(--fill));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    white-space: pre-wrap;
-  }
-
-  .status {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
-
-  .status p {
-    font-size: 15px;
-    font-weight: 500;
-    line-height: 1.3;
-    color: rgb(255 255 255 / 0.8);
-  }
-
-  .retry {
-    flex: none;
     display: grid;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    color: rgb(255 255 255 / 0.8);
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   }
 
-  .retry:hover,
-  .retry:focus-visible {
-    color: #fff;
+  .content {
+    grid-area: 1 / 1;
+    min-width: 0;
+    min-height: 0;
   }
 
-  .progress {
-    flex: none;
-    height: 2px;
-    border-radius: 1px;
-    background: rgb(255 255 255 / 0.16);
-    overflow: hidden;
+  /* Content appearing fades in, rises and sharpens. */
+  .overlay :global(.reveal) {
+    animation: reveal 0.55s cubic-bezier(0.23, 1, 0.32, 1) both;
   }
 
-  .progress div {
-    height: 100%;
-    background: rgb(255 255 255 / 0.7);
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: blur(6px);
+    }
+  }
+
+  @keyframes reveal-fade {
+    from {
+      opacity: 0;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .current {
-      animation: none !important;
-      transition: none !important;
+    .overlay :global(.reveal) {
+      animation-name: reveal-fade;
     }
   }
 </style>

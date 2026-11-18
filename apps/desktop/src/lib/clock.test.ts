@@ -41,6 +41,25 @@ describe("PlaybackClock", () => {
     expect(clock.positionAt(8_000)).toBe(0);
   });
 
+  it("jumps for a seek, however small, and keeps running", () => {
+    const clock = new PlaybackClock();
+    clock.update(reading(10), 0);
+    clock.seek(9.8, 1_000);
+    expect(clock.positionAt(1_000)).toBe(9.8);
+    expect(clock.positionAt(1_500)).toBeCloseTo(10.3);
+    clock.seek(500, 2_000);
+    expect(clock.positionAt(2_000)).toBe(200);
+    clock.seek(-4, 3_000);
+    expect(clock.positionAt(3_000)).toBe(0);
+  });
+
+  it("ignores a seek while the position is unknown", () => {
+    const clock = new PlaybackClock();
+    clock.seek(30, 0);
+    expect(clock.hasPosition).toBe(false);
+    expect(clock.positionAt(0)).toBe(0);
+  });
+
   it("follows the playback rate", () => {
     const clock = new PlaybackClock();
     clock.update(reading(10, { rate: 2 }), 0);

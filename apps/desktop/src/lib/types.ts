@@ -84,6 +84,8 @@ export interface LyricsView {
   status: LyricsStatus;
   origin: "local" | "online" | "demo" | null;
   lyrics: Lyrics | null;
+  /** Lyric times where each chorus starts; empty when nothing repeats or the lyrics are not synced. */
+  chorus: number[];
   songOffset: number;
   canRetry: boolean;
 }

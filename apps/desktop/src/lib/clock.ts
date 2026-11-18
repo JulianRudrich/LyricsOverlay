@@ -52,6 +52,14 @@ export class PlaybackClock {
     this.known = true;
   }
 
+  /** Jumps to `position` at once, however close it is, for a seek the listener asked for. */
+  seek(position: number, now: number): void {
+    if (!this.known || !Number.isFinite(position)) return;
+    const target = Math.max(0, position);
+    this.anchorPosition = this.duration && this.duration > 0 ? Math.min(target, this.duration) : target;
+    this.anchorTime = now;
+  }
+
   get hasPosition(): boolean {
     return this.known;
   }

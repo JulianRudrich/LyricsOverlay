@@ -5,7 +5,7 @@ use std::sync::mpsc::{Receiver, RecvTimeoutError};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use lyrics_core::{lrc, Lyrics, PlaybackClock};
+use lyrics_core::{chorus, lrc, Lyrics, PlaybackClock, SyncLevel};
 use lyrics_providers::{LookupOptions, LyricsOutcome, Query};
 use media_session::{
     default_backends, Backend, Capabilities, Command, CommandError, DemoBackend, Engine,
@@ -106,6 +106,9 @@ pub struct LyricsView {
     pub status: &'static str,
     pub origin: Option<&'static str>,
     pub lyrics: Option<Lyrics>,
+    /// Lyric times where each chorus starts. Empty when nothing repeats, and
+    /// for plain lyrics, whose estimated times are too rough to jump to.
+    pub chorus: Vec<f64>,
     pub song_offset: f64,
     pub can_retry: bool,
 }
@@ -117,6 +120,7 @@ impl LyricsView {
             status: "idle",
             origin: None,
             lyrics: None,
+            chorus: Vec::new(),
             song_offset: 0.0,
             can_retry: false,
         }
@@ -132,11 +136,17 @@ impl LyricsView {
     }
 
     fn ready(track_key: &str, lyrics: Lyrics, origin: &'static str, song_offset: f64) -> Self {
+        let chorus = if lyrics.sync == SyncLevel::Unsynced {
+            Vec::new()
+        } else {
+            chorus::starts(&lyrics.lines)
+        };
         Self {
             track_key: Some(track_key.to_owned()),
             status: "ready",
             origin: Some(origin),
             lyrics: Some(lyrics),
+            chorus,
             song_offset,
             can_retry: false,
         }
@@ -304,4 +314,37 @@ pub fn publish(app: &AppHandle, view: LyricsView) {
     let state = app.state::<AppState>();
     *state.lyrics_view.lock().unwrap_or_else(|p| p.into_inner()) = view.clone();
     let _ = app.emit("lyrics", &view);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use lyrics_core::LyricLine;
+
+    fn song(texts: &[&str]) -> Vec<LyricLine> {
+        texts
+            .iter()
+            .enumerate()
+            .map(|(index, text)| LyricLine::new(5.0 * index as f64, *text))
+            .collect()
+    }
+
+    #[test]
+    fn ready_lyrics_carry_the_chorus_starts() {
+        let lines = song(&["Hold on", "Let go", "Verse", "Hold on", "Let go"]);
+        let view = LyricsView::ready("key", Lyrics::timed(lines.clone()), "online", 0.0);
+        assert_eq!(view.chorus, [0.0, 15.0]);
+        let json = serde_json::to_value(&view).expect("the view serializes");
+        assert_eq!(json["chorus"], serde_json::json!([0.0, 15.0]));
+
+        let plain = LyricsView::ready("key", Lyrics::estimated(lines), "online", 0.0);
+        assert!(
+            plain.chorus.is_empty(),
+            "estimated times are too rough to jump to"
+        );
+        let unique = LyricsView::ready("key", Lyrics::timed(song(&["A", "B"])), "local", 0.0);
+        assert!(unique.chorus.is_empty());
+        assert!(LyricsView::idle().chorus.is_empty());
+        assert!(LyricsView::loading("key", 0.0).chorus.is_empty());
+    }
 }

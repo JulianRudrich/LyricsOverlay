@@ -13,6 +13,7 @@
   --duration-press: 140ms;
   --duration-pane: 240ms;
   --duration-reveal: 550ms;
+  --duration-dismiss: 120ms;
   --press-scale: 0.94;
   --press-scale-subtle: 0.97;
   --rise-pane: 6px;
@@ -67,6 +68,15 @@ html[data-view="settings"][data-glass] {
 }
 
 html[data-view="settings"] body {
+  overflow: hidden;
+}
+
+/* The tray panel draws its own glass edge, or its solid background, inside a
+   see-through window. */
+html[data-view="menu"],
+html[data-view="menu"] body {
+  color-scheme: dark;
+  background: transparent;
   overflow: hidden;
 }
 

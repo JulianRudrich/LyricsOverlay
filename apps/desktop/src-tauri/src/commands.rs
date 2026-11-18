@@ -146,6 +146,18 @@ pub async fn open_settings(app: AppHandle) {
     windows::open_settings(&app);
 }
 
+/// Async, like `open_settings`.
+#[tauri::command]
+pub async fn open_stats(app: AppHandle) {
+    windows::open_stats(&app);
+}
+
+#[tauri::command]
+pub fn quit(app: AppHandle, state: State<'_, AppState>) {
+    state.save_settings_now();
+    app.exit(0);
+}
+
 /// Changes the shortcut that shows and hides the overlay. When another app
 /// has the new one, the old one stays. Async, as registering waits for the
 /// main thread.

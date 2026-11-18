@@ -63,6 +63,15 @@ export function songExit(_node: Element, { reduced = false }: { reduced?: boolea
   };
 }
 
+/** A section that opens below a row drops 6 px into place. With reduced motion it only fades. */
+export function dropIn(_node: Element, { reduced = false }: { reduced?: boolean } = {}): TransitionConfig {
+  return {
+    duration: duration.pane,
+    easing: easeOut,
+    css: reduced ? (t) => `opacity: ${t}` : (t, u) => `opacity: ${t}; transform: translateY(${-rise.pane * u}px)`,
+  };
+}
+
 /** Controls that slide in from the right and fade. With reduced motion they only fade. */
 export function slideIn(_node: Element, { reduced = false }: { reduced?: boolean } = {}): TransitionConfig {
   return {
@@ -133,8 +142,10 @@ export const easeOutCss = "cubic-bezier(0.23, 1, 0.32, 1)";
 export const duration = {
   /** Buttons and items while pressed. */
   press: 140,
-  /** Switching panes, selections that glide, switches. */
+  /** Switching panes, selections that glide, switches, the tray panel opening. */
   pane: 240,
+  /** Closing is quicker than opening: the app answers, the listener does not decide. */
+  dismiss: 120,
   /** Content that arrives, such as a new song: rare, so it may take a little longer. */
   reveal: 550,
 } as const;
@@ -168,6 +179,15 @@ export function entranceKeyframes(kind: "pane" | "reveal", reduced: boolean): Ke
   return [
     { opacity: 0, transform: `translateY(${rise.reveal}px)`, filter: `blur(${revealBlur}px)` },
     { opacity: 1, transform: "none", filter: "none" },
+  ];
+}
+
+/** The tray panel opening: it fades in and rises 8 px. With reduced motion it only fades. */
+export function panelKeyframes(reduced: boolean): Keyframe[] {
+  if (reduced) return [{ opacity: 0 }, { opacity: 1 }];
+  return [
+    { opacity: 0, transform: `translateY(${rise.reveal}px)` },
+    { opacity: 1, transform: "none" },
   ];
 }
 

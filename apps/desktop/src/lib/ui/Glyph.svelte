@@ -16,7 +16,12 @@
     | "external"
     | "chevrons"
     | "eyeOff"
-    | "shuffle";
+    | "shuffle"
+    | "overlay"
+    | "pointer"
+    | "moon"
+    | "chart"
+    | "chevronRight";
 </script>
 
 <script lang="ts">
@@ -57,6 +62,18 @@
     <path d="M3 3l18 18M10.6 5.1A9.6 9.6 0 0 1 12 5c5.5 0 9 7 9 7a16.5 16.5 0 0 1-3.2 4.2M6.6 6.6C4.3 8.2 3 12 3 12s3.5 7 9 7a9.3 9.3 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
   {:else if name === "shuffle"}
     <path d="m18 14 4 4-4 4M18 2l4 4-4 4M2 18h2a4 4 0 0 0 3.3-1.7l5.4-8.6A4 4 0 0 1 16 6h6M2 6h2a4 4 0 0 1 3.6 2.2M22 18h-6a4 4 0 0 1-3.3-1.8l-.4-.5" />
+  {:else if name === "overlay"}
+    <rect x="3" y="8.5" width="13" height="11" rx="2" />
+    <path d="M8 8.5V6.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
+  {:else if name === "pointer"}
+    <path d="M5 3.5 19 10l-6.2 1.8L10 18 5 3.5Z" />
+    <path d="m13.5 13.5 5 5" />
+  {:else if name === "moon"}
+    <path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" />
+  {:else if name === "chart"}
+    <path d="M4 20h16M7 16.5v-5M12 16.5V6.5M17 16.5v-8" />
+  {:else if name === "chevronRight"}
+    <path d="m9.5 6 6 6-6 6" />
   {:else if name === "players"}
     <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
     <path d="M3 9h18M10.5 12.25v4.5l3.75-2.25-3.75-2.25Z" />

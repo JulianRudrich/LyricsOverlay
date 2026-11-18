@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "menu",
+  "description": "What the tray panel may do: listen to events.",
+  "windows": ["menu"],
+  "permissions": ["core:default"]
+}

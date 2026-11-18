@@ -139,7 +139,7 @@ pub fn open_settings(app: &AppHandle) {
     }
     let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
         .get("settings.title");
-    let glass = glass();
+    let glass = glass(20.0);
     // The page matches the window from its first paint: see-through over glass,
     // and room for the traffic lights where it runs under the title bar.
     let mut look = Vec::new();
@@ -233,28 +233,30 @@ pub fn open_shuffle(app: &AppHandle) {
 /// Behind the settings where the system offers no glass; the page paints the same.
 const SOLID_BACKGROUND: Color = Color(22, 22, 24, 255);
 
-/// Real behind-window blur for the settings: the dark HUD material, as in the macOS app.
+/// Real behind-window blur, `radius` round at the corners where the system
+/// draws them: the dark HUD material, as in the macOS app.
 #[cfg(target_os = "macos")]
-fn glass() -> Option<WindowEffectsConfig> {
+pub fn glass(radius: f64) -> Option<WindowEffectsConfig> {
     use tauri::window::{Effect, EffectState, EffectsBuilder};
     let effects = EffectsBuilder::new()
         .effect(Effect::HudWindow)
         .state(EffectState::Active)
-        .radius(20.0);
+        .radius(radius);
     Some(effects.build())
 }
 
-/// The acrylic system backdrop, which Windows offers from Windows 11 22H2 (build 22523).
+/// The acrylic system backdrop, which Windows offers from Windows 11 22H2
+/// (build 22523). Windows rounds the corners itself.
 #[cfg(windows)]
-fn glass() -> Option<WindowEffectsConfig> {
+pub fn glass(_radius: f64) -> Option<WindowEffectsConfig> {
     use tauri::window::{Effect, EffectsBuilder};
     let supported = windows_version::OsVersion::current().build >= 22_523;
     supported.then(|| EffectsBuilder::new().effect(Effect::Acrylic).build())
 }
 
-/// No window effects here: the settings get a solid background.
+/// No window effects here: the windows paint a solid background.
 #[cfg(not(any(target_os = "macos", windows)))]
-fn glass() -> Option<WindowEffectsConfig> {
+pub fn glass(_radius: f64) -> Option<WindowEffectsConfig> {
     None
 }
 

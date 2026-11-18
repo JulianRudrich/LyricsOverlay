@@ -5,7 +5,9 @@ import {
   duration,
   easeOut,
   easeOutCss,
+  dropIn,
   entranceKeyframes,
+  panelKeyframes,
   pressScale,
   revealBlur,
   rise,
@@ -99,6 +101,12 @@ describe("transitions", () => {
     expect(songExit(element, { reduced: true }).css?.(0.5, 0.5)).toBe("opacity: 0.5");
   });
 
+  it("drops a section into place below its row", () => {
+    expect(dropIn(element).duration).toBe(duration.pane);
+    expect(dropIn(element).css?.(0, 1)).toBe("opacity: 0; transform: translateY(-6px)");
+    expect(dropIn(element, { reduced: true }).css?.(0, 1)).toBe("opacity: 0");
+  });
+
   it("slides controls in from the right", () => {
     expect(slideIn(element).css?.(0, 1)).toBe("opacity: 0; transform: translateX(6px)");
     expect(slideIn(element, { reduced: true }).css?.(0, 1)).toBe("opacity: 0");
@@ -117,6 +125,7 @@ describe("motion tokens", () => {
     expect(token("--duration-press")).toBe(`${duration.press}ms`);
     expect(token("--duration-pane")).toBe(`${duration.pane}ms`);
     expect(token("--duration-reveal")).toBe(`${duration.reveal}ms`);
+    expect(token("--duration-dismiss")).toBe(`${duration.dismiss}ms`);
     expect(token("--press-scale")).toBe(String(pressScale.regular));
     expect(token("--press-scale-subtle")).toBe(String(pressScale.subtle));
     expect(token("--rise-pane")).toBe(`${rise.pane}px`);
@@ -131,5 +140,7 @@ describe("motion tokens", () => {
     }
     expect(entranceKeyframes("reveal", false)[0]).toMatchObject({ filter: "blur(6px)", transform: "translateY(8px)" });
     expect(entranceKeyframes("pane", false)[0]).toEqual({ opacity: 0, transform: "translateY(6px)" });
+    expect(panelKeyframes(true)).toEqual([{ opacity: 0 }, { opacity: 1 }]);
+    expect(panelKeyframes(false)[0]).toEqual({ opacity: 0, transform: "translateY(8px)" });
   });
 });

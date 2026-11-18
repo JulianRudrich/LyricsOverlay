@@ -8,6 +8,7 @@ import type {
   LyricsView,
   Playback,
   Settings,
+  SleepView,
   Snapshot,
   StampEdit,
 } from "./types";
@@ -38,8 +39,15 @@ export const api = {
   browserBridge: () => invoke<BridgeView>("browser_bridge"),
   forgetBrowser: (id: string) => invoke<BridgeView>("forget_browser", { id }),
   openSettings: () => invoke<void>("open_settings"),
+  openStats: () => invoke<void>("open_stats"),
+  quit: () => invoke<void>("quit"),
   /** Rejects with a HotkeyError name; the old shortcut then stays. */
   setHotkey: (hotkey: string) => invoke<Settings>("set_hotkey", { hotkey }),
+  sleepTimer: () => invoke<SleepView>("sleep_timer"),
+  setSleepTimer: (choice: string) => invoke<SleepView>("set_sleep_timer", { choice }),
+  // The tray panel reports its height, so its window fits it.
+  menuPanelResize: (height: number) => invoke<void>("menu_panel_resize", { height }),
+  closeMenuPanel: () => invoke<void>("close_menu_panel"),
   moveOverlay: (corner: Corner) => invoke<void>("move_overlay", { corner }),
   setLaunchAtLogin: (enabled: boolean) => invoke<boolean>("set_launch_at_login", { enabled }),
   reportLine: (position: number, text: string) => invoke<void>("report_line", { position, text }),
@@ -50,6 +58,9 @@ export interface Listeners {
   lyrics?: (lyrics: LyricsView) => void;
   settings?: (settings: Settings) => void;
   app?: (app: AppInfo) => void;
+  sleep?: (sleep: SleepView) => void;
+  /** The tray panel opens (play the entrance) or closes (fade out). */
+  menuPanel?: (event: { open: boolean }) => void;
 }
 
 /** Subscribes to the events the Rust side sends; returns one function to stop. */
@@ -59,6 +70,8 @@ export async function subscribe(listeners: Listeners): Promise<UnlistenFn> {
     listeners.lyrics && listen<LyricsView>("lyrics", (event) => listeners.lyrics?.(event.payload)),
     listeners.settings && listen<Settings>("settings", (event) => listeners.settings?.(event.payload)),
     listeners.app && listen<AppInfo>("app", (event) => listeners.app?.(event.payload)),
+    listeners.sleep && listen<SleepView>("sleep", (event) => listeners.sleep?.(event.payload)),
+    listeners.menuPanel && listen<{ open: boolean }>("menu-panel", (event) => listeners.menuPanel?.(event.payload)),
   ]);
   return () => stops.forEach((stop) => stop?.());
 }

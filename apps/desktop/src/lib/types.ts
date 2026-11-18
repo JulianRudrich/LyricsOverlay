@@ -149,6 +149,18 @@ export interface AppInfo {
 /** Why the Rust side did not take a shortcut. */
 export type HotkeyError = "invalid" | "unsupported" | "needsModifier" | "taken";
 
+/** The sleep timer, as the tray panel shows it. */
+export interface SleepView {
+  /** The running choice: "off", minutes such as "15", or "end". */
+  choice: string;
+  /** Every choice, in the order of the menu. */
+  choices: string[];
+  /** Whole minutes left while a set time runs. */
+  minutesLeft: number | null;
+  /** "End of track" needs a song to wait for. */
+  endOfTrack: boolean;
+}
+
 export interface Snapshot {
   settings: Settings;
   playback: Playback;

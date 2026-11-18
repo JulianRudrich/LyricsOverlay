@@ -1,4 +1,6 @@
-//! The tray (menu bar) icon and its menu.
+//! The tray (menu bar) icon and its menu. On macOS and Windows a left click
+//! opens the glass panel instead (see `menu_panel`) and a right click this
+//! menu; Linux reports no clicks, so any click opens the menu there.
 
 use media_session::SourcePreference;
 use tauri::menu::{
@@ -57,8 +59,24 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .tooltip("Singline")
         .menu(&menu)
-        .show_menu_on_left_click(true)
+        .show_menu_on_left_click(cfg!(target_os = "linux"))
         .on_menu_event(handle_event);
+    #[cfg(any(target_os = "macos", windows))]
+    {
+        use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
+        builder = builder.on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                rect,
+                ..
+            } = event
+            {
+                let app = tray.app_handle();
+                crate::menu_panel::toggle(app, crate::menu_panel::icon_bounds(app, rect));
+            }
+        });
+    }
     #[cfg(target_os = "macos")]
     {
         builder = builder

@@ -1,7 +1,7 @@
 <script lang="ts">
   // Cover art in a small rounded square. A note on a faint tile stands in
   // until the picture has loaded, and for players that have none.
-  let { url }: { url: string | null } = $props();
+  let { url, size = 36 }: { url: string | null; size?: number } = $props();
 
   // The overlay may only show pictures from the web or sent along as data.
   const source = $derived(url && /^(https:|data:image\/)/.test(url) ? url : null);
@@ -15,7 +15,7 @@
   });
 </script>
 
-<div class="cover">
+<div class="cover" style:width="{size}px" style:height="{size}px">
   <svg class="note" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
     <path d="M13 17.5V4.5c2.4.4 4.6 2 5.4 4.2" />
     <circle cx="10" cy="17.5" r="3" />
@@ -31,8 +31,6 @@
     flex: none;
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
     border-radius: 6px;
     background: rgb(255 255 255 / 0.08);
     box-shadow: 0 2px 4px rgb(0 0 0 / 0.18);

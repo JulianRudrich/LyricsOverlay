@@ -7,6 +7,7 @@ mod commands;
 mod history;
 mod hotkey;
 mod i18n;
+mod menu_panel;
 mod own_lyrics;
 mod playback;
 mod settings;
@@ -139,6 +140,20 @@ impl AppState {
     }
 }
 
+/// `--menu-panel` opens the tray panel, at startup or from a second launch, but
+/// only with SINGLINE_DEBUG: Linux reports no tray clicks to open it with.
+const MENU_PANEL_FLAG: &str = "--menu-panel";
+
+/// A second launch makes the app reachable again, or opens the tray panel.
+fn launched_again(app: &AppHandle, arguments: &[String]) {
+    let debug = app.try_state::<AppState>().is_some_and(|state| state.debug);
+    if debug && arguments.iter().any(|argument| argument == MENU_PANEL_FLAG) {
+        menu_panel::open_for_debug(app);
+    } else {
+        windows::reopen(app);
+    }
+}
+
 fn user_agent(app: &AppHandle) -> String {
     format!(
         "Singline/{} (https://github.com/JulianRudrich/LyricsOverlay)",
@@ -195,6 +210,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     app.manage(own_lyrics::EditorSession::default());
     app.manage(autohide::AutoHideState::new(settings.overlay_visible));
     app.manage(sleep::SleepState::default());
+    app.manage(menu_panel::MenuPanel::default());
     app.manage(history::History::default());
     let bridge_store = handle
         .state::<AppState>()
@@ -217,6 +233,11 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     hotkey::register_saved(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
     spotify::restore(&handle);
+    if handle.state::<AppState>().debug
+        && std::env::args().any(|argument| argument == MENU_PANEL_FLAG)
+    {
+        menu_panel::open_for_debug(&handle);
+    }
 
     let saver = handle.clone();
     thread::Builder::new()
@@ -235,7 +256,7 @@ fn main() {
     let demo = std::env::args().any(|argument| argument == "--demo");
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(
-            |app, _arguments, _directory| windows::reopen(app),
+            |app, arguments, _directory| launched_again(app, &arguments),
         ))
         // Opens the links in the settings in the browser.
         .plugin(tauri_plugin_opener::init())
@@ -268,6 +289,8 @@ fn main() {
             own_lyrics::remove_local_lyrics,
             commands::player_command,
             commands::open_settings,
+            commands::open_stats,
+            commands::quit,
             commands::set_hotkey,
             commands::move_overlay,
             commands::set_launch_at_login,
@@ -276,6 +299,10 @@ fn main() {
             history::clear_history,
             browser_bridge::browser_bridge,
             browser_bridge::forget_browser,
+            sleep::sleep_timer,
+            sleep::set_sleep_timer,
+            menu_panel::menu_panel_resize,
+            menu_panel::close_menu_panel,
             spotify::spotify_status,
             spotify::spotify_set_client_id,
             spotify::spotify_connect,

@@ -11,7 +11,7 @@ For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, ma
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-111111)](LICENSE)
 ![Windows, macOS and Linux](https://img.shields.io/badge/platforms-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-111111)
 
-<img src="docs/images/overlay.png" width="880" alt="The Singline overlay above a code editor. The previous line is dimmed, the current line lights up word by word, and the next line waits below.">
+<img src="docs/images/overlay.png" width="880" alt="The Singline overlay above a code editor: cover, title and artist at the top, the current line lighting up word by word, the lines around it fading out">
 
 </div>
 
@@ -41,9 +41,11 @@ For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, ma
 
 | One line | Focus | Context |
 |:-:|:-:|:-:|
-| <img src="docs/images/layout-caption.png" width="270" alt="One line layout: only the current line"> | <img src="docs/images/layout-focus.png" width="270" alt="Focus layout: the current line and the next line"> | <img src="docs/images/layout-context.png" width="270" alt="Context layout: previous, current and next line"> |
+| <img src="docs/images/layout-caption.png" width="270" alt="One line layout: only the current line"> | <img src="docs/images/layout-focus.png" width="270" alt="Focus layout: the current line with the lines before and after it"> | <img src="docs/images/layout-context.png" width="270" alt="Context layout: five lines that scroll, fading out towards the edges"> |
 
-<img src="docs/images/settings.png" width="880" alt="The settings window with the Appearance tab (layout, font size, opacity, size, open at login, language) and the Song &amp; timing tab (playback source, other players, correction for the current song, global timing correction, online search)">
+<p align="center"><img src="docs/images/mini-player.png" width="440" alt="The mini-player: previous, pause and next next to the title, and a seek bar with elapsed and remaining time"><br><sub>Move the pointer over the overlay for the mini-player.</sub></p>
+
+<img src="docs/images/settings.png" width="880" alt="The settings window with a sidebar and its four panes: General (player, auto-hide, open at login, language, shortcut), Appearance (layout, font size, opacity, size), Song &amp; timing (corrections, online search, your own lyrics) and About">
 
 ## Supported players
 

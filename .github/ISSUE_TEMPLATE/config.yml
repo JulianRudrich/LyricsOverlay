@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security issue
+    url: https://github.com/JulianRudrich/LyricsOverlay/security/advisories/new
+    about: Please report security problems privately, as described in SECURITY.md.
+  - name: Missing or wrong lyrics
+    url: https://lrclib.net
+    about: Singline gets its lyrics from LRCLIB. Lyrics that are missing or badly timed can be added or fixed there.

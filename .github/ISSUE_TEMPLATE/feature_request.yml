@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest an idea for Singline.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do?
+      description: Describe the situation and what is missing today.
+      placeholder: When I listen on my phone, I would like to …
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could Singline help?
+      description: Your idea for a solution. Sketches and examples from other apps are welcome.
+  - type: dropdown
+    id: systems
+    attributes:
+      label: Systems
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - All

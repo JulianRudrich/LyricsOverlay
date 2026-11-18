@@ -1,0 +1,63 @@
+name: Bug report
+description: Something does not work as it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem. Please do not paste song lyrics, tokens or other private data.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+      placeholder: I played a song in Spotify, but the overlay kept showing "Searching for synced lyrics…".
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start Singline
+        2. Play "Song" by "Artist" in Spotify
+        3. …
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: input
+    id: system-version
+    attributes:
+      label: System version
+      placeholder: Windows 11 24H2, macOS 15.2, Ubuntu 24.04 (Wayland) …
+  - type: input
+    id: singline-version
+    attributes:
+      label: Singline version
+      description: Shown in Settings → About, or the build you downloaded.
+      placeholder: 0.3.0, or the CI run of main you downloaded
+    validations:
+      required: true
+  - type: input
+    id: player
+    attributes:
+      label: Player
+      placeholder: Spotify desktop app, Apple Music, YouTube Music in Chrome with the extension …
+  - type: textarea
+    id: watch
+    attributes:
+      label: Output of singline-watch
+      description: Run `singline-watch` (included in every build) while the song plays and paste about 20 seconds of its output. It shows what your player reports.
+      render: text
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag images here if something looks wrong.

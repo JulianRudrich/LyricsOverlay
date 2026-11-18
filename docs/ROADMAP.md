@@ -29,7 +29,7 @@ Singline is the cross-platform successor of Lyrics Overlay: one code base for Wi
 ### First alpha
 
 - [x] Own lyrics: LRC import and an editor with a timestamp key
-- [ ] Hiding the overlay while nothing plays
+- [x] Hiding the overlay while nothing plays
 - [ ] A configurable shortcut
 - [ ] Installers with automatic updates
 - [ ] Fixes from measurements A and B, for example keeping the overlay above full-screen apps on macOS
@@ -38,15 +38,17 @@ Singline is the cross-platform successor of Lyrics Overlay: one code base for Wi
 
 Ported from the Swift code contributed from Linory:
 
-- [ ] Mini-player with a seek bar, jumping to a line by clicking it, chorus markers and cover art
-- [ ] Estimated word highlight for line-synced lyrics, splitting long lines, scrolling lines and smooth song changes
-- [ ] Glass menu panel, sleep timer and listening statistics
+- [x] Mini-player with a seek bar, jumping to a line by clicking it, chorus markers and cover art
+- [x] Estimated word highlight for line-synced lyrics, splitting long lines, scrolling lines and smooth song changes
+- [x] Settings in the glass design, sleep timer and listening statistics
+- [ ] Glass menu panel with the current song
 - [ ] Spotify connection with True Shuffle, liking songs and top lists
 - [ ] Homebrew
 
 ### Every player
 
-- [ ] A browser extension for Amazon Music, Apple Music, Spotify, YouTube Music, Tidal and Deezer on the web
+- [x] A browser extension for YouTube Music, YouTube, Spotify, Apple Music and Amazon Music on the web
+- [ ] The extension in the Chrome Web Store and on Firefox Add-ons; Tidal and Deezer
 - [ ] The Amazon Music desktop apps, as far as measurement B allows
 - [ ] Any player, with allow and ignore lists
 - [ ] Linux: Wayland support through the layer shell, and packages

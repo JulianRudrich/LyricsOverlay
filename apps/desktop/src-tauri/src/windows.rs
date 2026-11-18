@@ -14,6 +14,7 @@ pub const OVERLAY: &str = "overlay";
 pub const SETTINGS: &str = "settings";
 pub const EDITOR: &str = "editor";
 pub const STATS: &str = "stats";
+pub const SHUFFLE: &str = "shuffle";
 
 /// Distance from the screen edge, in logical pixels.
 const MARGIN: f64 = 16.0;
@@ -202,6 +203,30 @@ pub fn open_stats(app: &AppHandle) {
         .build();
     if let Err(error) = built {
         eprintln!("could not open your music: {error}");
+    }
+}
+
+/// The True Shuffle window, opened from the tray.
+pub fn open_shuffle(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(SHUFFLE) {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+        return;
+    }
+    let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
+        .get("shuffle.windowTitle");
+    let built =
+        WebviewWindowBuilder::new(app, SHUFFLE, WebviewUrl::App("index.html#/shuffle".into()))
+            .title(title)
+            .inner_size(380.0, 600.0)
+            .min_inner_size(340.0, 440.0)
+            .resizable(true)
+            .center()
+            .focused(true)
+            .build();
+    if let Err(error) = built {
+        eprintln!("could not open True Shuffle: {error}");
     }
 }
 

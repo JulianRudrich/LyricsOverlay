@@ -235,6 +235,10 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
         if track.as_ref().map(|t| &t.key) != current_track.as_ref().map(|t| &t.key) {
             current_track = track;
             load_lyrics(app, current_track.clone(), demo, false);
+            crate::shuffle::track_changed(
+                app,
+                current_track.as_ref().and_then(|t| t.source_id.as_deref()),
+            );
         } else if track.is_some() {
             // Same song; keep the details fresh, such as a late duration.
             current_track = track;

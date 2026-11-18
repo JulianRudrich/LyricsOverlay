@@ -128,6 +128,7 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .item(&crate::sleep::submenu(app, &texts)?)
         .separator()
         .item(&MenuItemBuilder::with_id("stats", texts.get("tray.stats")).build(app)?)
+        .item(&MenuItemBuilder::with_id("true-shuffle", texts.get("tray.trueShuffle")).build(app)?)
         .item(
             &MenuItemBuilder::with_id("settings", texts.get("tray.settings"))
                 .accelerator("CmdOrCtrl+,")
@@ -152,6 +153,7 @@ fn handle_event(app: &AppHandle, event: MenuEvent) {
         }
         "settings" => windows::open_settings(app),
         "stats" => windows::open_stats(app),
+        "true-shuffle" => windows::open_shuffle(app),
         "quit" => {
             state.save_settings_now();
             app.exit(0);

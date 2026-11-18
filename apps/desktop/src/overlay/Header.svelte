@@ -9,6 +9,7 @@
   import Icon from "../lib/Icon.svelte";
   import { songExit } from "../lib/motion";
   import type { Capabilities, Track } from "../lib/types";
+  import LikeButton from "../spotify/LikeButton.svelte";
   import Controls from "./Controls.svelte";
   import Cover from "./Cover.svelte";
 
@@ -46,6 +47,7 @@
     {/key}
   </div>
   {#if controls}
+    <LikeButton uri={track?.sourceId} {t} />
     <Controls capabilities={controls} {playing} {t} />
   {:else}
     {#if notSynced}

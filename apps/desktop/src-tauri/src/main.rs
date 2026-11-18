@@ -9,7 +9,9 @@ mod i18n;
 mod own_lyrics;
 mod playback;
 mod settings;
+mod shuffle;
 mod sleep;
+mod spotify;
 mod tray;
 mod windows;
 
@@ -166,6 +168,12 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         .clone()
         .or_else(|| handle.path().app_config_dir().ok());
     let data_dir = override_dir.or_else(|| handle.path().app_data_dir().ok());
+    app.manage(spotify::Spotify::new(
+        demo,
+        config_dir.as_deref(),
+        user_agent(&handle),
+    ));
+    app.manage(shuffle::Shuffle::new(demo, data_dir.as_deref()));
 
     let settings_path = config_dir.map(|dir| dir.join("settings.json"));
     let settings = settings_path
@@ -223,6 +231,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     tray::create(&handle)?;
     register_hotkey(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
+    spotify::restore(&handle);
 
     let saver = handle.clone();
     thread::Builder::new()
@@ -281,6 +290,27 @@ fn main() {
             history::clear_history,
             browser_bridge::browser_bridge,
             browser_bridge::forget_browser,
+            spotify::spotify_status,
+            spotify::spotify_set_client_id,
+            spotify::spotify_connect,
+            spotify::spotify_cancel_login,
+            spotify::spotify_disconnect,
+            spotify::spotify_open_dashboard,
+            spotify::spotify_open,
+            spotify::spotify_is_liked,
+            spotify::spotify_set_liked,
+            spotify::spotify_top,
+            shuffle::shuffle_open_window,
+            shuffle::shuffle_view,
+            shuffle::shuffle_load_sources,
+            shuffle::shuffle_select,
+            shuffle::shuffle_toggle_source,
+            shuffle::shuffle_play,
+            shuffle::shuffle_reset,
+            shuffle::shuffle_restore_removed,
+            shuffle::shuffle_set_keep_playing,
+            shuffle::shuffle_remove_current,
+            shuffle::shuffle_keep,
         ])
         .setup(move |app| setup(app, demo))
         .build(tauri::generate_context!())

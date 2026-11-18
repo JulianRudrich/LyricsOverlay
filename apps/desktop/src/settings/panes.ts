@@ -6,6 +6,7 @@ import About from "./About.svelte";
 import Appearance from "./Appearance.svelte";
 import General from "./General.svelte";
 import SongTiming from "./SongTiming.svelte";
+import SpotifyPane from "../spotify/SpotifyPane.svelte";
 
 /** What every pane gets: the current state and the changes it can make. */
 export interface PaneContext {
@@ -34,5 +35,6 @@ export const panes: Pane[] = [
   { id: "general", icon: "general", title: "settings.general", subtitle: "settings.generalSubtitle", component: General },
   { id: "appearance", icon: "appearance", title: "settings.appearance", subtitle: "settings.appearanceSubtitle", component: Appearance },
   { id: "song", icon: "timing", title: "settings.song", subtitle: "settings.songSubtitle", component: SongTiming },
+  { id: "spotify", icon: "shuffle", title: "spotify.title", subtitle: "spotify.subtitle", component: SpotifyPane },
   { id: "about", icon: "about", title: "settings.about", subtitle: "settings.aboutSubtitle", component: About },
 ];

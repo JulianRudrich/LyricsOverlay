@@ -15,7 +15,8 @@
     | "lyrics"
     | "external"
     | "chevrons"
-    | "eyeOff";
+    | "eyeOff"
+    | "shuffle";
 </script>
 
 <script lang="ts">
@@ -54,6 +55,8 @@
     <circle cx="18" cy="16" r="3" />
   {:else if name === "eyeOff"}
     <path d="M3 3l18 18M10.6 5.1A9.6 9.6 0 0 1 12 5c5.5 0 9 7 9 7a16.5 16.5 0 0 1-3.2 4.2M6.6 6.6C4.3 8.2 3 12 3 12s3.5 7 9 7a9.3 9.3 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+  {:else if name === "shuffle"}
+    <path d="m18 14 4 4-4 4M18 2l4 4-4 4M2 18h2a4 4 0 0 0 3.3-1.7l5.4-8.6A4 4 0 0 1 16 6h6M2 6h2a4 4 0 0 1 3.6 2.2M22 18h-6a4 4 0 0 1-3.3-1.8l-.4-.5" />
   {:else if name === "players"}
     <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
     <path d="M3 9h18M10.5 12.25v4.5l3.75-2.25-3.75-2.25Z" />

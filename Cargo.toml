@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
-members = ["crates/lyrics-core", "crates/media-session", "crates/lyrics-providers", "apps/desktop/src-tauri"]
+members = ["crates/lyrics-core", "crates/media-session", "crates/lyrics-providers", "crates/spotify-connect", "apps/desktop/src-tauri"]
 # The app embeds the built frontend, so plain `cargo test` covers the crates only.
-default-members = ["crates/lyrics-core", "crates/media-session", "crates/lyrics-providers"]
+default-members = ["crates/lyrics-core", "crates/media-session", "crates/lyrics-providers", "crates/spotify-connect"]
 
 [workspace.package]
 version = "0.3.0-alpha.0"
@@ -17,6 +17,7 @@ publish = false
 lyrics-core = { path = "crates/lyrics-core" }
 media-session = { path = "crates/media-session" }
 lyrics-providers = { path = "crates/lyrics-providers" }
+spotify-connect = { path = "crates/spotify-connect" }
 
 regex = "1"
 serde = { version = "1", features = ["derive"] }

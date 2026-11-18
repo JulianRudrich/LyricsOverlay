@@ -1,0 +1,31 @@
+[package]
+name = "spotify-connect"
+description = "The optional Spotify connection: login with PKCE, liked songs, top lists and True Shuffle."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+base64 = "0.22"
+fastrand = "2"
+futures-util = "0.3"
+getrandom = "0.3"
+# Windows Credential Manager, macOS Keychain, Secret Service on Linux (pure Rust over D-Bus).
+keyring = "4"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "rustls-tls-native-roots", "http2"] }
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+thiserror.workspace = true
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt", "sync", "time"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
+wiremock = "0.6"
+
+[lints]
+workspace = true

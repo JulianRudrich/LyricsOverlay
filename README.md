@@ -58,7 +58,7 @@ For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, ma
 1. Recognised as Apple Music or Amazon Music when the browser shares the page address, as Firefox does. In other browsers the tab counts as a browser player (see ⁴).
 2. Some versions of Amazon Music for Windows report only part of the song information.
 3. macOS offers no public way to read these players. A browser extension that covers web players on every system is on the [roadmap](#roadmap).
-4. Turn on **Also follow other players** in Settings → Song & timing. A tab keeps working in the background.
+4. Turn on **Also follow other players** in Settings → General. A tab keeps working in the background.
 
 On Linux, Singline reads players through MPRIS, on Windows through the system media controls, and on macOS through AppleScript.
 
@@ -92,15 +92,15 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Open the settings | Click the note in the overlay, or choose **Settings…** in the tray menu |
 | Fix the timing of a song | Settings → Song & timing → **−0.25** / **+0.25** (remembered per song) |
 | Fix the timing of all songs | Settings → Song & timing → **Global timing correction** |
-| Choose the player to follow | Tray menu → **Playback source**, or Settings → Song & timing |
-| Follow browsers and other players | Settings → Song & timing → **Also follow other players** |
+| Choose the player to follow | Tray menu → **Playback source**, or Settings → General |
+| Follow browsers and other players | Settings → General → **Also follow other players** |
 | Control the player | Move the pointer over the overlay for previous, play/pause, next and the seek bar |
 | Jump to a line or the chorus | Click the line, or a chorus marker on the seek bar |
 | Add your own lyrics | Settings → Song & timing → **Import LRC…** or **Edit lyrics…** |
 | Set a timestamp in the editor | Press **Ctrl+Shift+T** (**⌘⇧T** on macOS) while the line is sung |
 | Pause the music later | Tray menu → **Sleep timer** |
 | See your listening statistics | Tray menu → **Your music…** |
-| Hide the overlay while nothing plays | Turn on **Hide when nothing is playing** in the settings |
+| Hide the overlay while nothing plays | Settings → General → **Hide when nothing is playing** |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |
 | See Singline without playing music | Start it with `--demo` |
 
@@ -241,10 +241,10 @@ bash apps/desktop/e2e/linux-smoke.sh
 - Your own lyrics with LRC import and an editor with a timestamp key
 - The mini-player with seek bar, chorus markers and jumping to a line, cover art, scrolling lines and an estimated word highlight
 - Sleep timer, hiding the overlay while nothing plays, and listening statistics
+- Settings in the glass design of the native macOS app, with a sidebar
 
 **In progress**
 
-- Settings in the glass design of the native macOS app
 - Spotify connection for True Shuffle, liking songs and your top lists (requires Spotify Premium)
 - Web players on every system, including YouTube Music in a background tab on macOS
 

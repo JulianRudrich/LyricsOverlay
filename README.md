@@ -11,7 +11,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-111111)](LICENSE)
 ![Windows, macOS and Linux](https://img.shields.io/badge/platforms-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-111111)
 
-<img src="docs/images/overlay.png" width="880" alt="The Singline overlay above a code editor: cover, title and artist at the top, the current line lighting up word by word, the lines around it fading out">
+<img src="docs/images/demo.gif" width="770" alt="Singline playing a song: the lines scroll up, each word lights up as it is sung, three dots breathe during a break, and the mini-player slides in when the pointer moves over the overlay">
 
 </div>
 
@@ -40,6 +40,8 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Works offline.** Lyrics are cached on your device, so songs you have heard before work without a connection.
 - **Private.** No account, no tracking, no analytics. Only the song's title, artist, album and duration leave your computer, to look up lyrics, and you can turn that off.
 - **English and German**, following your system language.
+
+<img src="docs/images/overlay.png" width="880" alt="The Singline overlay above a code editor: cover, title and artist at the top, the current line lighting up word by word, the lines around it fading out">
 
 | One line | Focus | Context |
 |:-:|:-:|:-:|

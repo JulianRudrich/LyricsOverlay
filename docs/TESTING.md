@@ -8,6 +8,7 @@ Linux is tested automatically in CI. Windows and macOS need a real device. One p
 2. When the run has finished, download from **Artifacts**:
    - `singline-macOS`: the `.dmg` and `singline-watch-macos.tar.gz`
    - `singline-Windows`: the installer `…-setup.exe` (or `.msi`) and `singline-watch.exe`
+   - `singline-Linux`: a `.deb`, an `.AppImage` and `singline-watch-linux.tar.gz`
 
 The builds are not signed yet:
 

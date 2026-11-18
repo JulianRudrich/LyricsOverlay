@@ -70,6 +70,6 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Sleep timer | 🧪 | 🧪 | 🧪 | |
 | Listening statistics | ✅ | 🧪 | 🧪 | For every player |
 | Spotify connection, True Shuffle and top lists | ✅ | 🧪 | 🧪 | Linux tested against a simulated Spotify |
-| Installers | ⬜ | 🧪 | 🧪 | CI builds .exe, .msi and .dmg |
+| Installers | 🧪 | 🧪 | 🧪 | CI builds .deb, AppImage, .exe, .msi and .dmg |
 | Homebrew | — | — | ⬜ | |
 | Automatic updates | ⬜ | ⬜ | ⬜ | |

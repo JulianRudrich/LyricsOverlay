@@ -69,17 +69,21 @@ On Linux, Singline reads players through MPRIS, on Windows through the system me
 
 ## Install
 
-### Windows and macOS test builds
+### Test builds
+
+Every change on `main` produces test builds for all three systems.
 
 1. Open the [latest successful build of `main`](../../actions/workflows/ci.yml?query=branch%3Amain+is%3Asuccess) and choose the newest run. You need to be signed in to GitHub to download.
-2. Under **Artifacts**, download **singline-Windows** (installer as `.exe` and `.msi`) or **singline-macOS** (a universal `.dmg` for Apple silicon and Intel Macs).
+2. Under **Artifacts**, download the build for your system:
+   - **singline-Windows:** the installer as `.exe` and `.msi`
+   - **singline-macOS:** a universal `.dmg` for Apple silicon and Intel Macs
+   - **singline-Linux:** a `.deb` for Debian and Ubuntu, and an `.AppImage` for other distributions
 3. Install it. The builds are not signed yet:
    - **Windows:** if SmartScreen stops the installer, choose **More info** → **Run anyway**.
    - **macOS:** if macOS refuses to open the app, go to **System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14 and earlier, right-click the app and choose **Open**). When you play music, allow Singline to control Spotify or Music.
+   - **Linux:** install the package with `sudo apt install ./Singline_*.deb`, or make the AppImage executable with `chmod +x Singline_*.AppImage` and start it.
 
-### Linux
-
-Build Singline from source as described [below](#building-from-source). Packages (AppImage, .deb, Flatpak) are planned.
+Each build also contains `singline-watch`, a small tool that shows what your players report (see [Troubleshooting](#troubleshooting)).
 
 ### Browser extension
 

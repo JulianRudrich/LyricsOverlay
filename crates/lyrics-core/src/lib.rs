@@ -3,6 +3,7 @@
 //! Nothing in this crate touches the network, the file system or a player. Every
 //! function is deterministic, so the whole crate is covered by plain unit tests.
 
+pub mod chorus;
 pub mod clock;
 pub mod listening;
 pub mod lrc;

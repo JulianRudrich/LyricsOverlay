@@ -17,20 +17,20 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Shortcut to show and hide | 🧪 | 🧪 | 🧪 | Linux: X11 only for now |
 | Three layouts, font size, opacity and size | ✅ | 🧪 | 🧪 | Linory has one fixed layout |
 | Word-by-word highlight from real word timing | ✅ | 🧪 | 🧪 | Linory mostly estimates |
-| Estimated word highlight for line-synced lyrics | ⬜ | ⬜ | ⬜ | In progress |
-| Scrolling lines and smooth song changes | ⬜ | ⬜ | ⬜ | In progress |
-| Splitting long lines | ⬜ | ⬜ | ⬜ | |
-| Cover art | ⬜ | ⬜ | ⬜ | In progress |
-| Hiding while nothing plays | ⬜ | ⬜ | ⬜ | In progress |
+| Estimated word highlight for line-synced lyrics | ✅ | 🧪 | 🧪 | |
+| Scrolling lines and smooth song changes | ✅ | 🧪 | 🧪 | |
+| Splitting long lines | ✅ | 🧪 | 🧪 | |
+| Cover art | 🧪 | 🧪 | 🧪 | Windows: thumbnail of the media session; macOS: Spotify only so far |
+| Hiding while nothing plays | 🧪 | 🧪 | 🧪 | |
 
 ## Mini-player
 
 | Feature | Lin | Win | Mac | Notes |
 |---|:-:|:-:|:-:|---|
-| Play/pause, next, previous and seeking (commands) | ✅ | 🧪 | 🧪 | The controls in the overlay are in progress |
-| Controls and a seek bar with times | ⬜ | ⬜ | ⬜ | In progress |
-| Jumping to a line by clicking it | ⬜ | ⬜ | ⬜ | In progress |
-| Chorus markers | ⬜ | ⬜ | ⬜ | In progress |
+| Play/pause, next, previous and seeking (commands) | ✅ | 🧪 | 🧪 | |
+| Controls and a seek bar with times | ✅ | 🧪 | 🧪 | macOS: hover while the app is inactive needs checking |
+| Jumping to a line by clicking it | ✅ | 🧪 | 🧪 | |
+| Chorus markers | ✅ | 🧪 | 🧪 | |
 | ♥ (Spotify) | ⬜ | ⬜ | ⬜ | Needs the Spotify connection |
 | Open in Spotify | ⬜ | ⬜ | ⬜ | |
 
@@ -65,8 +65,8 @@ Before its first release, Singline must offer every feature of the native macOS 
 | English and German, following the system language | ✅ | 🧪 | 🧪 | |
 | Open at login | 🧪 | 🧪 | 🧪 | |
 | Tray menu | 🧪 | 🧪 | 🧪 | Linory: glass panel with the current song (planned) |
-| Sleep timer | ⬜ | ⬜ | ⬜ | In progress |
-| Listening statistics | ⬜ | ⬜ | ⬜ | In progress; for every player |
+| Sleep timer | 🧪 | 🧪 | 🧪 | |
+| Listening statistics | ✅ | 🧪 | 🧪 | For every player |
 | Spotify connection, True Shuffle and top lists | ⬜ | ⬜ | ⬜ | In progress |
 | Installers | ⬜ | 🧪 | 🧪 | CI builds .exe, .msi and .dmg |
 | Homebrew | — | — | ⬜ | |

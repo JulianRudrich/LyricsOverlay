@@ -25,11 +25,16 @@ For Spotify, Apple Music, Amazon Music and music in your browser, on Windows, ma
 ## Features
 
 - **Follows what you play.** Singline reads the song and the playback position from your music app. It needs no login and no API key, and it never starts a player by itself. Let it follow whichever player is playing, or pick one.
-- **Word by word.** When the lyrics have word timing, every word lights up as it is sung. Otherwise the current line is highlighted. Between two readings of the player the position keeps running, so the highlight moves smoothly.
-- **Three layouts.** One line, Focus (current and next line) or Context (previous, current and next line), with adjustable font size, opacity, background, width and height.
+- **Word by word.** Every word lights up as it is sung, from real word timing where the lyrics have it and estimated from the line timing otherwise. Between two readings of the player the position keeps running, so the highlight moves smoothly.
+- **Lyrics in motion.** The lines scroll up as the song goes on, the next line grows into place, and breaks show three breathing dots. A new song fades in with its cover, title and artist.
+- **A mini-player on hover.** Previous, play/pause and next, a seek bar with elapsed and remaining time, and markers for the chorus. Click any line to jump there.
+- **Three layouts.** One line, Focus or Context, with adjustable font size, opacity, background, width and height.
 - **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. It can let clicks pass through to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
 - **Timing you can correct.** If the lyrics run early or late, move them by a quarter of a second; Singline remembers the correction for that song. A global correction makes up for your audio setup, for example Bluetooth headphones.
 - **Finds the right version.** Exact matches first, then a search that prefers the same album and versions with word timing. Plain lyrics are spread over the song and marked *~ not synced*; instrumentals are recognised.
+- **Your own lyrics.** Import an LRC file, or paste the lyrics into the editor and set each line's timestamp with a key press while the song plays. Your lyrics always win.
+- **Your music.** Listening time, plays, your daily streak, skips, a listening clock, and your most played songs and artists, from every player, kept only on your device.
+- **Sleep timer and auto-hide.** Pause the music after 15 to 60 minutes or at the end of the song, and let the overlay disappear while nothing plays.
 - **Works offline.** Lyrics are cached on your device, so songs you have heard before work without a connection.
 - **Private.** No account, no tracking, no analytics. Only the song's title, artist, album and duration leave your computer, to look up lyrics, and you can turn that off.
 - **English and German**, following your system language.
@@ -73,7 +78,7 @@ Build Singline from source as described [below](#building-from-source). Packages
 
 ### The native macOS app
 
-[`apps/macos`](apps/macos) contains the original macOS app, written in Swift. It already includes the features contributed from Linory (mini-player, True Shuffle, listening statistics and a sleep timer) and remains available until Singline has all of them on every system. See its [README](apps/macos/README.md).
+[`apps/macos`](apps/macos) contains the original macOS app, written in Swift, with the features contributed from Linory. It remains available until Singline has all of them on every system; what is still missing is the Spotify connection with True Shuffle. See its [README](apps/macos/README.md).
 
 ## Using Singline
 
@@ -89,6 +94,13 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Fix the timing of all songs | Settings → Song & timing → **Global timing correction** |
 | Choose the player to follow | Tray menu → **Playback source**, or Settings → Song & timing |
 | Follow browsers and other players | Settings → Song & timing → **Also follow other players** |
+| Control the player | Move the pointer over the overlay for previous, play/pause, next and the seek bar |
+| Jump to a line or the chorus | Click the line, or a chorus marker on the seek bar |
+| Add your own lyrics | Settings → Song & timing → **Import LRC…** or **Edit lyrics…** |
+| Set a timestamp in the editor | Press **Ctrl+Shift+T** (**⌘⇧T** on macOS) while the line is sung |
+| Pause the music later | Tray menu → **Sleep timer** |
+| See your listening statistics | Tray menu → **Your music…** |
+| Hide the overlay while nothing plays | Turn on **Hide when nothing is playing** in the settings |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |
 | See Singline without playing music | Start it with `--demo` |
 
@@ -96,7 +108,7 @@ Positive corrections show the lyrics earlier, negative ones later. The global an
 
 ## Where the lyrics come from
 
-1. **Your own lyrics.** They are kept on your device and win over everything else. Adding them from the app arrives with the lyrics editor (see the [roadmap](#roadmap)).
+1. **Your own lyrics**, imported from an LRC file (UTF-8, up to 512 KB) or written in the editor. They are kept on your device and win over everything else.
 2. **The local cache.** Lyrics found earlier are remembered, so they appear instantly and work offline.
 3. **[LRCLIB](https://lrclib.net)**, a free, open lyrics database. Singline first asks for the exact recording (title, artist, album and a duration within a few seconds), then searches and prefers the same album and versions with word timing.
 
@@ -106,7 +118,8 @@ How often word timing is available varies by song. In a sample of ten popular so
 
 - Singline has no account, no telemetry and no analytics.
 - The only network requests go to LRCLIB, sending the title, artist, album and duration of the song you are playing. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
-- Your settings are stored in `settings.json`. The cache, your timing corrections and your own lyrics are stored in `singline.sqlite`. Deleting these files resets Singline.
+- Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
+- Your settings are stored in `settings.json`. The cache, your timing corrections, your own lyrics and your listening history are stored in `singline.sqlite`. Deleting these files resets Singline.
 
 | System | Location |
 |---|---|
@@ -223,14 +236,17 @@ bash apps/desktop/e2e/linux-smoke.sh
 
 ## Roadmap
 
+**Done recently**
+
+- Your own lyrics with LRC import and an editor with a timestamp key
+- The mini-player with seek bar, chorus markers and jumping to a line, cover art, scrolling lines and an estimated word highlight
+- Sleep timer, hiding the overlay while nothing plays, and listening statistics
+
 **In progress**
 
-- Your own lyrics: import LRC files and write them in an editor with a timestamp key
-- Mini-player on hover: previous, play/pause, next, a seek bar, click a line to jump to it, chorus markers and cover art
-- Estimated word highlight for line-synced lyrics, scrolling lines and smooth song changes
-- Sleep timer, hiding the overlay while nothing plays, and listening statistics
+- Settings in the glass design of the native macOS app
 - Spotify connection for True Shuffle, liking songs and your top lists (requires Spotify Premium)
-- A browser extension for web players on every system: YouTube Music, Amazon Music, Apple Music, Spotify, Tidal and Deezer
+- Web players on every system, including YouTube Music in a background tab on macOS
 
 **Later**
 

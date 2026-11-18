@@ -1,7 +1,10 @@
 //! Finding lyrics for a track: your own lyrics first, then the local cache,
-//! then LRCLIB.
+//! then LRCLIB. For Sing to find, [`search`] finds songs by words of their
+//! lyrics, through [`genius`].
 
+pub mod genius;
 pub mod lrclib;
+pub mod search;
 pub mod store;
 
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -9,7 +12,9 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use lyrics_core::{lrc, Lyrics, SyncLevel};
 use serde::Serialize;
 
-pub use lrclib::{LookupError, LookupResult, LrclibClient, Query};
+pub use genius::GeniusClient;
+pub use lrclib::{LookupError, LookupResult, LrclibClient, Query, SongLookup};
+pub use search::{find_sung, SearchError, SongCandidate, SongSearch, SungMatch, SungSearch};
 pub use store::{ImportError, Store, StoreError, MAX_LYRICS_BYTES};
 
 const DAY: i64 = 24 * 60 * 60;
@@ -66,6 +71,14 @@ impl Default for LookupOptions {
             refresh: false,
         }
     }
+}
+
+/// The lyrics for a title and artist, with the length and album LRCLIB knows.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SongLyrics {
+    pub outcome: LyricsOutcome,
+    pub duration: Option<f64>,
+    pub album: Option<String>,
 }
 
 pub struct LyricsService {
@@ -128,6 +141,68 @@ impl LyricsService {
             Err(error) => LyricsOutcome::Failed {
                 message: error.to_string(),
             },
+        }
+    }
+}
+
+impl LyricsService {
+    /// The lyrics for a song known only by title and artist, such as one
+    /// someone sang: your own lyrics under `track_key` first, then the cache,
+    /// then LRCLIB.
+    pub async fn song_lyrics(
+        &self,
+        track_key: &str,
+        title: &str,
+        artist: &str,
+        options: LookupOptions,
+    ) -> SongLyrics {
+        let answer = |outcome| SongLyrics {
+            outcome,
+            duration: None,
+            album: None,
+        };
+        if let Some(lyrics) = self.local(track_key) {
+            return answer(LyricsOutcome::Local { lyrics });
+        }
+        if !options.online {
+            return answer(LyricsOutcome::LocalOnly);
+        }
+        let key = format!(
+            "lrclib-song:{}\u{1f}{}",
+            lyrics_core::matching::normalized(title),
+            lyrics_core::matching::normalized(artist)
+        );
+        let now = store::unix_now();
+        let cached = if options.refresh {
+            None
+        } else {
+            self.store().cached::<SongLookup>(&key, now)
+        };
+        let found = match cached {
+            Some(found) => found,
+            None => match self.client.find_song(title, artist).await {
+                Ok(found) => {
+                    let expires_at = now + lifetime(&found.result);
+                    let _ = self.store().store_cached(&key, &found, now, expires_at);
+                    found
+                }
+                Err(LookupError::Offline) => return answer(LyricsOutcome::Offline),
+                Err(LookupError::RateLimited { retry_after }) => {
+                    return answer(LyricsOutcome::RateLimited {
+                        retry_after_secs: retry_after.as_secs().max(1),
+                    })
+                }
+                Err(error) => {
+                    return answer(LyricsOutcome::Failed {
+                        message: error.to_string(),
+                    })
+                }
+            },
+        };
+        SongLyrics {
+            outcome: outcome(found.result),
+            duration: found.duration,
+            album: found.album,
         }
     }
 }

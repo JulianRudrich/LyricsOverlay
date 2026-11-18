@@ -51,6 +51,26 @@ pub enum LookupResult {
     NotFound,
 }
 
+/// What [`LrclibClient::find_song`] found, with the length and album of the
+/// version it chose.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SongLookup {
+    pub result: LookupResult,
+    pub duration: Option<f64>,
+    pub album: Option<String>,
+}
+
+impl SongLookup {
+    fn not_found() -> Self {
+        Self {
+            result: LookupResult::NotFound,
+            duration: None,
+            album: None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum LookupError {
     #[error("no internet connection")]
@@ -171,6 +191,58 @@ impl LrclibClient {
             .map_or(LookupResult::NotFound, |lyrics| LookupResult::Found {
                 lyrics,
             }))
+    }
+
+    /// The best lyrics for a title and artist when the length of the song is
+    /// unknown, as for a song someone sang: synced lyrics first, from the
+    /// version most records agree on, preferring word timing.
+    pub async fn find_song(&self, title: &str, artist: &str) -> Result<SongLookup, LookupError> {
+        let (title, artist) = (title.trim(), artist.trim());
+        if title.is_empty() || artist.is_empty() {
+            return Ok(SongLookup::not_found());
+        }
+        let records = self.search(title, artist).await?;
+        let same: Vec<&LyricsRecord> = records
+            .iter()
+            .filter(|record| matching::same_song(record, title, artist))
+            .collect();
+        let synced: Vec<&LyricsRecord> = same
+            .iter()
+            .copied()
+            .filter(|record| record.has_synced_text())
+            .collect();
+        let chosen = most_common(&synced).or_else(|| {
+            let plain: Vec<&LyricsRecord> = same
+                .iter()
+                .copied()
+                .filter(|record| {
+                    record
+                        .plain_lyrics
+                        .as_deref()
+                        .is_some_and(|text| !text.trim().is_empty())
+                })
+                .collect();
+            most_common(&plain)
+        });
+        if let Some(record) = chosen {
+            if let Some(lyrics) = record.to_lyrics(record.duration) {
+                return Ok(SongLookup {
+                    result: LookupResult::Found { lyrics },
+                    duration: (record.duration > 0.0).then_some(record.duration),
+                    album: record
+                        .album_name
+                        .clone()
+                        .filter(|album| !album.trim().is_empty()),
+                });
+            }
+        }
+        if same.iter().any(|record| record.instrumental == Some(true)) {
+            return Ok(SongLookup {
+                result: LookupResult::Instrumental,
+                ..SongLookup::not_found()
+            });
+        }
+        Ok(SongLookup::not_found())
     }
 
     /// `/api/get`: the one record for this exact title, artist, album and duration.
@@ -317,6 +389,31 @@ fn best_synced<'a>(
             }
         })
         .map(|(_, _, record)| record)
+}
+
+/// The record whose length most others share, so an album version wins over
+/// a live cut or a radio edit; word timing breaks a tie, then the order given.
+fn most_common<'a>(records: &[&'a LyricsRecord]) -> Option<&'a LyricsRecord> {
+    let support = |record: &LyricsRecord| {
+        records
+            .iter()
+            .filter(|other| (other.duration - record.duration).abs() <= EXACT_DURATION_TOLERANCE)
+            .count()
+    };
+    let word = |record: &LyricsRecord| {
+        record
+            .lyricsfile
+            .as_ref()
+            .is_some_and(|file| file.has_word_sync())
+    };
+    records.iter().copied().reduce(|best, record| {
+        let better = (support(record), word(record)) > (support(best), word(best));
+        if better {
+            record
+        } else {
+            best
+        }
+    })
 }
 
 fn same_album(record: &LyricsRecord, album: Option<&str>) -> bool {

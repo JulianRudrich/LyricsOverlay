@@ -42,7 +42,7 @@ Ported from the Swift code contributed from Linory:
 - [x] Estimated word highlight for line-synced lyrics, splitting long lines, scrolling lines and smooth song changes
 - [x] Settings in the glass design, sleep timer and listening statistics
 - [ ] Glass menu panel with the current song
-- [ ] Spotify connection with True Shuffle, liking songs and top lists
+- [x] Spotify connection with True Shuffle, liking songs and top lists
 - [ ] Homebrew
 
 ### Every player

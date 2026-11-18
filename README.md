@@ -36,6 +36,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Your own lyrics.** Import an LRC file, or paste the lyrics into the editor and set each line's timestamp with a key press while the song plays. Your lyrics always win.
 - **Your music.** Listening time, plays, your daily streak, skips, a listening clock, and your most played songs and artists, from every player, kept only on your device.
 - **Sleep timer and auto-hide.** Pause the music after 15 to 60 minutes or at the end of the song, and let the overlay disappear while nothing plays.
+- **Spotify extras, if you want them.** Connect your own Spotify app to like the current song with ♥, see your top artists and tracks, and use **True Shuffle**: an honest random order through your Liked Songs, playlists and mixes in which nothing repeats until everything has played. Needs Spotify Premium.
 - **Works offline.** Lyrics are cached on your device, so songs you have heard before work without a connection.
 - **Private.** No account, no tracking, no analytics. Only the song's title, artist, album and duration leave your computer, to look up lyrics, and you can turn that off.
 - **English and German**, following your system language.
@@ -91,7 +92,7 @@ Then pair it once: Settings → General → **Browser extension** shows a six-di
 
 ### The native macOS app
 
-[`apps/macos`](apps/macos) contains the original macOS app, written in Swift, with the features contributed from Linory. It remains available until Singline has all of them on every system; what is still missing is the Spotify connection with True Shuffle. See its [README](apps/macos/README.md).
+[`apps/macos`](apps/macos) contains the original macOS app, written in Swift, with the features contributed from Linory. It remains available until Singline has been tested on every system. See its [README](apps/macos/README.md).
 
 ## Using Singline
 
@@ -113,6 +114,9 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Add your own lyrics | Settings → Song & timing → **Import LRC…** or **Edit lyrics…** |
 | Set a timestamp in the editor | Press **Ctrl+Shift+T** (**⌘⇧T** on macOS) while the line is sung |
 | Pause the music later | Tray menu → **Sleep timer** |
+| Connect Spotify | Settings → **Spotify**: follow the four steps, then press **Connect Spotify** |
+| Like the current song | Click ♥ next to the controls (Spotify connected) |
+| Start True Shuffle | Tray menu → **True Shuffle…** |
 | See your listening statistics | Tray menu → **Your music…** |
 | Hide the overlay while nothing plays | Settings → General → **Hide when nothing is playing** |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |
@@ -134,6 +138,7 @@ How often word timing is available varies by song. In a sample of ten popular so
 - The only network requests go to LRCLIB, sending the title, artist, album and duration of the song you are playing. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
 - The browser extension talks only to Singline on your own computer (`127.0.0.1`), and only after you paired it. Web pages and other programs without the pairing are refused.
 - Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
+- The Spotify connection is optional. It uses your own Spotify app, keeps the login in the system's credential store (Keychain, Credential Manager or Secret Service), and talks to Spotify only while you are connected.
 - Your settings are stored in `settings.json`. The cache, your timing corrections, your own lyrics and your listening history are stored in `singline.sqlite`. Deleting these files resets Singline.
 
 | System | Location |
@@ -147,6 +152,8 @@ How often word timing is available varies by song. In a sample of ten popular so
 **macOS says to allow access in System Settings.** Singline asks Spotify and Music for the current song through Apple Events. Turn on Singline under **System Settings → Privacy & Security → Automation**.
 
 **The lyrics are early or late.** Correct the song with −0.25 / +0.25. If every song is off by the same amount, which is typical for Bluetooth headphones, use the global correction instead.
+
+**Spotify cannot connect.** Check that the redirect URI in your Spotify app is exactly `http://127.0.0.1:43821/callback`, and that no other app uses port 43821. Spotify only lets accounts with Premium use apps in development mode.
 
 **No lyrics found.** LRCLIB does not know the song yet, or knows it only without timing. Click the retry button to search again later.
 
@@ -245,6 +252,7 @@ bash apps/desktop/e2e/linux-youtube.sh
 | `SINGLINE_DATA_DIR` | Keeps settings and data in this folder instead of the system location |
 | `SINGLINE_LRCLIB_URL` | Uses another LRCLIB server, for example a local test server |
 | `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks |
+| `SINGLINE_SPOTIFY_ACCOUNTS_URL`, `SINGLINE_SPOTIFY_API_URL` | Use other Spotify servers, for example local test servers |
 
 ### Project structure
 
@@ -252,6 +260,7 @@ bash apps/desktop/e2e/linux-youtube.sh
 |---|---|
 | [`crates/lyrics-core`](crates/lyrics-core) | Lyrics logic without input or output: LRC and Lyricsfile parsing with word timing, matching, the playback clock, choosing a player |
 | [`crates/media-session`](crates/media-session) | Reading and controlling players through MPRIS, the Windows media controls and AppleScript, plus `singline-watch` |
+| [`crates/spotify-connect`](crates/spotify-connect) | The optional Spotify connection: login, Web API client and True Shuffle |
 | [`crates/lyrics-providers`](crates/lyrics-providers) | The LRCLIB client and the SQLite store for your own lyrics, corrections and the cache |
 | [`apps/desktop`](apps/desktop) | The Singline app: Tauri and Rust in `src-tauri`, the Svelte interface in `src`, the end-to-end test in `e2e` |
 | [`extensions/browser`](extensions/browser) | The browser extension for web players, for Chrome, Edge and Firefox |
@@ -267,10 +276,11 @@ bash apps/desktop/e2e/linux-youtube.sh
 - Sleep timer, hiding the overlay while nothing plays, and listening statistics
 - Settings in the glass design of the native macOS app, with a sidebar
 - YouTube Music and other web players on every system through the browser extension
+- Spotify connection for True Shuffle, liking songs and your top lists
 
 **In progress**
 
-- Spotify connection for True Shuffle, liking songs and your top lists (requires Spotify Premium)
+- A glass menu panel from the tray icon with the current song, and a configurable shortcut
 - The browser extension in the Chrome Web Store and on Firefox Add-ons
 
 **Later**

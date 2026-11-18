@@ -31,7 +31,7 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Controls and a seek bar with times | ✅ | 🧪 | 🧪 | macOS: hover while the app is inactive needs checking |
 | Jumping to a line by clicking it | ✅ | 🧪 | 🧪 | |
 | Chorus markers | ✅ | 🧪 | 🧪 | |
-| ♥ (Spotify) | ⬜ | ⬜ | ⬜ | Needs the Spotify connection |
+| ♥ (Spotify) | ✅ | ⬜ | 🧪 | Windows does not report Spotify's track IDs |
 | Open in Spotify | ⬜ | ⬜ | ⬜ | |
 
 ## Sync and lyrics
@@ -69,7 +69,7 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Tray menu | 🧪 | 🧪 | 🧪 | Linory: glass panel with the current song (planned) |
 | Sleep timer | 🧪 | 🧪 | 🧪 | |
 | Listening statistics | ✅ | 🧪 | 🧪 | For every player |
-| Spotify connection, True Shuffle and top lists | ⬜ | ⬜ | ⬜ | In progress |
+| Spotify connection, True Shuffle and top lists | ✅ | 🧪 | 🧪 | Linux tested against a simulated Spotify |
 | Installers | ⬜ | 🧪 | 🧪 | CI builds .exe, .msi and .dmg |
 | Homebrew | — | — | ⬜ | |
 | Automatic updates | ⬜ | ⬜ | ⬜ | |

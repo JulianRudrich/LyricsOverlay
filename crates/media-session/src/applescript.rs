@@ -327,17 +327,76 @@ fn capabilities() -> Capabilities {
     }
 }
 
+/// Runs a program and returns its standard output, killing it after `timeout`.
+///
+/// Both pipes are read on their own threads while the program runs: `ps`
+/// lists hundreds of processes on a busy Mac, more than a pipe holds, and a
+/// program that cannot write blocks until someone reads.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+fn run(program: &str, args: &[&str], timeout: std::time::Duration) -> Result<String, String> {
+    use std::io::Read;
+    use std::process::{Command as Process, Stdio};
+    use std::thread;
+
+    let mut child = Process::new(program)
+        .args(args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|error| error.to_string())?;
+    let read = |pipe: Option<Box<dyn Read + Send>>| {
+        thread::spawn(move || {
+            let mut text = Vec::new();
+            if let Some(mut pipe) = pipe {
+                let _ = pipe.read_to_end(&mut text);
+            }
+            String::from_utf8_lossy(&text).into_owned()
+        })
+    };
+    let stdout = read(
+        child
+            .stdout
+            .take()
+            .map(|pipe| Box::new(pipe) as Box<dyn Read + Send>),
+    );
+    let stderr = read(
+        child
+            .stderr
+            .take()
+            .map(|pipe| Box::new(pipe) as Box<dyn Read + Send>),
+    );
+    let deadline = Instant::now() + timeout;
+    let status = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break status,
+            Ok(None) if Instant::now() >= deadline => {
+                // The readers end by themselves once the pipes close; waiting
+                // for them could hang on a grandchild that keeps a pipe open.
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err("timed out".into());
+            }
+            Ok(None) => thread::sleep(std::time::Duration::from_millis(10)),
+            Err(error) => return Err(error.to_string()),
+        }
+    };
+    let output = stdout.join().unwrap_or_default();
+    if status.success() {
+        return Ok(output);
+    }
+    let message = stderr.join().unwrap_or_default();
+    Err(format!("{status}: {}", message.trim()))
+}
+
 #[cfg(target_os = "macos")]
 pub use runner::AppleScriptBackend;
 
 #[cfg(target_os = "macos")]
 mod runner {
-    use std::io::Read;
-    use std::process::{Command as Process, Stdio};
-    use std::thread;
     use std::time::{Duration, Instant};
 
-    use super::{command_script, parse_output, read_script, running_players, MacPlayer};
+    use super::{command_script, parse_output, read_script, run, running_players, MacPlayer};
     use crate::backend::{Backend, CommandError};
     use crate::model::{Command, PlayerId, Problem, Reading};
 
@@ -415,49 +474,51 @@ mod runner {
             self.last_error.clone()
         }
     }
-
-    /// Runs a program and returns its standard output, killing it after `timeout`.
-    fn run(program: &str, args: &[&str], timeout: Duration) -> Result<String, String> {
-        let mut child = Process::new(program)
-            .args(args)
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|error| error.to_string())?;
-        let deadline = Instant::now() + timeout;
-        loop {
-            match child.try_wait().map_err(|error| error.to_string())? {
-                Some(status) => {
-                    let mut output = String::new();
-                    if let Some(mut stdout) = child.stdout.take() {
-                        stdout
-                            .read_to_string(&mut output)
-                            .map_err(|error| error.to_string())?;
-                    }
-                    if status.success() {
-                        return Ok(output);
-                    }
-                    let mut message = String::new();
-                    if let Some(mut stderr) = child.stderr.take() {
-                        let _ = stderr.read_to_string(&mut message);
-                    }
-                    return Err(format!("{status}: {}", message.trim()));
-                }
-                None if Instant::now() >= deadline => {
-                    let _ = child.kill();
-                    let _ = child.wait();
-                    return Err("timed out".into());
-                }
-                None => thread::sleep(Duration::from_millis(10)),
-            }
-        }
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn run_reads_output_larger_than_a_pipe() {
+        // About 1 MB, far more than a pipe buffer: the old helper hung here.
+        let output = run(
+            "/bin/sh",
+            &[
+                "-c",
+                "yes /Applications/Spotify.app/Contents/MacOS/Spotify | head -n 20000",
+            ],
+            std::time::Duration::from_secs(20),
+        )
+        .expect("the program finishes");
+        assert_eq!(output.lines().count(), 20_000);
+        assert_eq!(running_players(&output), [MacPlayer::Spotify]);
+    }
+
+    #[test]
+    fn run_stops_a_program_that_takes_too_long() {
+        let started = Instant::now();
+        let error = run(
+            "/bin/sh",
+            &["-c", "sleep 5"],
+            std::time::Duration::from_millis(200),
+        )
+        .unwrap_err();
+        assert_eq!(error, "timed out");
+        assert!(started.elapsed() < std::time::Duration::from_secs(3));
+    }
+
+    #[test]
+    fn run_reports_why_a_program_failed() {
+        let error = run(
+            "/bin/sh",
+            &["-c", "echo not allowed >&2; exit 3"],
+            std::time::Duration::from_secs(5),
+        )
+        .unwrap_err();
+        assert!(error.ends_with("not allowed"), "{error}");
+    }
 
     fn record(fields: &[&str]) -> String {
         fields.join(&FIELD.to_string())

@@ -480,6 +480,8 @@ mod runner {
 mod tests {
     use super::*;
 
+    // These run a shell, which Windows does not have; the helper only runs on macOS.
+    #[cfg(unix)]
     #[test]
     fn run_reads_output_larger_than_a_pipe() {
         // About 1 MB, far more than a pipe buffer: the old helper hung here.
@@ -496,6 +498,7 @@ mod tests {
         assert_eq!(running_players(&output), [MacPlayer::Spotify]);
     }
 
+    #[cfg(unix)]
     #[test]
     fn run_stops_a_program_that_takes_too_long() {
         let started = Instant::now();
@@ -509,6 +512,7 @@ mod tests {
         assert!(started.elapsed() < std::time::Duration::from_secs(3));
     }
 
+    #[cfg(unix)]
     #[test]
     fn run_reports_why_a_program_failed() {
         let error = run(

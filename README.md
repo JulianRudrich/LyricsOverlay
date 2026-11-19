@@ -11,7 +11,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-111111)](LICENSE)
 ![Windows, macOS and Linux](https://img.shields.io/badge/platforms-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-111111)
 
-<img src="docs/images/demo.gif" width="770" alt="Singline playing a song: the lines scroll up, each word lights up as it is sung, three dots breathe during a break, and the mini-player slides in when the pointer moves over the overlay">
+<img src="docs/images/demo.gif" width="770" alt="Singline playing Lady of Namek by Tory Lanez: the lines scroll up, each word lights up as it is sung, and the mini-player with chorus markers slides in when the pointer moves over the overlay">
 
 </div>
 

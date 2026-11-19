@@ -4,6 +4,7 @@
   import { translator } from "../lib/i18n";
   import { paneIn } from "../lib/motion";
   import type { AppInfo, HotkeyError, LyricsView, Playback, Settings } from "../lib/types";
+  import Glyph from "../lib/ui/Glyph.svelte";
   import Sidebar from "../lib/ui/Sidebar.svelte";
   import { panes, type PaneContext } from "./panes";
 
@@ -19,6 +20,7 @@
   const language = $derived(app?.language ?? "en");
   const t = $derived(translator(language));
   const pane = $derived(panes.find((entry) => entry.id === selected) ?? panes[0]);
+  const mac = $derived(app?.platform === "macos");
 
   $effect(() => {
     document.title = t("settings.title");
@@ -71,6 +73,15 @@
     },
   };
 
+  // ⌘Q or Ctrl+Q quits, as in the tray menu. A shortcut being recorded keeps the keys.
+  function keydown(event: KeyboardEvent) {
+    const command = mac ? event.metaKey : event.ctrlKey;
+    if (event.defaultPrevented || !command || event.shiftKey || event.altKey) return;
+    if (event.key.toLowerCase() !== "q") return;
+    event.preventDefault();
+    void api.quit();
+  }
+
   function select(id: string) {
     if (id === selected) return;
     selected = id;
@@ -103,6 +114,8 @@
   });
 </script>
 
+<svelte:window onkeydown={keydown} />
+
 {#if settings && app && pane}
   <!-- Like the macOS app, the window moves when dragged anywhere but on a control. -->
   <main class="window" data-tauri-drag-region="deep">
@@ -114,7 +127,20 @@
       label={t("settings.sections")}
       panel="settings-pane"
       onselect={select}
-    />
+    >
+      {#snippet footer()}
+        <button
+          type="button"
+          class="quit"
+          aria-keyshortcuts={mac ? "Meta+Q" : "Control+Q"}
+          title={mac ? "⌘Q" : "Ctrl+Q"}
+          onclick={() => api.quit()}
+        >
+          <Glyph name="power" size={16} />
+          <span>{t("settings.quit")}</span>
+        </button>
+      {/snippet}
+    </Sidebar>
     <div class="content" id="settings-pane" role="tabpanel" aria-labelledby="tab-{pane.id}" bind:this={content}>
       {#key pane.id}
         <div use:paneIn={switched}>
@@ -206,6 +232,42 @@
 
   header {
     margin-bottom: 20px;
+  }
+
+  /* Like a section in the sidebar, only quieter. */
+  .quit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: rgb(255 255 255 / 0.5);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    cursor: default;
+    transition:
+      color var(--duration-press) var(--ease-out),
+      background-color var(--duration-press) var(--ease-out),
+      transform var(--duration-press) var(--ease-out);
+  }
+
+  .quit:hover {
+    color: rgb(255 255 255 / 0.85);
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  .quit:active {
+    transform: scale(var(--press-scale-subtle));
+  }
+
+  .quit:focus-visible {
+    outline: 2px solid rgb(255 255 255 / 0.7);
+    outline-offset: -2px;
   }
 
   h1 {

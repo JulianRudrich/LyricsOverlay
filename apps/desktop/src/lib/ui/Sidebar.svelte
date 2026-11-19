@@ -9,6 +9,7 @@
 </script>
 
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import Glyph from "./Glyph.svelte";
   import Mark from "./Mark.svelte";
   import { glide } from "./glide";
@@ -23,6 +24,7 @@
     label,
     panel,
     onselect,
+    footer,
   }: {
     title: string;
     caption: string;
@@ -32,6 +34,8 @@
     /** The id of the element the items switch. */
     panel: string;
     onselect: (id: string) => void;
+    /** At the bottom, below the items. */
+    footer?: Snippet;
   } = $props();
 
   const index = $derived(items.findIndex((item) => item.id === selected));
@@ -82,6 +86,9 @@
       </button>
     {/each}
   </div>
+  {#if footer}
+    <div class="footer">{@render footer()}</div>
+  {/if}
 </nav>
 
 <style>
@@ -112,6 +119,11 @@
   .caption {
     font-size: 11px;
     color: rgb(255 255 255 / 0.5);
+  }
+
+  .footer {
+    margin-top: auto;
+    padding-bottom: 14px;
   }
 
   .items {

@@ -64,6 +64,7 @@
   "karaoke.timing": "Timing für diesen Song: {value}",
   "settings.title": "Singline – Einstellungen",
   "settings.sections": "Bereiche",
+  "settings.quit": "Singline beenden",
   "settings.general": "Allgemein",
   "settings.generalSubtitle": "Player, Start, Sprache und Tastenkürzel.",
   "settings.appearance": "Ansicht",

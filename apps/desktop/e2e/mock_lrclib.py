@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""A pretend LRCLIB for the Linux end-to-end check.
+"""A pretend LRCLIB for the Linux end-to-end checks.
 
-Answers /api/get and /api/search for one song whose synced lyrics have one line
-per second ("Line 0", "Line 1", ...), so the line the overlay shows tells the
-playback time it believes in. Every request is logged to stderr.
+Answers /api/get and /api/search for "Paper Lanterns", whose synced lyrics have
+one line per second ("Line 0", "Line 1", ...), so the line the overlay shows
+tells the playback time it believes in. For Sing to find it also knows
+"Morning Harbor", with real lines every four seconds, and a decoy that shares
+some of its words. Every request is logged to stderr.
 """
 
 import json
@@ -28,6 +30,43 @@ RECORD = {
     "syncedLyrics": SYNCED,
 }
 
+# The song sung in linux-sing.sh, one line every four seconds.
+HARBOR_LINES = [
+    "",
+    "The river carries every name we gave the summer",
+    "Paper boats are sailing past the silent harbor",
+    "I can hear the morning calling from the mountain",
+    "Every window opens when the swallows come home",
+    "Hold the lantern higher so the travelers find us",
+    "We will sing until the valley answers back",
+    "Golden fields are waiting on the other side",
+    "Nobody remembers how the story started",
+    "But the morning keeps on calling from the mountain",
+    "And the river carries every name we gave",
+    "",
+]
+DECOY_LINES = ["Good morning to the city", "The mountain is calling me", "Every morning I can hear the traffic"]
+
+
+def record(number, title, artist, album, duration, lines, spacing):
+    synced = "\n".join(f"[{int(i * spacing) // 60:02d}:{int(i * spacing) % 60:02d}.00]{line}" for i, line in enumerate(lines))
+    return {
+        "id": number,
+        "trackName": title,
+        "artistName": artist,
+        "albumName": album,
+        "duration": duration,
+        "instrumental": False,
+        "plainLyrics": None,
+        "syncedLyrics": synced,
+    }
+
+
+SEARCHABLE = [
+    record(2, "Morning Harbor", ARTIST, "Harbor Songs", 60, HARBOR_LINES, 4),
+    record(3, "City Morning", "Decoy Band", "Traffic", 30, DECOY_LINES, 4),
+]
+
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -38,7 +77,8 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/api/get":
             self.reply(200 if known else 404, RECORD if known else {"code": 404, "name": "TrackNotFound"})
         elif url.path == "/api/search":
-            self.reply(200, [RECORD] if known else [])
+            others = [r for r in SEARCHABLE if (r["trackName"], r["artistName"]) == (query.get("track_name"), query.get("artist_name"))]
+            self.reply(200, [RECORD] if known else others)
         else:
             self.reply(404, {"code": 404})
 

@@ -298,8 +298,9 @@ fn karaoke_home(app: &AppHandle) -> Option<Monitor> {
 }
 
 /// Opens karaoke fullscreen on `display` (an id from `karaoke_displays`) or
-/// where the overlay is; when it is open, it moves to that display. Nothing
-/// else hides. On Windows, call this from an async command or another thread.
+/// where the overlay is; when it is open, it moves to that display. The
+/// overlay steps aside on the same display. On Windows, call this from an async
+/// command or another thread.
 pub fn open_karaoke(app: &AppHandle, display: Option<&str>) {
     let chosen = display.and_then(|id| {
         app.available_monitors()
@@ -313,6 +314,8 @@ pub fn open_karaoke(app: &AppHandle, display: Option<&str>) {
         }
         let _ = window.show();
         let _ = window.set_focus();
+        let current = chosen.or_else(|| window.current_monitor().ok().flatten());
+        make_room_for_karaoke(app, current.as_ref());
         return;
     }
     let monitor = chosen.or_else(|| karaoke_home(app));
@@ -342,6 +345,7 @@ pub fn open_karaoke(app: &AppHandle, display: Option<&str>) {
                 }
             }
             let _ = window.set_focus();
+            make_room_for_karaoke(app, monitor.as_ref());
         }
         Err(error) => eprintln!("could not open karaoke: {error}"),
     }
@@ -374,7 +378,23 @@ pub fn close_karaoke(app: &AppHandle) {
         #[cfg(target_os = "macos")]
         let _ = window.set_simple_fullscreen(false);
         let _ = window.close();
+        let visible = app.state::<AppState>().settings().overlay_visible;
+        set_overlay_visible(app, visible);
     }
+}
+
+/// The overlay stays on top of everything, so on the display karaoke fills it
+/// steps aside until karaoke closes or moves on. Its setting stays as it is.
+fn make_room_for_karaoke(app: &AppHandle, karaoke: Option<&Monitor>) {
+    let Some(overlay) = app.get_webview_window(OVERLAY) else {
+        return;
+    };
+    let shared = match (karaoke, overlay.current_monitor().ok().flatten()) {
+        (Some(karaoke), Some(own)) => karaoke.position() == own.position(),
+        _ => true,
+    };
+    let visible = app.state::<AppState>().settings().overlay_visible;
+    set_overlay_visible(app, visible && !shared);
 }
 
 /// Behind the settings where the system offers no glass; the page paints the same.

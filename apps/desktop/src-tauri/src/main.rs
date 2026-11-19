@@ -383,6 +383,10 @@ fn main() {
                 event: tauri::WindowEvent::Destroyed,
                 ..
             } => dock::update(app, &label, true),
+            // Opening the app again from the Finder, Launchpad or the Dock, as
+            // a second launch does elsewhere.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { .. } => windows::reopen(app),
             _ => {}
         });
 }

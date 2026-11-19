@@ -3,6 +3,7 @@
   import { reveal } from "../lib/motion";
   import type { Layout } from "../lib/types";
   import Card from "../lib/ui/Card.svelte";
+  import Note from "../lib/ui/Note.svelte";
   import Segmented from "../lib/ui/Segmented.svelte";
   import Slider from "../lib/ui/Slider.svelte";
   import type { PaneContext } from "./panes";
@@ -12,6 +13,7 @@
   const settings = $derived(ctx.settings);
   const overlayOpacity = $derived(Math.round(settings.overlayOpacity * 100));
   const backgroundOpacity = $derived(Math.round(settings.backgroundOpacity * 100));
+  const karaokeScale = $derived(Math.round(settings.karaokeScale * 100));
 
   const layouts: Layout[] = ["caption", "focus", "context"];
 </script>
@@ -83,6 +85,19 @@
     </div>
   {/if}
 </Card>
+
+<Card>
+  <Slider
+    label={t("settings.karaokeScale")}
+    value={karaokeScale}
+    min={60}
+    max={160}
+    step={5}
+    display={t("unit.percent", { value: karaokeScale })}
+    onchange={(value) => ctx.update({ karaokeScale: value / 100 })}
+  />
+</Card>
+<Note>{t("settings.karaokeScaleHint")}</Note>
 
 <style>
   .field {

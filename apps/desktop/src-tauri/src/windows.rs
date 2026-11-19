@@ -1,5 +1,6 @@
-//! The overlay, settings and lyrics editor windows.
+//! The overlay, settings, lyrics editor and karaoke windows.
 
+use serde::Serialize;
 use tauri::utils::config::WindowEffectsConfig;
 use tauri::window::Color;
 use tauri::{
@@ -15,6 +16,7 @@ pub const SETTINGS: &str = "settings";
 pub const EDITOR: &str = "editor";
 pub const STATS: &str = "stats";
 pub const SHUFFLE: &str = "shuffle";
+pub const KARAOKE: &str = "karaoke";
 
 /// Distance from the screen edge, in logical pixels.
 const MARGIN: f64 = 16.0;
@@ -113,6 +115,15 @@ pub fn toggle_overlay(app: &AppHandle) {
     let state = app.state::<AppState>();
     let visible = !state.settings().overlay_visible;
     state.update_settings(app, |settings| settings.overlay_visible = visible);
+}
+
+/// The shortcut shows or hides the overlay; while karaoke is open, it leaves karaoke.
+pub fn shortcut_pressed(app: &AppHandle) {
+    if app.get_webview_window(KARAOKE).is_some() {
+        close_karaoke(app);
+    } else {
+        toggle_overlay(app);
+    }
 }
 
 pub fn move_to_corner(app: &AppHandle, corner: Corner) {
@@ -227,6 +238,142 @@ pub fn open_shuffle(app: &AppHandle) {
             .build();
     if let Err(error) = built {
         eprintln!("could not open True Shuffle: {error}");
+    }
+}
+
+/// A display karaoke can fill, as its chooser lists it.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KaraokeDisplay {
+    /// The top-left corner in physical pixels, which tells displays apart while they are connected.
+    pub id: String,
+    pub name: Option<String>,
+    /// Logical pixels.
+    pub width: f64,
+    pub height: f64,
+    /// Karaoke is on this display, or opens there.
+    pub current: bool,
+}
+
+/// The displays, from left to right, marking the one karaoke is on or would open on.
+pub fn karaoke_displays(app: &AppHandle) -> Vec<KaraokeDisplay> {
+    let home = karaoke_home(app).map(|monitor| display_id(&monitor));
+    let mut monitors = app.available_monitors().unwrap_or_default();
+    monitors.sort_by_key(|monitor| (monitor.position().x, monitor.position().y));
+    monitors
+        .iter()
+        .map(|monitor| {
+            let size = monitor.size().to_logical::<f64>(monitor.scale_factor());
+            let id = display_id(monitor);
+            KaraokeDisplay {
+                current: home.as_deref() == Some(id.as_str()),
+                name: monitor.name().and_then(|name| display_name(name)),
+                width: size.width,
+                height: size.height,
+                id,
+            }
+        })
+        .collect()
+}
+
+fn display_id(monitor: &Monitor) -> String {
+    let position = monitor.position();
+    format!("{},{}", position.x, position.y)
+}
+
+/// The system's name for a display, without the device prefix Windows puts before it.
+fn display_name(name: &str) -> Option<String> {
+    let name = name.trim_start_matches(r"\\.\").trim();
+    (!name.is_empty()).then(|| name.to_owned())
+}
+
+/// Where karaoke is, or else where the overlay is, or else the main display.
+fn karaoke_home(app: &AppHandle) -> Option<Monitor> {
+    [KARAOKE, OVERLAY]
+        .into_iter()
+        .filter_map(|label| app.get_webview_window(label))
+        .find_map(|window| window.current_monitor().ok().flatten())
+        .or_else(|| app.primary_monitor().ok().flatten())
+        .or_else(|| app.available_monitors().ok()?.into_iter().next())
+}
+
+/// Opens karaoke fullscreen on `display` (an id from `karaoke_displays`) or
+/// where the overlay is; when it is open, it moves to that display. Nothing
+/// else hides. On Windows, call this from an async command or another thread.
+pub fn open_karaoke(app: &AppHandle, display: Option<&str>) {
+    let chosen = display.and_then(|id| {
+        app.available_monitors()
+            .ok()?
+            .into_iter()
+            .find(|monitor| display_id(monitor) == id)
+    });
+    if let Some(window) = app.get_webview_window(KARAOKE) {
+        if let Some(monitor) = &chosen {
+            fill(&window, monitor);
+        }
+        let _ = window.show();
+        let _ = window.set_focus();
+        return;
+    }
+    let monitor = chosen.or_else(|| karaoke_home(app));
+    let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
+        .get("karaoke.title");
+    let mut builder =
+        WebviewWindowBuilder::new(app, KARAOKE, WebviewUrl::App("index.html#/karaoke".into()))
+            .title(title)
+            .decorations(false)
+            .theme(Some(Theme::Dark))
+            .background_color(Color(0, 0, 0, 255))
+            .focused(true);
+    if let Some(monitor) = &monitor {
+        let scale = monitor.scale_factor();
+        let position = monitor.position().to_logical::<f64>(scale);
+        let size = monitor.size().to_logical::<f64>(scale);
+        builder = builder
+            .position(position.x, position.y)
+            .inner_size(size.width, size.height);
+    }
+    match builder.build() {
+        Ok(window) => {
+            match &monitor {
+                Some(monitor) => fill(&window, monitor),
+                None => {
+                    let _ = window.set_fullscreen(true);
+                }
+            }
+            let _ = window.set_focus();
+        }
+        Err(error) => eprintln!("could not open karaoke: {error}"),
+    }
+}
+
+/// Fills `monitor` with the karaoke window: macOS gets the simple fullscreen,
+/// which needs no Space of its own, the others fullscreen on that display.
+/// The window takes the display's place and size first, for window managers
+/// without fullscreen.
+fn fill(window: &WebviewWindow, monitor: &Monitor) {
+    let position = *monitor.position();
+    #[cfg(target_os = "macos")]
+    let _ = window.set_simple_fullscreen(false);
+    #[cfg(not(target_os = "macos"))]
+    let _ = window.set_fullscreen(false);
+    let _ = window.set_position(position);
+    let _ = window.set_size(*monitor.size());
+    #[cfg(target_os = "macos")]
+    let _ = window.set_simple_fullscreen(true);
+    #[cfg(not(target_os = "macos"))]
+    let _ = window.set_fullscreen_on_monitor(tauri::PhysicalPosition::new(
+        f64::from(position.x),
+        f64::from(position.y),
+    ));
+}
+
+pub fn close_karaoke(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(KARAOKE) {
+        // Leaving the simple fullscreen first brings the menu bar and the Dock back.
+        #[cfg(target_os = "macos")]
+        let _ = window.set_simple_fullscreen(false);
+        let _ = window.close();
     }
 }
 
@@ -363,4 +510,16 @@ fn fits_on_a_monitor(app: &AppHandle, x: f64, y: f64, width: f64, height: f64) -
                 && y < top + area_height - 30.0
         })
         && height > 0.0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_names_lose_the_windows_device_prefix() {
+        assert_eq!(display_name(r"\\.\DISPLAY2").as_deref(), Some("DISPLAY2"));
+        assert_eq!(display_name("HDMI-1").as_deref(), Some("HDMI-1"));
+        assert_eq!(display_name(" "), None);
+    }
 }

@@ -3,10 +3,15 @@
   // instrumental break), breathing gently while the music plays.
   import { clamp } from "../lib/lyrics";
 
-  let { progress, size, breathing }: { progress: number; size: number; breathing: boolean } = $props();
+  let {
+    progress,
+    size,
+    breathing,
+    centered = false,
+  }: { progress: number; size: number; breathing: boolean; centered?: boolean } = $props();
 </script>
 
-<span class="dots" class:breathing style:height="{size * 1.2}px" style:gap="{size * 0.3}px" aria-hidden="true">
+<span class="dots" class:breathing class:centered style:height="{size * 1.2}px" style:gap="{size * 0.3}px" aria-hidden="true">
   {#each [0, 1, 2] as dot (dot)}
     <span
       class="dot"
@@ -29,6 +34,11 @@
 
   .breathing {
     animation-play-state: running;
+  }
+
+  /* Breathes from its middle where it stands centred, as in karaoke. */
+  .centered {
+    transform-origin: center;
   }
 
   .dot {

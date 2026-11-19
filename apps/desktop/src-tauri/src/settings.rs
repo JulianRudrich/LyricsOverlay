@@ -59,6 +59,8 @@ pub struct Settings {
     /// Top-left corner in logical pixels, once the overlay was moved.
     pub overlay_position: Option<[f64; 2]>,
     pub hotkey: String,
+    /// Karaoke's type size, as a factor of the size that fits its screen.
+    pub karaoke_scale: f64,
 }
 
 pub const DEFAULT_HOTKEY: &str = "Alt+Shift+L";
@@ -83,6 +85,7 @@ impl Default for Settings {
             auto_hide: false,
             overlay_position: None,
             hotkey: DEFAULT_HOTKEY.to_owned(),
+            karaoke_scale: 1.0,
         }
     }
 }
@@ -148,6 +151,7 @@ impl Settings {
         self.width = clamp(self.width, 260.0, 800.0, defaults.width).round();
         self.height = clamp(self.height, 160.0, 500.0, defaults.height).round();
         self.global_offset = (clamp(self.global_offset, -5.0, 5.0, 0.0) * 10.0).round() / 10.0;
+        self.karaoke_scale = (clamp(self.karaoke_scale, 0.6, 1.6, 1.0) * 20.0).round() / 20.0;
         self.overlay_position = self
             .overlay_position
             .filter(|[x, y]| x.is_finite() && y.is_finite());
@@ -176,9 +180,17 @@ mod tests {
     fn patches_only_known_fields_and_clamps_them() {
         let settings = Settings::default();
         let changed = settings
-            .merged(&json!({ "fontSize": 90, "globalOffset": 1.234, "unknown": true, "layout": "caption" }))
+            .merged(&json!({ "fontSize": 90, "globalOffset": 1.234, "unknown": true, "layout": "caption", "karaokeScale": 1.234 }))
             .expect("valid change");
         assert_eq!(changed.font_size, 44.0);
+        assert_eq!(changed.karaoke_scale, 1.25, "karaoke grows in steps of 5 %");
+        assert_eq!(
+            settings
+                .merged(&json!({ "karaokeScale": 9 }))
+                .expect("valid change")
+                .karaoke_scale,
+            1.6
+        );
         assert_eq!(changed.global_offset, 1.2);
         assert_eq!(changed.layout, Layout::Caption);
         assert_eq!(changed.overlay_size(), (420.0, 150.0));
@@ -236,6 +248,10 @@ mod tests {
         let loaded: Settings = serde_json::from_str(r#"{ "fontSize": 30 }"#).expect("valid");
         assert!(!loaded.auto_hide, "auto-hide starts off");
         assert!(loaded.keep_history, "the listening history starts on");
+        assert_eq!(
+            loaded.karaoke_scale, 1.0,
+            "karaoke starts at the size that fits"
+        );
         let changed = loaded
             .merged(&json!({ "autoHide": true, "keepHistory": false }))
             .expect("valid change");

@@ -21,7 +21,9 @@
     | "pointer"
     | "moon"
     | "chart"
-    | "chevronRight";
+    | "chevronRight"
+    | "mic"
+    | "display";
 </script>
 
 <script lang="ts">
@@ -72,6 +74,12 @@
     <path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" />
   {:else if name === "chart"}
     <path d="M4 20h16M7 16.5v-5M12 16.5V6.5M17 16.5v-8" />
+  {:else if name === "mic"}
+    <rect x="9" y="3" width="6" height="11" rx="3" />
+    <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" />
+  {:else if name === "display"}
+    <rect x="3" y="4" width="18" height="12" rx="2" />
+    <path d="M9 20h6M12 16v4" />
   {:else if name === "chevronRight"}
     <path d="m9.5 6 6 6-6 6" />
   {:else if name === "players"}

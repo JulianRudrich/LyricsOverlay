@@ -29,6 +29,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Word by word.** Every word lights up as it is sung, from real word timing where the lyrics have it and estimated from the line timing otherwise. Between two readings of the player the position keeps running, so the highlight moves smoothly.
 - **Lyrics in motion.** The lines scroll up as the song goes on, the next line grows into place, and breaks show three breathing dots. A new song fades in with its cover, title and artist.
 - **A mini-player on hover.** Previous, play/pause and next, a seek bar with elapsed and remaining time, and markers for the chorus. Click any line to jump there.
+- **Karaoke.** The lyrics fill a second screen or a TV, white on black: the current line lights up word by word, the next ones wait below it, breaks count down with three dots, and a long intro shows the cover, title and artist. Move the mouse for the controls.
 - **Three layouts.** One line, Focus or Context, with adjustable font size, opacity, background, width and height.
 - **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. It can let clicks pass through to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
 - **Timing you can correct.** If the lyrics run early or late, move them by a quarter of a second; Singline remembers the correction for that song. A global correction makes up for your audio setup, for example Bluetooth headphones.
@@ -123,6 +124,7 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Connect Spotify | Settings → **Spotify**: follow the four steps, then press **Connect Spotify** |
 | Like the current song | Click ♥ next to the controls (Spotify connected) |
 | Start True Shuffle | Tray menu → **True Shuffle…** |
+| Sing along on a big screen | Tray menu → **Karaoke**; pick another display in its controls. Space plays or pauses, ← / → jump 5 seconds, ↑ / ↓ move the lyrics by a quarter second, and Esc or the shortcut leaves |
 | See your listening statistics | Tray menu → **Your music…** |
 | Hide the overlay while nothing plays | Settings → General → **Hide when nothing is playing** |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |
@@ -257,7 +259,7 @@ bash apps/desktop/e2e/linux-youtube.sh
 |---|---|
 | `SINGLINE_DATA_DIR` | Keeps settings and data in this folder instead of the system location |
 | `SINGLINE_LRCLIB_URL` | Uses another LRCLIB server, for example a local test server |
-| `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks |
+| `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks. With it, `--karaoke` and `--menu-panel` open karaoke and the tray panel, at start or from a second launch |
 | `SINGLINE_SPOTIFY_ACCOUNTS_URL`, `SINGLINE_SPOTIFY_API_URL` | Use other Spotify servers, for example local test servers |
 
 ### Project structure

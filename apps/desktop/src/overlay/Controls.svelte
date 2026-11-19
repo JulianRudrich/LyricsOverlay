@@ -7,14 +7,19 @@
   import { slideIn } from "../lib/motion";
   import type { Capabilities } from "../lib/types";
 
-  let { capabilities, playing, t }: { capabilities: Capabilities; playing: boolean; t: Translate } = $props();
+  let {
+    capabilities,
+    playing,
+    t,
+    large = false,
+  }: { capabilities: Capabilities; playing: boolean; t: Translate; large?: boolean } = $props();
 
   function send(command: PlayerCommand) {
     void api.playerCommand(command);
   }
 </script>
 
-<div class="controls" transition:slideIn={{ reduced: prefersReducedMotion.current }}>
+<div class="controls" class:large transition:slideIn={{ reduced: prefersReducedMotion.current }}>
   {#if capabilities.previous}
     <button class="skip" onclick={() => send({ kind: "previous" })} title={t("player.previous")} aria-label={t("player.previous")}>
       <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
@@ -88,6 +93,31 @@
     stroke: currentColor;
     stroke-width: 1.6;
     stroke-linejoin: round;
+  }
+
+  /* For the karaoke bar. */
+  .large {
+    gap: 26px;
+  }
+
+  .large .skip {
+    width: 32px;
+    height: 32px;
+  }
+
+  .large .main {
+    width: 44px;
+    height: 44px;
+  }
+
+  .large .skip svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .large .main svg {
+    width: 30px;
+    height: 30px;
   }
 
   @media (prefers-reduced-motion: reduce) {

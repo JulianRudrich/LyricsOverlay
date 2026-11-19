@@ -5,6 +5,7 @@ import type {
   BridgeView,
   Corner,
   EditorState,
+  KaraokeDisplay,
   LyricsView,
   Playback,
   Settings,
@@ -40,6 +41,10 @@ export const api = {
   forgetBrowser: (id: string) => invoke<BridgeView>("forget_browser", { id }),
   openSettings: () => invoke<void>("open_settings"),
   openStats: () => invoke<void>("open_stats"),
+  /** Opens karaoke fullscreen, on the overlay's display or the one given; moves it there when open. */
+  openKaraoke: (display?: string) => invoke<void>("open_karaoke", { display: display ?? null }),
+  closeKaraoke: () => invoke<void>("close_karaoke"),
+  karaokeDisplays: () => invoke<KaraokeDisplay[]>("karaoke_displays"),
   quit: () => invoke<void>("quit"),
   /** Rejects with a HotkeyError name; the old shortcut then stays. */
   setHotkey: (hotkey: string) => invoke<Settings>("set_hotkey", { hotkey }),

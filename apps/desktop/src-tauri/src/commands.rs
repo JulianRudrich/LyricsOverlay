@@ -152,6 +152,22 @@ pub async fn open_stats(app: AppHandle) {
     windows::open_stats(&app);
 }
 
+/// Opens karaoke, or moves it to another display. Async, like `open_settings`.
+#[tauri::command]
+pub async fn open_karaoke(app: AppHandle, display: Option<String>) {
+    windows::open_karaoke(&app, display.as_deref());
+}
+
+#[tauri::command]
+pub fn close_karaoke(app: AppHandle) {
+    windows::close_karaoke(&app);
+}
+
+#[tauri::command]
+pub fn karaoke_displays(app: AppHandle) -> Vec<windows::KaraokeDisplay> {
+    windows::karaoke_displays(&app)
+}
+
 #[tauri::command]
 pub fn quit(app: AppHandle, state: State<'_, AppState>) {
     state.save_settings_now();

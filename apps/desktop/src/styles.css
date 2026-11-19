@@ -80,6 +80,14 @@ html[data-view="menu"] body {
   overflow: hidden;
 }
 
+/* Karaoke is black from the first paint. */
+html[data-view="karaoke"],
+html[data-view="karaoke"] body {
+  color-scheme: dark;
+  background: #000;
+  overflow: hidden;
+}
+
 html[data-view="overlay"],
 html[data-view="overlay"] body {
   background: transparent;

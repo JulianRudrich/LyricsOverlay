@@ -15,8 +15,8 @@
   });
 </script>
 
-<div class="cover" style:width="{size}px" style:height="{size}px">
-  <svg class="note" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+<div class="cover" style:width="{size}px" style:height="{size}px" style:border-radius="{Math.max(6, size * 0.12)}px">
+  <svg class="note" width={Math.max(16, Math.round(size * 0.3))} height={Math.max(16, Math.round(size * 0.3))} viewBox="0 0 24 24" aria-hidden="true">
     <path d="M13 17.5V4.5c2.4.4 4.6 2 5.4 4.2" />
     <circle cx="10" cy="17.5" r="3" />
   </svg>
@@ -31,7 +31,6 @@
     flex: none;
     display: grid;
     place-items: center;
-    border-radius: 6px;
     background: rgb(255 255 255 / 0.08);
     box-shadow: 0 2px 4px rgb(0 0 0 / 0.18);
     color: rgb(255 255 255 / 0.6);

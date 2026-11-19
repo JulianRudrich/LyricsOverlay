@@ -130,6 +130,8 @@ export interface Settings {
   overlayVisible: boolean;
   autoHide: boolean;
   hotkey: string;
+  /** Karaoke's type size, as a factor of the size that fits the screen. */
+  karaokeScale: number;
 }
 
 export interface AppInfo {
@@ -144,6 +146,18 @@ export interface AppInfo {
   /** The shortcut "Reset" brings back. */
   defaultHotkey: string;
   launchAtLogin: boolean;
+}
+
+/** A display karaoke can fill, as its chooser lists it. */
+export interface KaraokeDisplay {
+  id: string;
+  /** The system's name for it, when it has one. */
+  name: string | null;
+  /** Logical pixels. */
+  width: number;
+  height: number;
+  /** Karaoke is on this display, or opens there. */
+  current: boolean;
 }
 
 /** Why the Rust side did not take a shortcut. */

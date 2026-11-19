@@ -4,12 +4,13 @@
   import { prefersReducedMotion } from "svelte/motion";
   import { api, subscribe } from "../lib/api";
   import { PlaybackClock } from "../lib/clock";
-  import { translator, type MessageKey } from "../lib/i18n";
+  import { translator } from "../lib/i18n";
   import { clamp, currentIndex } from "../lib/lyrics";
   import { lyricMeasure } from "../lib/measure";
   import { songExit } from "../lib/motion";
   import { lyricSeekTarget, SeekHold } from "../lib/player";
   import { splitLongLines } from "../lib/segment";
+  import { statusText } from "../lib/status";
   import type { AppInfo, LyricLine, LyricsView, Playback, Settings } from "../lib/types";
   import Header from "./Header.svelte";
   import LyricLines from "./LyricLines.svelte";
@@ -71,48 +72,7 @@
   });
 
   const playerName = $derived(playback?.player?.name ?? "");
-  const sourceName = $derived.by(() => {
-    const source = settings?.source ?? "automatic";
-    return source === "automatic" ? "" : t(`source.${source}` as MessageKey);
-  });
-
-  const status = $derived.by((): string => {
-    if (!playback || !settings) return "";
-    if (playback.state === "idle") {
-      return sourceName ? t("status.idleSource", { player: sourceName }) : t("status.idleAutomatic");
-    }
-    if (playback.state === "problem") {
-      const player = playerName;
-      switch (playback.problem?.kind) {
-        case "permissionDenied":
-          return t("status.permission", { player });
-        case "noTrackData":
-          return t("status.noTrackData", { player });
-        default:
-          return t("status.readFailed", { player });
-      }
-    }
-    switch (lyricsView?.status) {
-      case "loading":
-        return t("lyrics.loading");
-      case "instrumental":
-        return t("lyrics.instrumental");
-      case "notFound":
-        return t("lyrics.notFound");
-      case "offline":
-        return t("lyrics.offline");
-      case "rateLimited":
-        return t("lyrics.rateLimited");
-      case "localOnly":
-        return t("lyrics.localOnly");
-      case "failed":
-        return t("lyrics.failed");
-      case "ready":
-        return playback.position === null ? t("status.noPosition", { player: playerName }) : "";
-      default:
-        return t("lyrics.loading");
-    }
-  });
+  const status = $derived(statusText(playback, lyricsView, settings, t));
   const searching = $derived(
     playback?.state === "track" && (!lyricsView || lyricsView.status === "loading" || lyricsView.status === "idle"),
   );

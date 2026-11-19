@@ -143,12 +143,17 @@ impl AppState {
 /// `--menu-panel` opens the tray panel, at startup or from a second launch, but
 /// only with SINGLINE_DEBUG: Linux reports no tray clicks to open it with.
 const MENU_PANEL_FLAG: &str = "--menu-panel";
+/// `--karaoke` opens karaoke the same way, for screenshots.
+const KARAOKE_FLAG: &str = "--karaoke";
 
-/// A second launch makes the app reachable again, or opens the tray panel.
+/// A second launch makes the app reachable again, or opens the tray panel or karaoke.
 fn launched_again(app: &AppHandle, arguments: &[String]) {
     let debug = app.try_state::<AppState>().is_some_and(|state| state.debug);
-    if debug && arguments.iter().any(|argument| argument == MENU_PANEL_FLAG) {
+    let flag = |name: &str| debug && arguments.iter().any(|argument| argument == name);
+    if flag(MENU_PANEL_FLAG) {
         menu_panel::open_for_debug(app);
+    } else if flag(KARAOKE_FLAG) {
+        windows::open_karaoke(app, None);
     } else {
         windows::reopen(app);
     }
@@ -233,10 +238,14 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     hotkey::register_saved(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
     spotify::restore(&handle);
-    if handle.state::<AppState>().debug
-        && std::env::args().any(|argument| argument == MENU_PANEL_FLAG)
-    {
-        menu_panel::open_for_debug(&handle);
+    if handle.state::<AppState>().debug {
+        let flag = |name: &str| std::env::args().any(|argument| argument == name);
+        if flag(MENU_PANEL_FLAG) {
+            menu_panel::open_for_debug(&handle);
+        }
+        if flag(KARAOKE_FLAG) {
+            windows::open_karaoke(&handle, None);
+        }
     }
 
     let saver = handle.clone();
@@ -269,7 +278,7 @@ fn main() {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, _shortcut, event| {
                     if event.state() == ShortcutState::Pressed {
-                        windows::toggle_overlay(app);
+                        windows::shortcut_pressed(app);
                     }
                 })
                 .build(),
@@ -290,6 +299,9 @@ fn main() {
             commands::player_command,
             commands::open_settings,
             commands::open_stats,
+            commands::open_karaoke,
+            commands::close_karaoke,
+            commands::karaoke_displays,
             commands::quit,
             commands::set_hotkey,
             commands::move_overlay,

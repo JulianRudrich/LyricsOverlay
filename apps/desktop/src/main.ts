@@ -1,5 +1,6 @@
 import { mount } from "svelte";
 import Editor from "./editor/Editor.svelte";
+import Karaoke from "./karaoke/Karaoke.svelte";
 import Overlay from "./overlay/Overlay.svelte";
 import Settings from "./settings/Settings.svelte";
 import MenuPanel from "./menu/MenuPanel.svelte";
@@ -7,10 +8,10 @@ import Stats from "./stats/Stats.svelte";
 import Shuffle from "./shuffle/Shuffle.svelte";
 import "./styles.css";
 
-// One page serves every window; the Rust side opens `#/overlay`, `#/settings`, `#/editor`, `#/stats`, `#/shuffle`
-// or `#/menu`, the tray panel.
+// One page serves every window; the Rust side opens `#/overlay`, `#/settings`, `#/editor`, `#/stats`, `#/shuffle`,
+// `#/karaoke` or `#/menu`, the tray panel.
 const route = window.location.hash.replace(/^#\/?/, "");
-const views = { overlay: Overlay, settings: Settings, editor: Editor, stats: Stats, shuffle: Shuffle, menu: MenuPanel } as const;
+const views = { overlay: Overlay, settings: Settings, editor: Editor, stats: Stats, shuffle: Shuffle, karaoke: Karaoke, menu: MenuPanel } as const;
 const view = (Object.prototype.hasOwnProperty.call(views, route) ? route : "overlay") as keyof typeof views;
 document.documentElement.dataset.view = view;
 

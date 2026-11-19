@@ -68,6 +68,7 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Open at login | 🧪 | 🧪 | 🧪 | |
 | Tray menu | 🧪 | 🧪 | 🧪 | Linory: glass panel with the current song (planned) |
 | Sleep timer | 🧪 | 🧪 | 🧪 | |
+| Karaoke: fullscreen lyrics on a chosen display, countdowns, intro card | 🧪 | 🧪 | 🧪 | Not in Linory; Linux checked on a virtual display |
 | Listening statistics | ✅ | 🧪 | 🧪 | For every player |
 | Spotify connection, True Shuffle and top lists | ✅ | 🧪 | 🧪 | Linux tested against a simulated Spotify |
 | Installers | 🧪 | 🧪 | 🧪 | CI builds .deb, AppImage, .exe, .msi and .dmg |

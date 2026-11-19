@@ -18,7 +18,8 @@ export interface WordFill {
   fill: number;
 }
 
-const LONGEST_WORD = 1.5;
+/** A timed word without an end lasts at most this many seconds. */
+export const LONGEST_WORD = 1.5;
 
 /**
  * How far each timed word of a line has been sung. Lines without word timing

@@ -259,6 +259,7 @@
 
       <hr />
 
+      <MenuRow icon="mic" title={t("tray.karaoke")} onclick={() => openWindow(() => api.openKaraoke())} />
       <MenuRow icon="chart" title={t("tray.stats")} onclick={() => openWindow(api.openStats)} />
       <MenuRow icon="shuffle" title={t("tray.trueShuffle")} onclick={() => openWindow(shuffle.openWindow)} />
       <MenuRow icon="general" title={t("tray.settings")} shortcut={mac ? "⌘," : "Ctrl+,"} onclick={() => openWindow(api.openSettings)} />

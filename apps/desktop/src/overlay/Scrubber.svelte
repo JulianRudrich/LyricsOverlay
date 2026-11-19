@@ -24,9 +24,11 @@
     onseek: (position: number) => void;
     /** Reports a drag starting and ending, so the overlay stays open meanwhile. */
     onscrub: (held: boolean) => void;
+    /** Larger, for the karaoke bar. */
+    large?: boolean;
   }
 
-  let { position, duration, expanded, seekable, marks, t, onseek, onscrub }: Props = $props();
+  let { position, duration, expanded, seekable, marks, t, onseek, onscrub, large = false }: Props = $props();
 
   /** Seconds one arrow key moves. */
   const STEP = 5;
@@ -82,7 +84,7 @@
   }
 </script>
 
-<div class="scrubber" class:expanded class:interactive class:held={held !== null} data-no-drag={interactive ? "" : undefined}>
+<div class="scrubber" class:large class:expanded class:interactive class:held={held !== null} data-no-drag={interactive ? "" : undefined}>
   {#if expanded}
     <span class="time" transition:fade={fadeMotion}>{formatTime(shown)}</span>
   {/if}
@@ -237,6 +239,34 @@
 
   .mark:active::before {
     transform: scale(0.8);
+  }
+
+  /* The karaoke bar is used from further away. */
+  .large {
+    height: 24px;
+    margin-top: 0;
+    gap: 14px;
+  }
+
+  .large .time {
+    font-size: 13px;
+  }
+
+  .large.expanded .track,
+  .large.held .track {
+    height: 6px;
+    border-radius: 3px;
+  }
+
+  .large .mark {
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+  }
+
+  .large .mark::before {
+    width: 10px;
+    height: 10px;
   }
 
   @media (prefers-reduced-motion: reduce) {

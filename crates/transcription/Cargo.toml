@@ -1,0 +1,33 @@
+[package]
+name = "transcription"
+description = "Sing to find: hears someone sing through the microphone and turns it into text on the device, with Whisper."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = ["microphone", "whisper"]
+# Records from the system's default input device through cpal.
+microphone = ["dep:cpal"]
+# Transcribes with whisper.cpp, which needs cmake, a C++ compiler and libclang to build.
+whisper = ["dep:whisper-rs"]
+
+[dependencies]
+cpal = { version = "0.18", optional = true }
+hound = "3.5"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "rustls-tls-native-roots", "http2"] }
+sha2 = "0.10"
+thiserror.workspace = true
+tokio = { version = "1", features = ["time"] }
+whisper-rs = { version = "0.16", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+wiremock = "0.6"
+
+[lints]
+workspace = true

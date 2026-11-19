@@ -8,15 +8,28 @@
   </head>
   <body>
     <main>
-      <header>
-        <img src="../icons/icon-32.png" width="20" height="20" alt="" />
+      <header class="reveal">
+        <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
+          <defs>
+            <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2a2a2d" />
+              <stop offset="1" stop-color="#050505" />
+            </linearGradient>
+          </defs>
+          <rect x="32" y="32" width="960" height="960" rx="232" fill="url(#tile)" />
+          <rect x="34" y="34" width="956" height="956" rx="230" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="4" />
+          <rect x="224" y="300" width="400" height="60" rx="30" fill="#fff" fill-opacity="0.4" />
+          <rect x="224" y="466" width="576" height="92" rx="46" fill="#fff" />
+          <rect x="224" y="664" width="472" height="60" rx="30" fill="#fff" fill-opacity="0.4" />
+        </svg>
         <h1>Singline</h1>
+        <span class="pill" id="pill"><span class="dot" aria-hidden="true"></span><span id="pill-label"></span></span>
       </header>
 
-      <section class="card" aria-live="polite">
+      <section class="card reveal" aria-live="polite">
         <div class="row">
-          <span class="icon" aria-hidden="true">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <span class="tile" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
               <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
             </svg>
@@ -25,37 +38,28 @@
             <span class="title" id="state"></span>
             <span class="hint" id="state-hint"></span>
           </div>
-          <span class="dot" id="dot" aria-hidden="true"></span>
         </div>
       </section>
 
-      <section class="card" id="pairing" hidden>
+      <section class="card reveal" id="pairing" hidden>
         <div class="text">
           <span class="title" data-message="popupPairTitle"></span>
           <span class="hint" data-message="popupPairHint"></span>
         </div>
-        <form id="pair-form" class="pair">
-          <input
-            id="code"
-            name="code"
-            inputmode="numeric"
-            autocomplete="off"
-            maxlength="7"
-            placeholder="123 456"
-            data-label="popupCodeLabel"
-          />
-          <button type="submit" id="pair-button" data-message="popupPair"></button>
+        <form id="pair-form" class="pair" autocomplete="off">
+          <div class="digits" id="digits" role="group" data-label="popupCodeLabel"></div>
+          <button type="submit" id="pair-button" class="primary" data-message="popupPair" disabled></button>
         </form>
         <p class="message" id="pair-error" role="alert" hidden></p>
       </section>
 
-      <section class="card" id="tabs" hidden>
-        <span class="title" data-message="popupSharing"></span>
+      <section class="card reveal" id="tabs" hidden>
+        <span class="label" data-message="popupSharing"></span>
         <ul id="tab-list"></ul>
         <span class="hint" id="no-tabs" data-message="popupNothing"></span>
       </section>
 
-      <footer id="paired-footer" hidden>
+      <footer id="paired-footer" class="reveal" hidden>
         <button type="button" id="unpair" class="quiet" data-message="popupUnpair"></button>
       </footer>
     </main>

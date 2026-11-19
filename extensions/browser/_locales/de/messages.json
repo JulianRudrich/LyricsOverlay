@@ -67,5 +67,14 @@
   },
   "errorFailed": {
     "message": "Das Koppeln hat nicht geklappt. Versuch es noch einmal."
+  },
+  "pillConnected": {
+    "message": "Verbunden"
+  },
+  "pillOffline": {
+    "message": "Offline"
+  },
+  "pillNotPaired": {
+    "message": "Nicht gekoppelt"
   }
 }

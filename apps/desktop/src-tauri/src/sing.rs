@@ -337,8 +337,10 @@ impl Sing {
     }
 
     fn settings_view(&self) -> SingSettings {
+        // Its own statement: the lock must be released before `model_view` takes it.
+        let token = self.lock().token.clone();
         SingSettings {
-            token: self.lock().token.clone(),
+            token,
             built_in: BUILT_IN_TOKEN.is_some_and(|token| !token.trim().is_empty()),
             available: transcription::can_transcribe(),
             model: self.model_view(),

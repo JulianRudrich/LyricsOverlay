@@ -116,6 +116,9 @@ jobs:
     defaults:
       run:
         shell: bash
+    env:
+      # whisper.cpp for any CPU of the platform (AVX2 on x86), not only the runner's.
+      GGML_NATIVE: "OFF"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -130,12 +133,17 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Point bindgen at LLVM for whisper.cpp
+        # The Windows runners come with LLVM; elsewhere libclang is found by itself.
+        if: runner.os == 'Windows'
+        run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> "$GITHUB_ENV"
       - name: Install system libraries
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev patchelf libfuse2
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev patchelf libfuse2 \
+            libasound2-dev libclang-dev cmake
       - name: Build singline-watch
         run: |
           mkdir -p dist

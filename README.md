@@ -48,6 +48,8 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 |:-:|:-:|:-:|
 | <img src="docs/images/layout-caption.png" width="270" alt="One line layout: only the current line"> | <img src="docs/images/layout-focus.png" width="270" alt="Focus layout: the current line with the lines before and after it"> | <img src="docs/images/layout-context.png" width="270" alt="Context layout: five lines that scroll, fading out towards the edges"> |
 
+<p align="center"><img src="docs/images/karaoke.gif" width="900" alt="Karaoke mode playing Lady of Namek by Tory Lanez: large white lines on black, the current line lighting up word by word, the next lines waiting below"><br><sub>Karaoke mode for a second screen or a TV.</sub></p>
+
 <p align="center"><img src="docs/images/mini-player.png" width="440" alt="The mini-player: previous, pause and next next to the title, and a seek bar with elapsed and remaining time"><br><sub>Move the pointer over the overlay for the mini-player.</sub></p>
 
 <img src="docs/images/settings.png" width="880" alt="The settings window with a sidebar and its four panes: General (player, auto-hide, open at login, language, shortcut), Appearance (layout, font size, opacity, size), Song &amp; timing (corrections, online search, your own lyrics) and About">

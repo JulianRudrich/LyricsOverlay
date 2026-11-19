@@ -50,9 +50,9 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 
 <p align="center"><img src="docs/images/karaoke.gif" width="900" alt="Karaoke mode playing Lady of Namek by Tory Lanez: large white lines on black, the current line lighting up word by word, the next lines waiting below"><br><sub>Karaoke mode for a second screen or a TV.</sub></p>
 
-<p align="center"><img src="docs/images/mini-player.png" width="440" alt="The mini-player: previous, pause and next next to the title, and a seek bar with elapsed and remaining time"><br><sub>Move the pointer over the overlay for the mini-player.</sub></p>
+<p align="center"><img src="docs/images/mini-player.png" width="440" alt="The mini-player over Lady of Namek by Tory Lanez: previous, pause and next next to the cover and title, and a seek bar with chorus markers and times"><br><sub>Move the pointer over the overlay for the mini-player.</sub></p>
 
-<img src="docs/images/settings.png" width="880" alt="The settings window with a sidebar and its four panes: General (player, auto-hide, open at login, language, shortcut), Appearance (layout, font size, opacity, size), Song &amp; timing (corrections, online search, your own lyrics) and About">
+<img src="docs/images/settings.png" width="880" alt="The settings window with a sidebar: General (player, browser extension, auto-hide, open at login, language, shortcut), Appearance (layout, font size, opacity, size), Song &amp; timing (Lady of Namek by Tory Lanez with its timing correction and your own lyrics) and Spotify">
 
 ## Supported players
 

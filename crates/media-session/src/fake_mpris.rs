@@ -30,6 +30,8 @@ struct State {
     commands: Vec<String>,
     /// `xesam:url`, as browsers with a page address report it.
     url: Option<String>,
+    /// `mpris:artUrl`, the cover of the track.
+    art_url: Option<String>,
 }
 
 impl State {
@@ -72,6 +74,7 @@ impl FakePlayer {
             since: Instant::now(),
             commands: Vec::new(),
             url: None,
+            art_url: None,
         }));
         let builder = match address {
             Some(address) => zbus::blocking::connection::Builder::address(address)?,
@@ -119,6 +122,11 @@ impl FakePlayer {
     /// Reports `url` as the page the track plays on, like a browser tab.
     pub fn set_url(&self, url: Option<String>) {
         self.state().url = url;
+    }
+
+    /// Reports `art_url` as the cover of the track.
+    pub fn set_art_url(&self, art_url: Option<String>) {
+        self.state().art_url = art_url;
     }
 
     /// The commands received so far, such as `PlayPause` or `SetPosition`.
@@ -208,6 +216,9 @@ impl Player {
         );
         if let Some(url) = &state.url {
             metadata.insert("xesam:url".to_owned(), owned(Value::from(url.as_str())));
+        }
+        if let Some(art) = &state.art_url {
+            metadata.insert("mpris:artUrl".to_owned(), owned(Value::from(art.as_str())));
         }
         metadata
     }

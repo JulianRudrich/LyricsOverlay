@@ -2,7 +2,7 @@
 //! player: `cargo run -p media-session --example fake_mpris_player -- "Title" "Artist" SECONDS`.
 //!
 //! `--bus chromium.instance1 --identity Chromium --url https://www.youtube.com/watch?v=1`
-//! pretends to be a browser tab instead.
+//! pretends to be a browser tab instead, and `--art URL` reports a cover.
 
 #[cfg(target_os = "linux")]
 fn main() {
@@ -13,6 +13,7 @@ fn main() {
     let mut bus = "spotify".to_owned();
     let mut identity = "Spotify".to_owned();
     let mut url = None;
+    let mut art = None;
     let mut positional = Vec::new();
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
@@ -20,6 +21,7 @@ fn main() {
             "--bus" => bus = args.next().unwrap_or(bus),
             "--identity" => identity = args.next().unwrap_or(identity),
             "--url" => url = args.next(),
+            "--art" => art = args.next(),
             _ => positional.push(arg),
         }
     }
@@ -48,6 +50,7 @@ fn main() {
     let player =
         FakePlayer::spawn(None, &bus, &identity, track, true).expect("session bus is reachable");
     player.set_url(url);
+    player.set_art_url(art);
     player.seek_to(Duration::from_secs_f64(start));
     println!("Pretend {identity} is playing. Press Ctrl+C to stop.");
     loop {

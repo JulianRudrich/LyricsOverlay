@@ -13,7 +13,7 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Floats above other windows on every desktop | ✅ | 🧪 | 🧪 | macOS above full-screen apps: measurement A |
 | Never takes the focus from other apps | 🧪 | 🧪 | 🧪 | |
 | Dragging, four corners, remembered position, several displays | 🧪 | 🧪 | 🧪 | |
-| Click-through, remembered; opening the app again turns it off | 🧪 | 🧪 | 🧪 | |
+| Click-through, remembered; opening the app again turns it off | 🧪 | 🧪 | 🧪 | macOS: also from Applications or the Dock |
 | Shortcut to show and hide | 🧪 | 🧪 | 🧪 | Linux: X11 only for now |
 | Three layouts, font size, opacity and size | ✅ | 🧪 | 🧪 | Linory has one fixed layout |
 | Word-by-word highlight from real word timing | ✅ | 🧪 | 🧪 | Linory mostly estimates |

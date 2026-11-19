@@ -60,7 +60,9 @@ After starting, the overlay appears in the top right corner and an icon appears 
 - [ ] Own lyrics: import an `.lrc` file, then open the editor, stamp a few lines with Ctrl+Shift+T (⌘⇧T on macOS) and save. Does the overlay show them at once? Remove them again.
 - [ ] Switch the language between English and German: do the overlay, settings and tray menu change?
 - [ ] Open at login: turn it on, log out and log back in.
-- [ ] Open the app a second time while it is running: do the settings open, and is click-through off?
+- [ ] Open the app a second time while it is running (on macOS from Applications or with a click on the Dock icon): do the settings open, and is click-through off?
+- [ ] macOS: while the settings are open, is Singline in the Dock, in the app switcher (⌘Tab) and in Force Quit (⌥⌘Esc)? Does it leave the Dock when the last of its windows closes? Does ⌘Q quit it?
+- [ ] **Quit Singline** at the bottom of the settings quits the app.
 - [ ] Sing to find (tray menu or the microphone in the overlay): the first time, does the system ask for the microphone and the speech model download show its progress? Sing or play a few lines of a well-known song: is it found within about ten seconds, and does the overlay start at the line you sang and keep up? Deny the microphone in the system settings and try again: does the overlay say where to allow it?
 
 Note ✅ for each item, or what happened instead.

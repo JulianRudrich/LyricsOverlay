@@ -106,14 +106,14 @@ Then pair it once: Settings → General → **Browser extension** shows a six-di
 
 ## Using Singline
 
-Start Singline and play a song. Singline sits in the system tray (the menu bar on macOS) and shows the lyrics as soon as it finds them.
+Start Singline and play a song. Singline sits in the system tray (the menu bar on macOS) and shows the lyrics as soon as it finds them. On macOS it also appears in the Dock while one of its windows, such as the settings, is open.
 
 | To … | do this |
 |---|---|
 | Show or hide the overlay | Press **Alt+Shift+L** (**⌥⇧L** on macOS), or use the tray menu |
 | Move the overlay | Drag it, or choose a corner in the tray menu under **Position** |
 | Click the window behind the overlay | Turn on **Click-through** in the tray menu |
-| Open the settings | Click the note in the overlay, or choose **Settings…** in the tray menu |
+| Open the settings | Click the note in the overlay, choose **Settings…** in the tray menu, or open Singline again while it runs |
 | Fix the timing of a song | Settings → Song & timing → **−0.25** / **+0.25** (remembered per song) |
 | Fix the timing of all songs | Settings → Song & timing → **Global timing correction** |
 | Choose the player to follow | Tray menu → **Playback source**, or Settings → General |
@@ -134,6 +134,7 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Hide the overlay while nothing plays | Settings → General → **Hide when nothing is playing** |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |
 | See Singline without playing music | Start it with `--demo` |
+| Quit Singline | Tray menu → **Quit**, or **Quit Singline** at the bottom of the settings |
 
 Positive corrections show the lyrics earlier, negative ones later. The global and the per-song correction add up.
 
@@ -164,6 +165,8 @@ For **Sing to find**, Whisper first turns your singing into words on your comput
 | Linux | `~/.config/io.github.julianrudrich.singline` (settings) and `~/.local/share/io.github.julianrudrich.singline` (data) |
 
 ## Troubleshooting
+
+**Singline is not in the Dock on macOS.** Singline lives in the menu bar: look for the icon with three lines near the clock. It joins the Dock, the app switcher and Force Quit while one of its windows is open. Open Singline again from Applications, Launchpad or Spotlight to bring up the settings, where **Quit Singline** sits at the bottom. On a MacBook with a notch, macOS hides the menu bar icons that do not fit beside it; quit a few other menu bar apps to make room.
 
 **macOS says to allow access in System Settings.** Singline asks Spotify and Music for the current song through Apple Events. Turn on Singline under **System Settings → Privacy & Security → Automation**.
 

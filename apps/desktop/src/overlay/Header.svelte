@@ -22,11 +22,17 @@
     notSynced: boolean;
     ownLyrics: boolean;
     paused: boolean;
+    /** Show the Sing to find button, while the pointer is over the overlay. */
+    mic: boolean;
+    /** Sing to find listens or follows a song. */
+    singing: boolean;
     t: Translate;
     onsettings: () => void;
+    onsing: () => void;
   }
 
-  let { track, playerName, controls, playing, notSynced, ownLyrics, paused, t, onsettings }: Props = $props();
+  let { track, playerName, controls, playing, notSynced, ownLyrics, paused, mic, singing, t, onsettings, onsing }: Props =
+    $props();
 
   const details = $derived(track ? [track.title, track.artist, playerName].filter(Boolean).join(" · ") : undefined);
   const fadeMotion = $derived({ duration: prefersReducedMotion.current ? 0 : 200 });
@@ -63,6 +69,15 @@
         <Icon name="pause" size={12} />
       </span>
     {/if}
+  {/if}
+  {#if mic}
+    {@const label = singing ? t("overlay.stopSinging") : t("overlay.sing")}
+    <button class="sing" class:on={singing} onclick={onsing} title={label} aria-label={label} transition:fade={fadeMotion}>
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="9" y="3" width="6" height="11" rx="3" />
+        <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" />
+      </svg>
+    </button>
   {/if}
   <button class="settings" onclick={onsettings} title={t("overlay.openSettings")} aria-label={t("overlay.openSettings")}>
     <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
@@ -134,6 +149,47 @@
     display: grid;
     place-items: center;
     color: rgb(255 255 255 / 0.35);
+  }
+
+  .sing {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 50%;
+    padding: 0;
+    background: none;
+    color: rgb(255 255 255 / 0.6);
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      background-color 0.15s,
+      transform 0.14s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .sing svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .sing:hover,
+  .sing:focus-visible {
+    color: #fff;
+  }
+
+  /* While it listens: a white disc with a black microphone. */
+  .sing.on {
+    background: #fff;
+    color: #000;
+  }
+
+  .sing:active {
+    transform: scale(0.92);
   }
 
   .settings {

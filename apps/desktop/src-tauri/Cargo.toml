@@ -10,6 +10,12 @@ repository.workspace = true
 publish.workspace = true
 default-run = "singline"
 
+[features]
+default = ["sing-to-find"]
+# Whisper and the microphone for Sing to find. Building them needs cmake, a C++
+# compiler and libclang; without this feature Singline builds without them.
+sing-to-find = ["transcription/whisper", "transcription/microphone"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -30,6 +36,7 @@ tauri-plugin-global-shortcut = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 tokio = { version = "1", features = ["time"] }
+transcription.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 windows-version = "0.1"

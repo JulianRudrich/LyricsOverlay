@@ -12,9 +12,12 @@
   import { splitLongLines } from "../lib/segment";
   import { statusText } from "../lib/status";
   import type { AppInfo, LyricLine, LyricsView, Playback, Settings } from "../lib/types";
+  import { isActive, onSing, sing as singApi, type ModelView, type SingView } from "../sing/api";
   import Header from "./Header.svelte";
   import LyricLines from "./LyricLines.svelte";
   import Scrubber from "./Scrubber.svelte";
+  import SingFound from "./SingFound.svelte";
+  import SingPanel from "./SingPanel.svelte";
   import Status from "./Status.svelte";
 
   let settings = $state<Settings | null>(null);
@@ -22,6 +25,9 @@
   let lyricsView = $state<LyricsView | null>(null);
   let app = $state<AppInfo | null>(null);
   let position = $state(0);
+  let singView = $state<SingView | null>(null);
+  let singLevel = $state(0);
+  let singModel = $state<ModelView | null>(null);
 
   const clock = new PlaybackClock();
   const t = $derived(translator(app?.language ?? "en"));
@@ -71,7 +77,25 @@
     if (settings?.clickThrough || settings?.overlayVisible === false) hovering = false;
   });
 
-  const playerName = $derived(playback?.player?.name ?? "");
+  // Sing to find: the listening panel replaces the lyrics area until a song is
+  // found; then the found song shows above the lyrics for a moment.
+  const singing = $derived(isActive(singView));
+  const singPanel = $derived(
+    singView !== null && ["preparing", "listening", "searching", "notFound", "problem"].includes(singView.phase),
+  );
+  const foundSong = $derived(singView?.phase === "following" ? singView.song : null);
+  let justFound = $state(false);
+  $effect(() => {
+    if (!foundSong) return;
+    justFound = true;
+    const timer = setTimeout(() => (justFound = false), 8000);
+    return () => clearTimeout(timer);
+  });
+  const micShown = $derived(hovering && !settings?.clickThrough);
+
+  const playerName = $derived(
+    playback?.player?.service === "microphone" ? t("sing.microphone") : (playback?.player?.name ?? ""),
+  );
   const status = $derived(statusText(playback, lyricsView, settings, t));
   const searching = $derived(
     playback?.state === "track" && (!lyricsView || lyricsView.status === "loading" || lyricsView.status === "idle"),
@@ -81,7 +105,9 @@
   );
   // Changes when the lyrics area shows something new: another song, lyrics arriving, another status.
   const contentKey = $derived(
-    `${track?.key ?? ""}|${showLyrics ? `lyrics|${lyrics?.lines.length ?? 0}` : `status|${status}`}`,
+    singPanel
+      ? `sing|${singView?.phase}|${singView?.problem?.kind ?? ""}`
+      : `${track?.key ?? ""}|${showLyrics ? `lyrics|${lyrics?.lines.length ?? 0}` : `status|${status}`}`,
   );
 
   // With SINGLINE_DEBUG set, every line change is reported for end-to-end checks.
@@ -156,8 +182,20 @@
         settings: (next) => (settings = next),
         app: (next) => (app = next),
       });
-      if (!alive) return unlisten();
-      stop = unlisten;
+      const unlistenSing = await onSing({
+        view: (next) => (singView = next),
+        level: (next) => (singLevel = next),
+        model: (next) => (singModel = next),
+      });
+      if (!alive) {
+        unlistenSing();
+        return unlisten();
+      }
+      stop = () => {
+        unlisten();
+        unlistenSing();
+      };
+      singView = await singApi.view();
       const snapshot = await api.snapshot();
       settings = snapshot.settings;
       lyricsView = snapshot.lyrics;
@@ -190,14 +228,39 @@
     notSynced={lyrics?.sync === "unsynced" && showLyrics}
     ownLyrics={lyricsView?.origin === "local" && lyrics !== null}
     paused={track !== null && !playback?.playing}
+    mic={micShown}
+    {singing}
     {t}
     onsettings={() => api.openSettings()}
+    onsing={() => singApi.toggle()}
   />
+
+  {#if foundSong && (justFound || hovering)}
+    <SingFound
+      title={foundSong.title}
+      artist={foundSong.artist}
+      alternatives={(singView?.alternatives ?? 0) > 0}
+      {t}
+      onnext={() => singApi.next()}
+      onagain={() => singApi.again()}
+    />
+  {/if}
 
   <div class="area" bind:clientWidth={areaWidth} bind:clientHeight={areaHeight}>
     {#key contentKey}
       <div class="content" out:songExit={{ reduced: prefersReducedMotion.current }}>
-        {#if showLyrics && lyrics}
+        {#if singPanel && singView}
+          <SingPanel
+            view={singView}
+            level={singLevel}
+            model={singModel}
+            platform={app?.platform ?? "linux"}
+            {t}
+            onstop={() => singApi.stop()}
+            onagain={() => singApi.again()}
+            onsettings={() => api.openSettings()}
+          />
+        {:else if showLyrics && lyrics}
           <LyricLines
             {lines}
             current={active ?? -1}

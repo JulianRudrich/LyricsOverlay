@@ -36,7 +36,11 @@ impl AutoHideState {
 /// After every reading of the players. The open settings window keeps the
 /// overlay in view, so changes to its look can be seen while nothing plays.
 pub fn update(app: &AppHandle, view: &PlaybackView) {
-    let playing = view.state == "track" && view.playing;
+    // Listening for a song to find counts as playing.
+    let singing = app
+        .try_state::<crate::sing::Sing>()
+        .is_some_and(|sing| sing.is_active());
+    let playing = (view.state == "track" && view.playing) || singing;
     let settings_open = app.get_webview_window(windows::SETTINGS).is_some();
     apply(app, |policy, now| {
         policy.observe(playing || settings_open, now)
@@ -52,6 +56,11 @@ pub fn settings_changed(app: &AppHandle, old: &Settings, new: &Settings) {
             policy.wake(now);
         }
     });
+}
+
+/// Brings a hidden overlay back for a while, as when Sing to find starts.
+pub fn wake(app: &AppHandle) {
+    apply(app, |policy, now| policy.wake(now));
 }
 
 fn apply(app: &AppHandle, change: impl FnOnce(&mut AutoHide, Instant)) {

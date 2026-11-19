@@ -1,6 +1,6 @@
 // Mirrors the JSON the Rust side sends. Field names follow serde's camelCase.
 
-export type Service = "spotify" | "appleMusic" | "amazonMusic" | "youTubeMusic" | "other";
+export type Service = "spotify" | "appleMusic" | "amazonMusic" | "youTubeMusic" | "microphone" | "other";
 export type SourcePreference = "automatic" | "spotify" | "appleMusic" | "amazonMusic" | "youTubeMusic";
 export type Layout = "caption" | "focus" | "context";
 export type Language = "system" | "de" | "en";

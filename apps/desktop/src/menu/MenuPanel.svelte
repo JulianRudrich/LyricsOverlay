@@ -18,10 +18,13 @@
   import Cover from "../overlay/Cover.svelte";
   import Scrubber from "../overlay/Scrubber.svelte";
   import { shuffle } from "../shuffle/api";
+  import { isActive, onSing, sing, type SingView } from "../sing/api";
   import LikeButton from "../spotify/LikeButton.svelte";
   import MenuRow from "./MenuRow.svelte";
 
   let settings = $state<Settings | null>(null);
+  let singView = $state<SingView | null>(null);
+  const singing = $derived(isActive(singView));
   let playback = $state<Playback | null>(null);
   let app = $state<AppInfo | null>(null);
   let sleep = $state<SleepView | null>(null);
@@ -158,10 +161,18 @@
         sleep: (next) => (sleep = next),
         menuPanel: (event) => (event.open ? opened() : closed()),
       });
-      if (!alive) return unlisten();
-      stop = unlisten;
-      const [snapshot, timer] = await Promise.all([api.snapshot(), api.sleepTimer()]);
+      const unlistenSing = await onSing({ view: (next) => (singView = next) });
+      if (!alive) {
+        unlistenSing();
+        return unlisten();
+      }
+      stop = () => {
+        unlisten();
+        unlistenSing();
+      };
+      const [snapshot, timer, singing] = await Promise.all([api.snapshot(), api.sleepTimer(), sing.view()]);
       if (!alive) return;
+      singView = singing;
       settings = snapshot.settings;
       app = snapshot.app;
       sleep = timer;
@@ -259,6 +270,11 @@
 
       <hr />
 
+      <MenuRow
+        icon="search"
+        title={singing ? t("tray.stopSinging") : t("tray.singToFind")}
+        onclick={() => openWindow(async () => void (await sing.toggle()))}
+      />
       <MenuRow icon="mic" title={t("tray.karaoke")} onclick={() => openWindow(() => api.openKaraoke())} />
       <MenuRow icon="chart" title={t("tray.stats")} onclick={() => openWindow(api.openStats)} />
       <MenuRow icon="shuffle" title={t("tray.trueShuffle")} onclick={() => openWindow(shuffle.openWindow)} />

@@ -128,6 +128,11 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     } else {
         "tray.showOverlay"
     };
+    let sing = if app.state::<crate::sing::Sing>().is_active() {
+        "tray.stopSinging"
+    } else {
+        "tray.singToFind"
+    };
     MenuBuilder::new(app)
         .item(
             &MenuItemBuilder::with_id("title", texts.get("app.name"))
@@ -145,6 +150,7 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .item(&corners.build()?)
         .item(&crate::sleep::submenu(app, &texts)?)
         .separator()
+        .item(&MenuItemBuilder::with_id("sing", texts.get(sing)).build(app)?)
         .item(&MenuItemBuilder::with_id("karaoke", texts.get("tray.karaoke")).build(app)?)
         .item(&MenuItemBuilder::with_id("stats", texts.get("tray.stats")).build(app)?)
         .item(&MenuItemBuilder::with_id("true-shuffle", texts.get("tray.trueShuffle")).build(app)?)
@@ -173,6 +179,7 @@ fn handle_event(app: &AppHandle, event: MenuEvent) {
         "settings" => windows::open_settings(app),
         "karaoke" => windows::open_karaoke(app, None),
         "stats" => windows::open_stats(app),
+        "sing" => crate::sing::toggle(app),
         "true-shuffle" => windows::open_shuffle(app),
         "quit" => {
             state.save_settings_now();

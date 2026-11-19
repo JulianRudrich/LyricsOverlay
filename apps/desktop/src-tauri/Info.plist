@@ -4,6 +4,8 @@
 <dict>
   <key>NSAppleEventsUsageDescription</key>
   <string>Singline reads the current song and playback position from Spotify or Music to show synced lyrics.</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Sing to find listens to a few words you sing to recognise the song. The audio stays on your Mac; only the recognised words are used to look the song up.</string>
   <key>LSUIElement</key>
   <true/>
 </dict>

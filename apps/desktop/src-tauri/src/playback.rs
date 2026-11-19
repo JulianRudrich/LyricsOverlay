@@ -9,7 +9,8 @@ use lyrics_core::{chorus, lrc, Lyrics, PlaybackClock, SyncLevel};
 use lyrics_providers::{LookupOptions, LyricsOutcome, Query};
 use media_session::{
     default_backends, Backend, Capabilities, Command, CommandError, DemoBackend, Engine,
-    NowPlaying, PlayerInfo, Problem, SourcePreference, Track, DEMO_LRC, DEMO_PLAYER_ID,
+    MicrophoneBackend, NowPlaying, PlayerInfo, Problem, SourcePreference, Track, DEMO_LRC,
+    DEMO_PLAYER_ID,
 };
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
@@ -209,6 +210,10 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
     {
         backends.push(Box::new(bridge));
     }
+    // The song someone sings, for Sing to find. It takes over while it listens.
+    backends.push(Box::new(MicrophoneBackend::new(
+        app.state::<crate::sing::Sing>().feed(),
+    )));
     let interval = backends
         .iter()
         .map(|backend| backend.poll_interval())
@@ -293,6 +298,14 @@ pub fn load_lyrics(app: &AppHandle, track: Option<Track>, demo: bool, refresh: b
         publish(
             app,
             LyricsView::ready(&track.key, lyrics, "demo", song_offset),
+        );
+        return;
+    }
+    // Sing to find already chose these lyrics to line the singer up with.
+    if let Some((lyrics, origin)) = app.state::<crate::sing::Sing>().lyrics_for(&track.key) {
+        publish(
+            app,
+            LyricsView::ready(&track.key, lyrics, origin, song_offset),
         );
         return;
     }

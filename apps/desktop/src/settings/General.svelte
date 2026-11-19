@@ -8,6 +8,7 @@
   import BrowserBridge from "./BrowserBridge.svelte";
   import HotkeyField, { type HotkeyStatus } from "./HotkeyField.svelte";
   import type { PaneContext } from "./panes";
+  import SingToFind from "./SingToFind.svelte";
 
   let { ctx }: { ctx: PaneContext } = $props();
   const t = $derived(ctx.t);
@@ -71,6 +72,8 @@
 </Row>
 
 <BrowserBridge />
+
+<SingToFind {ctx} />
 
 <Row icon="eyeOff" title={t("settings.autoHide")} hint={t("settings.autoHideHint")}>
   <Toggle label={t("settings.autoHide")} checked={settings.autoHide} onchange={(autoHide) => ctx.update({ autoHide })} />

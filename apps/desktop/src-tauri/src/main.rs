@@ -12,6 +12,7 @@ mod own_lyrics;
 mod playback;
 mod settings;
 mod shuffle;
+mod sing;
 mod sleep;
 mod spotify;
 mod tray;
@@ -179,6 +180,13 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         user_agent(&handle),
     ));
     app.manage(shuffle::Shuffle::new(demo, data_dir.as_deref()));
+    app.manage(sing::Sing::new(
+        demo,
+        config_dir.as_deref(),
+        data_dir.as_deref(),
+        user_agent(&handle),
+        std::env::var_os("SINGLINE_DEBUG").is_some(),
+    ));
 
     let settings_path = config_dir.map(|dir| dir.join("settings.json"));
     let settings = settings_path
@@ -238,6 +246,14 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     hotkey::register_saved(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
     spotify::restore(&handle);
+    if handle.state::<sing::Sing>().starts_by_itself() {
+        // SINGLINE_MIC_FILE plays a recording instead of the microphone, for tests.
+        let starter = handle.clone();
+        tauri::async_runtime::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1500)).await;
+            sing::start(&starter);
+        });
+    }
     if handle.state::<AppState>().debug {
         let flag = |name: &str| std::env::args().any(|argument| argument == name);
         if flag(MENU_PANEL_FLAG) {
@@ -336,6 +352,17 @@ fn main() {
             shuffle::shuffle_set_keep_playing,
             shuffle::shuffle_remove_current,
             shuffle::shuffle_keep,
+            sing::sing_view,
+            sing::sing_toggle,
+            sing::sing_stop,
+            sing::sing_next,
+            sing::sing_again,
+            sing::sing_settings,
+            sing::sing_set_token,
+            sing::sing_download_model,
+            sing::sing_cancel_download,
+            sing::sing_remove_model,
+            sing::sing_open_genius,
         ])
         .setup(move |app| setup(app, demo))
         .build(tauri::generate_context!())

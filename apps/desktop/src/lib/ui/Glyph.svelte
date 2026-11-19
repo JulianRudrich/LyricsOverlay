@@ -23,7 +23,8 @@
     | "chart"
     | "chevronRight"
     | "mic"
-    | "display";
+    | "display"
+    | "download";
 </script>
 
 <script lang="ts">
@@ -104,6 +105,8 @@
   {:else if name === "lyrics"}
     <path d="M4.5 5h15A1.5 1.5 0 0 1 21 6.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17h-1A1.5 1.5 0 0 1 3 15.5v-9A1.5 1.5 0 0 1 4.5 5Z" />
     <path d="M7.5 9.5h9M7.5 13h6" />
+  {:else if name === "download"}
+    <path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14" />
   {:else if name === "external"}
     <path d="M8 16 16 8M9.5 8H16v6.5" />
   {:else}

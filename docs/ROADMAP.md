@@ -55,6 +55,13 @@ Ported from the Swift code contributed from Linory:
 
 The first release follows this milestone. Singline then replaces the native macOS app.
 
+### Sing to find
+
+- [x] Recognise a song from a few sung words: Whisper on the device, Genius for the words, LRCLIB for the lyrics
+- [x] Start at the sung line and follow the singer
+- [ ] Find songs among your own and cached lyrics without Genius, also offline
+- [ ] A smaller or larger speech model to choose, and the Metal and GPU builds of whisper.cpp
+
 ### More
 
 More lyrics sources and a choice between versions, an editor for word timing, publishing lyrics to LRCLIB, a delay per audio output, translations, themes, accessibility, and a mode for streaming with OBS.

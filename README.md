@@ -34,12 +34,13 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. It can let clicks pass through to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
 - **Timing you can correct.** If the lyrics run early or late, move them by a quarter of a second; Singline remembers the correction for that song. A global correction makes up for your audio setup, for example Bluetooth headphones.
 - **Finds the right version.** Exact matches first, then a search that prefers the same album and versions with word timing. Plain lyrics are spread over the song and marked *~ not synced*; instrumentals are recognised.
+- **Sing to find.** Don't know what's playing on the radio, or want lyrics to sing along to? Sing a few words: Singline recognises them on your computer, finds the song, shows its lyrics from the line you sang and keeps up while you go on singing. Your voice never leaves your computer.
 - **Your own lyrics.** Import an LRC file, or paste the lyrics into the editor and set each line's timestamp with a key press while the song plays. Your lyrics always win.
 - **Your music.** Listening time, plays, your daily streak, skips, a listening clock, and your most played songs and artists, from every player, kept only on your device.
 - **Sleep timer and auto-hide.** Pause the music after 15 to 60 minutes or at the end of the song, and let the overlay disappear while nothing plays.
 - **Spotify extras, if you want them.** Connect your own Spotify app to like the current song with ♥, see your top artists and tracks, and use **True Shuffle**: an honest random order through your Liked Songs, playlists and mixes in which nothing repeats until everything has played. Needs Spotify Premium.
 - **Works offline.** Lyrics are cached on your device, so songs you have heard before work without a connection.
-- **Private.** No account, no tracking, no analytics. Only the song's title, artist, album and duration leave your computer, to look up lyrics, and you can turn that off.
+- **Private.** No account, no tracking, no analytics. Only the song's title, artist, album and duration leave your computer, to look up lyrics, and you can turn that off. Sing to find sends only the words it heard, never audio.
 - **English and German**, following your system language.
 
 <img src="docs/images/overlay.png" width="880" alt="The Singline overlay above a code editor: cover, title and artist at the top, the current line lighting up word by word, the lines around it fading out">
@@ -128,6 +129,8 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Start True Shuffle | Tray menu → **True Shuffle…** |
 | Sing along on a big screen | Tray menu → **Karaoke**; pick another display in its controls. Space plays or pauses, ← / → jump 5 seconds, ↑ / ↓ move the lyrics by a quarter second, and Esc or the shortcut leaves |
 | See your listening statistics | Tray menu → **Your music…** |
+| Find a song by singing it | Tray menu → **Sing to find…**, or the microphone in the overlay's corner, then sing a line |
+| Say a found song is the wrong one | Click **Not this song** above the lyrics, or ↻ to listen again |
 | Hide the overlay while nothing plays | Settings → General → **Hide when nothing is playing** |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |
 | See Singline without playing music | Start it with `--demo` |
@@ -142,12 +145,15 @@ Positive corrections show the lyrics earlier, negative ones later. The global an
 
 How often word timing is available varies by song. In a sample of ten popular songs on LRCLIB, eight had at least one version with word timing.
 
+For **Sing to find**, Whisper first turns your singing into words on your computer. [Genius](https://genius.com) finds the songs those words belong to, since LRCLIB cannot search lyrics. Singline then loads the lyrics of the best candidates the usual way (your own lyrics, the cache, LRCLIB), picks the song whose lyrics match what you sang, and starts at the line you sang. While you keep singing, it listens again every few seconds and keeps the lyrics with you. Songs that LRCLIB has only without timing cannot be followed.
+
 ## Privacy
 
 - Singline has no account, no telemetry and no analytics.
 - The only network requests go to LRCLIB, sending the title, artist, album and duration of the song you are playing. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
 - The browser extension talks only to Singline on your own computer (`127.0.0.1`), and only after you paired it. Web pages and other programs without the pairing are refused.
 - Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
+- Sing to find runs only while you use it. The audio stays in memory on your computer and is transcribed there by [Whisper](https://github.com/ggerganov/whisper.cpp); the speech model (about 150 MB) is downloaded once from Hugging Face into the data folder. Only the words it heard go to Genius, to find the song, and the found title and artist to LRCLIB. It needs **Search lyrics online**.
 - The Spotify connection is optional. It uses your own Spotify app, keeps the login in the system's credential store (Keychain, Credential Manager or Secret Service), and talks to Spotify only while you are connected.
 - Your settings are stored in `settings.json`. The cache, your timing corrections, your own lyrics and your listening history are stored in `singline.sqlite`. Deleting these files resets Singline.
 
@@ -160,6 +166,10 @@ How often word timing is available varies by song. In a sample of ten popular so
 ## Troubleshooting
 
 **macOS says to allow access in System Settings.** Singline asks Spotify and Music for the current song through Apple Events. Turn on Singline under **System Settings → Privacy & Security → Automation**.
+
+**Sing to find cannot hear you.** Allow Singline to use the microphone: on macOS under **System Settings → Privacy & Security → Microphone**, on Windows under **Settings → Privacy & security → Microphone → Let desktop apps access your microphone**. On Linux, check that the microphone is the chosen input and not muted. Singline says which of these it is.
+
+**Sing to find needs a Genius token.** Builds from source have none. Create a free API client at [genius.com/api-clients](https://genius.com/api-clients), generate an access token and paste the **Client Access Token** in Settings → General → **Sing to find**.
 
 **The lyrics are early or late.** Correct the song with −0.25 / +0.25. If every song is off by the same amount, which is typical for Bluetooth headphones, use the global correction instead.
 
@@ -183,11 +193,13 @@ Please include its output when you [report a problem](../../issues/new).
 
 ## Building from source
 
-You need Rust 1.85 or later, Node.js 22 and pnpm 10. On Linux you also need the WebKitGTK development files; on Debian and Ubuntu:
+You need Rust 1.88 or later, Node.js 22 and pnpm 10, plus CMake, a C++ compiler and libclang for whisper.cpp, which Sing to find uses (on macOS the Xcode command line tools, on Windows Visual Studio's C++ tools and LLVM). On Linux you also need the WebKitGTK and ALSA development files; on Debian and Ubuntu:
 
 ```bash
-sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libasound2-dev libclang-dev cmake
 ```
+
+To build without Sing to find, and so without CMake and libclang, pass `--no-default-features` to Cargo for the app.
 
 Install the dependencies:
 
@@ -253,7 +265,11 @@ bash apps/desktop/e2e/linux-smoke.sh
 bash apps/desktop/e2e/linux-youtube.sh
 ```
 
-`cargo test --workspace` needs the built interface (`pnpm --filter singline-desktop build`); a plain `cargo test` covers the crates only. The end-to-end check starts the app on a virtual display with a simulated Spotify and a simulated LRCLIB, and compares every line the overlay shows with the playback time.
+```bash
+bash apps/desktop/e2e/linux-sing.sh
+```
+
+`cargo test --workspace` needs the built interface (`pnpm --filter singline-desktop build`); a plain `cargo test` covers the crates only. The end-to-end check starts the app on a virtual display with a simulated Spotify and a simulated LRCLIB, and compares every line the overlay shows with the playback time. The check for Sing to find plays lines synthesized with espeak-ng instead of the microphone and needs a Whisper model; the top of [`linux-sing.sh`](apps/desktop/e2e/linux-sing.sh) says how to get one, and without it the check is skipped.
 
 ### Environment variables for development
 
@@ -263,6 +279,11 @@ bash apps/desktop/e2e/linux-youtube.sh
 | `SINGLINE_LRCLIB_URL` | Uses another LRCLIB server, for example a local test server |
 | `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks. With it, `--karaoke` and `--menu-panel` open karaoke and the tray panel, at start or from a second launch |
 | `SINGLINE_SPOTIFY_ACCOUNTS_URL`, `SINGLINE_SPOTIFY_API_URL` | Use other Spotify servers, for example local test servers |
+| `SINGLINE_GENIUS_TOKEN` | At build time: a Genius token built into the app, so Sing to find works without setup |
+| `SINGLINE_GENIUS_URL` | Uses another Genius API server, for example a local test server |
+| `SINGLINE_MIC_FILE` | Sing to find hears this WAV file instead of the microphone, and starts by itself |
+| `SINGLINE_WHISPER_MODEL` | Uses this Whisper model file instead of downloading one |
+| `SINGLINE_WHISPER_MODEL_URL` | Downloads the Whisper model from another server |
 
 ### Project structure
 
@@ -271,7 +292,8 @@ bash apps/desktop/e2e/linux-youtube.sh
 | [`crates/lyrics-core`](crates/lyrics-core) | Lyrics logic without input or output: LRC and Lyricsfile parsing with word timing, matching, the playback clock, choosing a player |
 | [`crates/media-session`](crates/media-session) | Reading and controlling players through MPRIS, the Windows media controls and AppleScript, plus `singline-watch` |
 | [`crates/spotify-connect`](crates/spotify-connect) | The optional Spotify connection: login, Web API client and True Shuffle |
-| [`crates/lyrics-providers`](crates/lyrics-providers) | The LRCLIB client and the SQLite store for your own lyrics, corrections and the cache |
+| [`crates/lyrics-providers`](crates/lyrics-providers) | The LRCLIB client and the SQLite store for your own lyrics, corrections and the cache, and the song search for Sing to find (Genius) |
+| [`crates/transcription`](crates/transcription) | Sing to find: microphone capture, voice detection, the Whisper model download and transcription on the device |
 | [`apps/desktop`](apps/desktop) | The Singline app: Tauri and Rust in `src-tauri`, the Svelte interface in `src`, the end-to-end test in `e2e` |
 | [`extensions/browser`](extensions/browser) | The browser extension for web players, for Chrome, Edge and Firefox |
 | [`apps/macos`](apps/macos) | The native macOS app in Swift |
@@ -287,6 +309,7 @@ bash apps/desktop/e2e/linux-youtube.sh
 - Settings in the glass design of the native macOS app, with a sidebar
 - YouTube Music and other web players on every system through the browser extension
 - Spotify connection for True Shuffle, liking songs and your top lists
+- Sing to find: recognising a song from a few sung words and following the singer
 
 **In progress**
 

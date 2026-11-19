@@ -61,6 +61,7 @@ After starting, the overlay appears in the top right corner and an icon appears 
 - [ ] Switch the language between English and German: do the overlay, settings and tray menu change?
 - [ ] Open at login: turn it on, log out and log back in.
 - [ ] Open the app a second time while it is running: do the settings open, and is click-through off?
+- [ ] Sing to find (tray menu or the microphone in the overlay): the first time, does the system ask for the microphone and the speech model download show its progress? Sing or play a few lines of a well-known song: is it found within about ten seconds, and does the overlay start at the line you sang and keep up? Deny the microphone in the system settings and try again: does the overlay say where to allow it?
 
 Note ✅ for each item, or what happened instead.
 

@@ -4,6 +4,7 @@
 mod autohide;
 mod browser_bridge;
 mod commands;
+mod dock;
 mod history;
 mod hotkey;
 mod i18n;
@@ -225,6 +226,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     app.manage(sleep::SleepState::default());
     app.manage(menu_panel::MenuPanel::default());
     app.manage(history::History::default());
+    app.manage(dock::Dock::default());
     let bridge_store = handle
         .state::<AppState>()
         .settings_path
@@ -376,6 +378,11 @@ fn main() {
                 history::flush(app);
                 app.state::<AppState>().save_settings_now();
             }
+            tauri::RunEvent::WindowEvent {
+                label,
+                event: tauri::WindowEvent::Destroyed,
+                ..
+            } => dock::update(app, &label, true),
             _ => {}
         });
 }

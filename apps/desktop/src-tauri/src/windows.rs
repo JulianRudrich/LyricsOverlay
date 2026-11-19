@@ -9,7 +9,7 @@ use tauri::{
 };
 
 use crate::settings::{Corner, Settings};
-use crate::{i18n, tray, AppState};
+use crate::{dock, i18n, tray, AppState};
 
 pub const OVERLAY: &str = "overlay";
 pub const SETTINGS: &str = "settings";
@@ -185,8 +185,9 @@ pub fn open_settings(app: &AppHandle) {
         Some(effects) => builder.transparent(true).effects(effects),
         None => builder.background_color(SOLID_BACKGROUND),
     };
-    if let Err(error) = builder.build() {
-        eprintln!("could not open the settings: {error}");
+    match builder.build() {
+        Ok(_) => dock::update(app, SETTINGS, false),
+        Err(error) => eprintln!("could not open the settings: {error}"),
     }
 }
 
@@ -212,8 +213,9 @@ pub fn open_stats(app: &AppHandle) {
         .theme(Some(Theme::Dark))
         .background_color(Color(17, 17, 19, 255))
         .build();
-    if let Err(error) = built {
-        eprintln!("could not open your music: {error}");
+    match built {
+        Ok(_) => dock::update(app, STATS, false),
+        Err(error) => eprintln!("could not open your music: {error}"),
     }
 }
 
@@ -236,8 +238,9 @@ pub fn open_shuffle(app: &AppHandle) {
             .center()
             .focused(true)
             .build();
-    if let Err(error) = built {
-        eprintln!("could not open True Shuffle: {error}");
+    match built {
+        Ok(_) => dock::update(app, SHUFFLE, false),
+        Err(error) => eprintln!("could not open True Shuffle: {error}"),
     }
 }
 
@@ -454,8 +457,9 @@ pub fn open_editor(app: &AppHandle) {
             .center()
             .focused(true)
             .build();
-    if let Err(error) = built {
-        eprintln!("could not open the lyrics editor: {error}");
+    match built {
+        Ok(_) => dock::update(app, EDITOR, false),
+        Err(error) => eprintln!("could not open the lyrics editor: {error}"),
     }
 }
 

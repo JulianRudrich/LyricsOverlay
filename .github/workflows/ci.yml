@@ -129,6 +129,8 @@ jobs:
       GGML_NATIVE: "OFF"
       # A Genius token for Sing to find, built in so test builds work without setup.
       SINGLINE_GENIUS_TOKEN: ${{ secrets.SINGLINE_GENIUS_TOKEN }}
+      # Signs the update packages; without it the builds cannot update themselves.
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -141,6 +143,16 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Number the test build
+        # Builds of main count up from the next minor version, such as 0.4.0-70,
+        # so installed test builds take each newer one as an update.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          current=$(node -p "require('./apps/desktop/src-tauri/tauri.conf.json').version")
+          IFS=. read -r major minor _ <<< "${current%%-*}"
+          version="$major.$((minor + 1)).0-${{ github.run_number }}"
+          node scripts/set-version.mjs "$version"
+          echo "TEST_VERSION=$version" >> "$GITHUB_ENV"
       - name: Point bindgen at LLVM for whisper.cpp
         # The Windows runners come with LLVM; elsewhere libclang is found by itself.
         if: runner.os == 'Windows'
@@ -179,13 +191,100 @@ jobs:
             tar -czf dist-test/singline-watch-linux.tar.gz -C target/release singline-watch
           fi
       - name: Build the app
-        run: pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }}
+        run: |
+          # Update packages need the signing key; without it there are installers only.
+          config=()
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo '{"bundle":{"createUpdaterArtifacts":false}}' > "$RUNNER_TEMP/no-updater.json"
+            config=(--config "$RUNNER_TEMP/no-updater.json")
+          fi
+          pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }} "${config[@]}"
       - name: Collect the installers
         run: |
           find target -path '*/release/bundle/*' \( -name '*.dmg' -o -name '*-setup.exe' -o -name '*.msi' -o -name '*.deb' -o -name '*.AppImage' \) -exec cp {} dist-test/ \;
           ls -la dist-test
+          if [ -n "${TEST_VERSION:-}" ]; then
+            # For the test build release: the same names every time, so its links stay.
+            mkdir -p nightly
+            case "${{ runner.os }}" in
+              macOS)
+                cp target/universal-apple-darwin/release/bundle/dmg/*.dmg nightly/Singline-macOS.dmg
+                for file in target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz*; do
+                  [ -e "$file" ] && cp "$file" "nightly/Singline-macOS.app.tar.gz${file##*.tar.gz}"
+                done
+                ;;
+              Windows)
+                for file in target/release/bundle/nsis/*-setup.exe*; do
+                  cp "$file" "nightly/Singline-Windows-setup.exe${file##*-setup.exe}"
+                done
+                ;;
+              Linux)
+                cp target/release/bundle/deb/*.deb nightly/Singline-Linux.deb
+                for file in target/release/bundle/appimage/*.AppImage*; do
+                  cp "$file" "nightly/Singline-Linux.AppImage${file##*.AppImage}"
+                done
+                ;;
+            esac
+            ls -la nightly
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: singline-${{ matrix.name }}
           path: dist-test
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: env.TEST_VERSION != ''
+        with:
+          name: nightly-${{ matrix.name }}
+          path: nightly
+          if-no-files-found: error
+
+  nightly:
+    name: Publish the test build
+    needs: desktop
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    concurrency:
+      group: nightly
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nightly-*
+          path: nightly
+          merge-multiple: true
+      - name: Write the update manifest
+        run: |
+          current=$(node -p "require('./apps/desktop/src-tauri/tauri.conf.json').version")
+          IFS=. read -r major minor _ <<< "${current%%-*}"
+          version="$major.$((minor + 1)).0-${{ github.run_number }}"
+          echo "TEST_VERSION=$version" >> "$GITHUB_ENV"
+          if ls nightly/*.sig > /dev/null 2>&1; then
+            node scripts/update-manifest.mjs nightly "$version" \
+              "https://github.com/${{ github.repository }}/releases/download/nightly" \
+              "Test build $version of ${GITHUB_SHA::7}" > nightly/latest.json
+          else
+            echo "::warning::Without the TAURI_SIGNING_PRIVATE_KEY secret this test build cannot update itself."
+          fi
+          ls -la nightly
+      - name: Replace the test build release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<EOF
+          The newest test build of \`main\` (${GITHUB_SHA::7}). Installed test builds update themselves to it.
+
+          To install it the first time, download the file for your system:
+
+          - **macOS:** \`Singline-macOS.dmg\`
+          - **Windows:** \`Singline-Windows-setup.exe\`
+          - **Linux:** \`Singline-Linux.AppImage\` or \`Singline-Linux.deb\`
+
+          Test builds are not signed by Apple or Microsoft yet: see Install in the README for opening them anyway.
+          EOF
+          gh release delete nightly --cleanup-tag --yes || true
+          gh release create nightly nightly/* --prerelease --latest=false --target "$GITHUB_SHA" \
+            --title "Test build $TEST_VERSION" --notes-file notes.md

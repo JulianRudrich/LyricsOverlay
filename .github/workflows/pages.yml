@@ -1,10 +1,11 @@
 name: Website
 
 # Publishes site/ to GitHub Pages, with the pictures from docs/images.
-# Runs by hand and for every release until Pages is switched on in the repository settings.
+# Runs by hand and for every release, but not for the test build release,
+# until Pages is switched on in the repository settings.
 on:
   release:
-    types: [published]
+    types: [released]
   workflow_dispatch:
 
 permissions:

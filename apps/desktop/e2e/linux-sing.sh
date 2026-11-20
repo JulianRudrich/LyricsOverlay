@@ -37,6 +37,8 @@ if ! command -v espeak-ng > /dev/null; then
 fi
 
 rm -rf "$OUT" && mkdir -p "$OUT/data"
+# Not the first start: no welcome window over the overlay.
+echo '{"welcomed": true}' > "$OUT/data/settings.json"
 python3 "$HERE/sung_audio.py" "$OUT/sung.wav" 1.0 4.0 \
   "I can hear the morning calling from the mountain" \
   "Every window opens when the swallows come home" \

@@ -33,7 +33,11 @@ run() {
   shift
   mkdir -p "$OUT/$name/data"
   # A YouTube video is a web player like any other, so it needs this setting.
-  [ "$name" = "video" ] && echo '{"includeOtherPlayers": true}' > "$OUT/$name/data/settings.json"
+  if [ "$name" = "video" ]; then
+    echo '{"includeOtherPlayers": true, "welcomed": true}' > "$OUT/$name/data/settings.json"
+  else
+    echo '{"welcomed": true}' > "$OUT/$name/data/settings.json"
+  fi
   RUN="$OUT/$name" SINGLINE_DATA_DIR="$OUT/$name/data" timeout 90 dbus-run-session -- xvfb-run -a -s "-screen 0 1280x800x24" bash -c '
     set -u
     python3 "$HERE/mock_lrclib.py" "$PORT" 2> "$RUN/lrclib.log" &

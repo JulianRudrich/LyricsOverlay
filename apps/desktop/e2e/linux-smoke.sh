@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # End-to-end check on Linux: starts the real app on a virtual display with a
-# pretend Spotify (MPRIS) and a pretend LRCLIB, then checks that the overlay
-# shows the line that matches the playback time, and saves a screenshot.
+# pretend Spotify (MPRIS) and a pretend LRCLIB, then checks that the welcome
+# window opens at this first start and that the overlay shows the line that
+# matches the playback time, and saves a screenshot.
 #
 # Needs: xvfb-run, dbus-run-session, python3, ImageMagick (import).
 # Build first:
@@ -65,6 +66,10 @@ if reports:
     first = math.floor(float(reports[0][0]))
     if not start <= first <= start + 25:
         failures.append(f"the first line came at {first} s; the player started at {start} s")
+
+log = (out / "app.log").read_text()
+if not re.search(r"^welcome-window$", log, re.M):
+    failures.append("the welcome window did not open at the first start")
 
 print(f"LRCLIB requests: {len(requests)}, overlay lines: {len(reports)}")
 for position, text in reports[:8]:

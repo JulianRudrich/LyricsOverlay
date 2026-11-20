@@ -65,6 +65,7 @@ After starting, the overlay appears in the top right corner and an icon appears 
 - [ ] Open the app a second time while it is running (on macOS from Applications or with a click on the Dock icon): do the settings open, and is click-through off?
 - [ ] macOS: while the settings are open, is Singline in the Dock, in the app switcher (⌘Tab) and in Force Quit (⌥⌘Esc)? Does it leave the Dock when the last of its windows closes? Does ⌘Q quit it?
 - [ ] **Quit Singline** at the bottom of the settings quits the app.
+- [ ] macOS: Settings → General → **Show in Dock**: does Singline stay in the Dock after the settings close, does a click on the Dock icon open the settings, and does it leave the Dock when the setting is off again?
 - [ ] Sing to find (tray menu or the microphone in the overlay): the first time, does the system ask for the microphone and the speech model download show its progress? Sing or play a few lines of a well-known song: is it found within about ten seconds, and does the overlay start at the line you sang and keep up? Deny the microphone in the system settings and try again: does the overlay say where to allow it?
 
 Note ✅ for each item, or what happened instead.

@@ -175,16 +175,32 @@ jobs:
           SECRET_APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           SECRET_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           SINGLINE_GENIUS_TOKEN: ${{ secrets.SINGLINE_GENIUS_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         run: |
           # macOS signing and notarization start as soon as the secrets exist.
           for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
             value="SECRET_$name"
             if [ -n "${!value}" ]; then export "$name=${!value}"; fi
           done
-          pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }}
+          # Update packages need the signing key; without it there are installers only.
+          config=()
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo '{"bundle":{"createUpdaterArtifacts":false}}' > "$RUNNER_TEMP/no-updater.json"
+            config=(--config "$RUNNER_TEMP/no-updater.json")
+          fi
+          pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }} "${config[@]}"
       - name: Collect the installers
         run: |
           find target -path '*/release/bundle/*' \( -name '*.dmg' -o -name '*-setup.exe' -o -name '*.msi' -o -name '*.deb' -o -name '*.AppImage' \) -exec cp {} dist/ \;
+          # The update packages, under the names the update manifest points to.
+          for file in target/*/release/bundle/macos/*.app.tar.gz* target/release/bundle/nsis/*-setup.exe.sig target/release/bundle/appimage/*.AppImage.sig; do
+            [ -e "$file" ] || continue
+            case "$file" in
+              *.app.tar.gz*) cp "$file" "dist/Singline-macOS.app.tar.gz${file##*.tar.gz}" ;;
+              *-setup.exe.sig) cp "$file" dist/Singline-Windows-setup.exe.sig && cp "${file%.sig}" dist/Singline-Windows-setup.exe ;;
+              *.AppImage.sig) cp "$file" dist/Singline-Linux.AppImage.sig && cp "${file%.sig}" dist/Singline-Linux.AppImage ;;
+            esac
+          done
           ls -la dist
       - name: Upload to the release
         if: ${{ !inputs.dry_run }}
@@ -204,6 +220,20 @@ jobs:
     if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+      - name: Write the update manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p updates
+          gh release download "v$VERSION" --repo "$GITHUB_REPOSITORY" --pattern '*.sig' --dir updates || true
+          if ls updates/*.sig > /dev/null 2>&1; then
+            node scripts/update-manifest.mjs updates "$VERSION" \
+              "https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION" "Singline $VERSION" > updates/latest.json
+            gh release upload "v$VERSION" updates/latest.json --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            echo "::warning::Without the TAURI_SIGNING_PRIVATE_KEY secret this release cannot update installed apps."
+          fi
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}

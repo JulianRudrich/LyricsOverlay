@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # End-to-end check on Linux: starts the real app on a virtual display with a
 # pretend Spotify (MPRIS) and a pretend LRCLIB, then checks that the welcome
-# window opens at this first start and that the overlay shows the line that
-# matches the playback time, and saves a screenshot.
+# window opens at this first start, that the overlay shows the line that
+# matches the playback time and that `singline now` prints it for the
+# terminal, and saves a screenshot.
 #
 # Needs: xvfb-run, dbus-run-session, python3, ImageMagick (import).
 # Build first:
@@ -38,6 +39,8 @@ timeout 120 dbus-run-session -- xvfb-run -a -s "-screen 0 1280x800x24" bash -c '
   done
   sleep 3.2
   import -window root "$OUT/screen.png" || true
+  "$APP" now > "$OUT/now.txt" 2>&1 || true
+  date +%s.%N > "$OUT/now-at"
   kill "$app" 2>/dev/null; wait "$app" 2>/dev/null
   kill $(jobs -p) 2>/dev/null || true
 ' 2>&1 | grep -v "fd limit" || true
@@ -70,6 +73,17 @@ if reports:
 log = (out / "app.log").read_text()
 if not re.search(r"^welcome-window$", log, re.M):
     failures.append("the welcome window did not open at the first start")
+
+# `singline now` reads now.json, which the app keeps up to date for the terminal.
+printed = (out / "now.txt").read_text().strip() if (out / "now.txt").exists() else ""
+match = re.fullmatch(r"♪ Line (\d+)", printed)
+if not match:
+    failures.append(f"singline now printed {printed!r}, expected a line like '♪ Line 42'")
+else:
+    elapsed = float((out / "now-at").read_text()) - float((out / "player-started").read_text())
+    expected = math.floor(start + elapsed)
+    if abs(int(match.group(1)) - expected) > 1:
+        failures.append(f"singline now printed {printed!r} about {expected} s into the song")
 
 print(f"LRCLIB requests: {len(requests)}, overlay lines: {len(reports)}")
 for position, text in reports[:8]:

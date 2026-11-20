@@ -149,7 +149,7 @@ pub fn open_settings(app: &AppHandle) {
     let title = texts(app).get("settings.title");
     match glass_window(app, SETTINGS, "settings", &title, 700.0, 480.0) {
         Ok(_) => dock::update(app, SETTINGS, false),
-        Err(error) => eprintln!("could not open the settings: {error}"),
+        Err(error) => log::error!("could not open the settings: {error}"),
     }
 }
 
@@ -167,7 +167,7 @@ pub fn open_welcome(app: &AppHandle) {
                 println!("welcome-window");
             }
         }
-        Err(error) => eprintln!("could not open the welcome window: {error}"),
+        Err(error) => log::error!("could not open the welcome window: {error}"),
     }
 }
 

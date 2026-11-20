@@ -215,7 +215,7 @@ pub fn update(app: &AppHandle) {
                 at: now,
             })
         }
-        Err(error) => eprintln!("could not write {}: {error}", path.display()),
+        Err(error) => log::warn!("could not write now.json: {error}"),
     }
 }
 

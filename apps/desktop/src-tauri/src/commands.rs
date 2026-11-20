@@ -160,7 +160,7 @@ pub fn open_automation_settings() {
     if let Err(error) =
         open::that("x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")
     {
-        eprintln!("could not open System Settings: {error}");
+        log::warn!("could not open System Settings: {error}");
     }
 }
 

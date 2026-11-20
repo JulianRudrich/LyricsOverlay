@@ -33,6 +33,9 @@
   <Row card={false} icon="lyrics" title={t("settings.lyricsOnly")} hint={t("settings.lyricsOnlyHint")}>
     <Toggle label={t("settings.lyricsOnly")} checked={settings.lyricsOnly} onchange={(lyricsOnly) => ctx.update({ lyricsOnly })} />
   </Row>
+  <Row card={false} icon="pointer" title={t("tray.clickThrough")} hint={t("settings.clickThroughHint")}>
+    <Toggle label={t("tray.clickThrough")} checked={settings.clickThrough} onchange={(clickThrough) => ctx.update({ clickThrough })} />
+  </Row>
 </Card>
 
 <Card>

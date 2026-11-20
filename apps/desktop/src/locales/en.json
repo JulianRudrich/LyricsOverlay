@@ -19,6 +19,7 @@
   "tray.lyricsOnly": "Lyrics only",
   "settings.lyricsOnly": "Lyrics only",
   "settings.lyricsOnlyHint": "No song, buttons, microphone or timeline, not even under the pointer.",
+  "settings.clickThroughHint": "Clicks go through the lyrics to the window behind them. Turn it off in Singline's menu, or open Singline again.",
   "menu.idle": "Nothing is playing",
   "menu.sleepLeft": "{minutes} min left",
   "menu.sleepMinutes": "{minutes} min",

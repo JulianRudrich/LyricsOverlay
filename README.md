@@ -113,7 +113,7 @@ Start Singline and play a song. Singline sits in the system tray (the menu bar o
 | Show or hide the overlay | Press **Alt+Shift+L** (**⌥⇧L** on macOS), or use the tray menu |
 | Move the overlay | Drag it, or choose a corner in the tray menu under **Position** |
 | Show nothing but the lyrics | Turn on **Lyrics only** in the tray menu or under Settings → Appearance: no song, buttons, microphone or timeline |
-| Click the window behind the overlay | Turn on **Click-through** in the tray menu |
+| Click the window behind the overlay | Turn on **Click-through** in the tray menu or under Settings → Appearance; opening Singline again turns it off |
 | Open the settings | Click the note in the overlay, choose **Settings…** in the tray menu, or open Singline again while it runs |
 | Fix the timing of a song | Settings → Song & timing → **−0.25** / **+0.25** (remembered per song) |
 | Fix the timing of all songs | Settings → Song & timing → **Global timing correction** |

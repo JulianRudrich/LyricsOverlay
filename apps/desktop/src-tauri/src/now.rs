@@ -301,11 +301,38 @@ pub fn print(arguments: &[String]) -> i32 {
     0
 }
 
+/// Whether `now` comes from a Singline that is still running, in a format this
+/// build knows.
+pub fn is_fresh(now: &Now, at_ms: u64) -> bool {
+    now.version == VERSION && at_ms.saturating_sub(now.updated_at) <= STALE_AFTER.as_millis() as u64
+}
+
+/// Reads `now.json` again only after Singline rewrote it.
+#[derive(Default)]
+pub struct Reader {
+    modified: Option<SystemTime>,
+    now: Option<Now>,
+}
+
+impl Reader {
+    pub fn read(&mut self) -> Option<&Now> {
+        let path = path()?;
+        let modified = fs::metadata(&path).and_then(|meta| meta.modified()).ok();
+        if modified.is_none() {
+            self.now = None;
+        } else if modified != self.modified {
+            self.now = fs::read_to_string(&path)
+                .ok()
+                .and_then(|text| serde_json::from_str(&text).ok());
+        }
+        self.modified = modified;
+        self.now.as_ref()
+    }
+}
+
 /// The text to print at `at_ms`, or nothing for an old file or without a song.
 fn render(now: &Now, at_ms: u64, format: Option<&str>) -> Option<String> {
-    if now.version != VERSION
-        || at_ms.saturating_sub(now.updated_at) > STALE_AFTER.as_millis() as u64
-    {
+    if !is_fresh(now, at_ms) {
         return None;
     }
     let title = now.title.as_deref()?;

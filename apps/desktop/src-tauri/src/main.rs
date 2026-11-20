@@ -17,6 +17,8 @@ mod shuffle;
 mod sing;
 mod sleep;
 mod spotify;
+#[cfg(unix)]
+mod terminal;
 mod tray;
 mod windows;
 
@@ -302,11 +304,15 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
 }
 
 fn main() {
-    // `singline now` prints the line being sung for a status line, and exits
-    // before anything of the app starts.
+    // `singline now` prints the line being sung for a status line and
+    // `singline lyrics` shows the lyrics in the terminal; both start nothing of
+    // the app.
     let arguments: Vec<String> = std::env::args().skip(1).collect();
-    if arguments.first().map(String::as_str) == Some("now") {
-        std::process::exit(now::print(&arguments[1..]));
+    match arguments.first().map(String::as_str) {
+        Some("now") => std::process::exit(now::print(&arguments[1..])),
+        #[cfg(unix)]
+        Some("lyrics") => std::process::exit(terminal::run(&arguments[1..])),
+        _ => {}
     }
     let demo = std::env::args().any(|argument| argument == "--demo");
     tauri::Builder::default()

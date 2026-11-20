@@ -18,6 +18,7 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Three layouts, font size, opacity and size | ✅ | 🧪 | 🧪 | Linory has one fixed layout |
 | Lyrics only, without song, controls and timeline | ✅ | 🧪 | 🧪 | Not in Linory |
 | Welcome at the first start: where the icon is, player, permissions, extension | ✅ | 🧪 | 🧪 | Not in Linory |
+| The line being sung in the terminal: `singline now` and the pi extension | ✅ | 🧪 | 🧪 | Windows: the pi extension only. Not in Linory |
 | Word-by-word highlight from real word timing | ✅ | 🧪 | 🧪 | Linory mostly estimates |
 | Estimated word highlight for line-synced lyrics | ✅ | 🧪 | 🧪 | |
 | Scrolling lines and smooth song changes | ✅ | 🧪 | 🧪 | |

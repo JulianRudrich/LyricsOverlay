@@ -20,7 +20,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 
 ## Contents
 
-[Features](#features) · [Supported players](#supported-players) · [Install](#install) · [Using Singline](#using-singline) · [Where the lyrics come from](#where-the-lyrics-come-from) · [Privacy](#privacy) · [Troubleshooting](#troubleshooting) · [Building from source](#building-from-source) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Credits](#credits) · [License](#license)
+[Features](#features) · [Supported players](#supported-players) · [Install](#install) · [Using Singline](#using-singline) · [In the terminal](#in-the-terminal) · [Where the lyrics come from](#where-the-lyrics-come-from) · [Privacy](#privacy) · [Troubleshooting](#troubleshooting) · [Building from source](#building-from-source) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Credits](#credits) · [License](#license)
 
 ## Features
 
@@ -32,6 +32,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Karaoke.** The lyrics fill a second screen or a TV, white on black: the current line lights up word by word, the next ones wait below it, breaks count down with three dots, and a long intro shows the cover, title and artist. Move the mouse for the controls.
 - **Three layouts.** One line, Focus or Context, with adjustable font size, opacity, background, width and height. **Lyrics only** leaves out the song, the buttons and the timeline, even under the pointer.
 - **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. With click-through it becomes a ghost that lets every click pass to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
+- **In your terminal.** The line being sung in the footer of pi, the coding agent, in your tmux status bar or any other status line, for coding with music.
 - **A welcome that gets you started.** The first start shows where Singline lives, lets you choose your player, tells you as soon as Singline hears it and pairs the browser extension.
 - **Timing you can correct.** If the lyrics run early or late, move them by a quarter of a second; Singline remembers the correction for that song. A global correction makes up for your audio setup, for example Bluetooth headphones.
 - **Finds the right version.** Exact matches first, then a search that prefers the same album and versions with word timing. Plain lyrics are spread over the song and marked *~ not synced*; instrumentals are recognised.
@@ -146,6 +147,41 @@ At the first start, a short welcome shows where Singline lives, lets you choose 
 | Quit Singline | Tray menu → **Quit**, or **Quit Singline** at the bottom of the settings |
 
 Positive corrections show the lyrics earlier, negative ones later. The global and the per-song correction add up.
+
+## In the terminal
+
+Coding with music? Singline brings the line being sung into your terminal. The Singline app has to run: it keeps `now.json` up to date in its cache folder, and nothing leaves your computer.
+
+**pi.** The [Singline extension for pi](extensions/pi) shows the line in pi's footer, lighting up word by word, in any terminal such as Kitty, WezTerm or Ghostty:
+
+```bash
+mkdir -p ~/.pi/agent/extensions
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/JulianRudrich/Singline/main/extensions/pi/singline.ts -o ~/.pi/agent/extensions/singline.ts
+```
+
+Then start pi, or run `/reload` in a running one. `/singline` shows or hides the lyrics.
+
+**tmux and other status lines.** `singline now` prints the current line, the song between two lines, and nothing while no song plays. `--format` chooses what to print, with `{line}`, `{next}`, `{title}`, `{artist}`, `{album}` and `{player}`. For tmux, add this to `~/.tmux.conf`:
+
+```tmux
+set -g status-interval 1
+set -g status-right '#(singline now)'
+```
+
+On macOS the command lives inside the app, at `/Applications/Singline.app/Contents/MacOS/singline`. To call it `singline`, link it once:
+
+```bash
+sudo mkdir -p /usr/local/bin
+```
+
+```bash
+sudo ln -sf /Applications/Singline.app/Contents/MacOS/singline /usr/local/bin/singline
+```
+
+`singline now` works on macOS and Linux. On Windows, use the pi extension.
 
 ## Where the lyrics come from
 

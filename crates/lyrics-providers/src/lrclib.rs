@@ -336,7 +336,9 @@ impl LrclibClient {
     }
 }
 
+/// Describes a failed request without its URL, which names the song.
 fn network_error(error: reqwest::Error) -> LookupError {
+    let error = error.without_url();
     if error.is_connect() {
         LookupError::Offline
     } else if error.is_timeout() {

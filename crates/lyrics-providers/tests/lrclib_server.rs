@@ -307,6 +307,30 @@ async fn server_errors_and_missing_servers() {
 }
 
 #[tokio::test]
+async fn failed_requests_do_not_name_the_song() {
+    // A server that hangs up without answering.
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a free port");
+    let address = listener.local_addr().expect("a bound port");
+    std::thread::spawn(move || {
+        for connection in listener.incoming() {
+            drop(connection);
+        }
+    });
+    let silent =
+        LrclibClient::with_base_url(&format!("http://{address}"), AGENT).with_pause(Duration::ZERO);
+    let error = silent
+        .find(&query("Paper Lanterns", None, 200.0))
+        .await
+        .expect_err("no answer");
+    assert!(matches!(error, LookupError::Network(_)), "{error:?}");
+    let message = error.to_string();
+    assert!(
+        !message.contains("Lanterns") && !message.contains("Example"),
+        "the message ends up in the log: {message}"
+    );
+}
+
+#[tokio::test]
 async fn service_prefers_own_lyrics_and_caches_online_results() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))

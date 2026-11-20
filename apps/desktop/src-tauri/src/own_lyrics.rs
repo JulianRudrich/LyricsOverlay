@@ -175,7 +175,8 @@ fn read_lyrics_file(path: &Path) -> Result<String, OwnLyricsError> {
     File::open(path)
         .and_then(|file| file.take(limit).read_to_end(&mut bytes))
         .map_err(|error| {
-            eprintln!("could not read {}: {error}", path.display());
+            // The path often names the song and the listener, so it stays out.
+            log::warn!("could not read a lyrics file: {error}");
             OwnLyricsError::Unreadable
         })?;
     decode_lyrics(&bytes)
@@ -228,7 +229,7 @@ fn store_lyrics(state: &AppState, track_key: &str, text: &str) -> Result<(), Own
         .import_lyrics(track_key, text)
         .map_err(|error| {
             if let ImportError::Storage(detail) = &error {
-                eprintln!("could not save your own lyrics: {detail}");
+                log::error!("could not save your own lyrics: {detail}");
             }
             OwnLyricsError::from(error)
         })?;
@@ -353,7 +354,7 @@ pub async fn remove_local_lyrics(app: AppHandle, track_key: String) -> Result<()
         .store()
         .remove_local_lyrics(&track_key)
         .map_err(|error| {
-            eprintln!("could not remove your own lyrics: {error}");
+            log::error!("could not remove your own lyrics: {error}");
             OwnLyricsError::Storage
         })?;
     reload_if_playing(&state, &track_key);

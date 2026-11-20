@@ -146,7 +146,7 @@ pub fn register_saved(app: &AppHandle, state: &AppState, hotkey: &str) {
     let failed = match shortcuts.register(hotkey) {
         Ok(()) => false,
         Err(error) => {
-            eprintln!("could not register the shortcut {hotkey}: {error}");
+            log::warn!("could not register the shortcut {hotkey}: {error}");
             true
         }
     };
@@ -165,7 +165,7 @@ pub fn change(app: &AppHandle, state: &AppState, requested: &str) -> Result<Stri
     }
     let shortcuts = app.global_shortcut();
     if let Err(error) = shortcuts.register(hotkey.as_str()) {
-        eprintln!("could not register the shortcut {hotkey}: {error}");
+        log::warn!("could not register the shortcut {hotkey}: {error}");
         return Err(HotkeyError::Taken);
     }
     if hotkey != current {

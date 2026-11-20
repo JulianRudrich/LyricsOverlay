@@ -175,7 +175,7 @@ fn open_at(app: &AppHandle, icon: Bounds) {
         return;
     }
     if let Err(error) = create(app) {
-        eprintln!("could not open the menu: {error}");
+        log::error!("could not open the menu: {error}");
         let mut inner = panel.lock();
         inner.open = false;
         inner.waiting = false;
@@ -403,7 +403,7 @@ pub fn menu_panel_resize(app: AppHandle, height: f64) {
         return;
     }
     if app.state::<AppState>().debug {
-        eprintln!("menu-panel-height {height}");
+        log::debug!(target: crate::logging::CHECKS, "menu-panel-height {height}");
     }
     let panel = app.state::<MenuPanel>();
     let (spot, waiting, generation) = {

@@ -2748,6 +2748,7 @@ version = "0.3.0-alpha.0"
 dependencies = [
  "getrandom 0.3.4",
  "httparse",
+ "log",
  "lyrics-core",
  "serde",
  "serde_json",
@@ -4545,6 +4546,7 @@ version = "0.3.0"
 dependencies = [
  "chrono",
  "crossterm",
+ "log",
  "lyrics-core",
  "lyrics-providers",
  "media-session",

@@ -21,6 +21,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 chrono = { version = "0.4.45", default-features = false, features = ["clock"] }
+log = "0.4"
 lyrics-core.workspace = true
 lyrics-providers.workspace = true
 media-session.workspace = true

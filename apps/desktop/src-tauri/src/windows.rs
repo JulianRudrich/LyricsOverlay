@@ -263,7 +263,7 @@ pub fn open_stats(app: &AppHandle) {
         .build();
     match built {
         Ok(_) => dock::update(app, STATS, false),
-        Err(error) => eprintln!("could not open your music: {error}"),
+        Err(error) => log::error!("could not open your music: {error}"),
     }
 }
 
@@ -288,7 +288,7 @@ pub fn open_shuffle(app: &AppHandle) {
             .build();
     match built {
         Ok(_) => dock::update(app, SHUFFLE, false),
-        Err(error) => eprintln!("could not open True Shuffle: {error}"),
+        Err(error) => log::error!("could not open True Shuffle: {error}"),
     }
 }
 
@@ -398,7 +398,7 @@ pub fn open_karaoke(app: &AppHandle, display: Option<&str>) {
             let _ = window.set_focus();
             make_room_for_karaoke(app, monitor.as_ref());
         }
-        Err(error) => eprintln!("could not open karaoke: {error}"),
+        Err(error) => log::error!("could not open karaoke: {error}"),
     }
 }
 
@@ -507,7 +507,7 @@ pub fn open_editor(app: &AppHandle) {
             .build();
     match built {
         Ok(_) => dock::update(app, EDITOR, false),
-        Err(error) => eprintln!("could not open the lyrics editor: {error}"),
+        Err(error) => log::error!("could not open the lyrics editor: {error}"),
     }
 }
 

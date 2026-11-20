@@ -241,7 +241,7 @@ impl Clients {
             clients: self.clients.clone(),
         };
         if let Err(error) = write_atomically(path, &stored) {
-            eprintln!("could not save the paired browsers: {error}");
+            log::error!("could not save the paired browsers: {error}");
         }
     }
 }

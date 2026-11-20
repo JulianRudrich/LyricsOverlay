@@ -211,7 +211,7 @@ impl Spotify {
                 fs::rename(&temporary, path)
             });
         if let Err(error) = written {
-            eprintln!("could not save the Spotify Client ID: {error}");
+            log::error!("could not save the Spotify Client ID: {error}");
         }
     }
 }
@@ -279,7 +279,7 @@ async fn finish_connecting(app: &AppHandle, client: &SpotifyClient, generation: 
             let persistent = client.persistence() == Some(Persistence::System);
             if !persistent {
                 if let Some(reason) = client.store_problem() {
-                    eprintln!("the Spotify login stays only until quit: {reason}");
+                    log::warn!("the Spotify login stays only until quit: {reason}");
                 }
             }
             update(app, generation, |inner| {
@@ -563,7 +563,7 @@ fn disconnect(app: &AppHandle) {
                 .unwrap_or(Ok(())),
         };
         if let Err(error) = forgotten {
-            eprintln!("could not remove the Spotify login: {error}");
+            log::error!("could not remove the Spotify login: {error}");
         }
     });
     emit(app);

@@ -102,7 +102,7 @@ pub fn refresh(app: &AppHandle) {
         Ok(menu) => {
             let _ = tray.set_menu(Some(menu));
         }
-        Err(error) => eprintln!("could not rebuild the tray menu: {error}"),
+        Err(error) => log::error!("could not rebuild the tray menu: {error}"),
     }
 }
 

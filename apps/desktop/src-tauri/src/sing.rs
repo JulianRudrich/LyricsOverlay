@@ -347,9 +347,11 @@ impl Sing {
         }
     }
 
+    /// A step for the end-to-end checks. It names what was heard, so it
+    /// stays out of the log file.
     fn log(&self, message: impl FnOnce() -> String) {
         if self.debug {
-            eprintln!("sing: {}", message());
+            log::debug!(target: crate::logging::CHECKS, "sing: {}", message());
         }
     }
 }
@@ -1206,7 +1208,7 @@ pub fn sing_set_token(state: State<'_, Sing>, token: String) -> SingSettings {
                 fs::rename(&temporary, path)
             });
         if let Err(error) = written {
-            eprintln!("could not save the Genius token: {error}");
+            log::error!("could not save the Genius token: {error}");
         }
     }
     state.settings_view()
@@ -1235,7 +1237,7 @@ pub fn sing_remove_model(app: AppHandle) -> ModelView {
     }
     if let Some(dir) = &sing.models_dir {
         if let Err(error) = MODEL.remove(dir) {
-            eprintln!("could not remove the speech model: {error}");
+            log::error!("could not remove the speech model: {error}");
         }
     }
     sing.lock().download_error = None;
@@ -1246,6 +1248,6 @@ pub fn sing_remove_model(app: AppHandle) -> ModelView {
 #[tauri::command]
 pub fn sing_open_genius() {
     if let Err(error) = open::that(GENIUS_API_CLIENTS) {
-        eprintln!("could not open {GENIUS_API_CLIENTS}: {error}");
+        log::error!("could not open {GENIUS_API_CLIENTS}: {error}");
     }
 }

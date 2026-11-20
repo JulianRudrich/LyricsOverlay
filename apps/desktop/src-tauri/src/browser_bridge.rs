@@ -28,7 +28,7 @@ impl BrowserBridge {
         let bridge = Bridge::start(options);
         if debug {
             if let Some(code) = bridge.pairing_code() {
-                eprintln!("bridge-pairing-code {code}");
+                log::debug!(target: crate::logging::CHECKS, "bridge-pairing-code {code}");
             }
         }
         Self(Some(bridge))

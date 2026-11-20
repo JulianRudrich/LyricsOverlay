@@ -8,6 +8,7 @@ mod dock;
 mod history;
 mod hotkey;
 mod i18n;
+mod logging;
 mod menu_panel;
 mod now;
 mod own_lyrics;
@@ -17,6 +18,7 @@ mod shuffle;
 mod sing;
 mod sleep;
 mod spotify;
+mod system;
 #[cfg(unix)]
 mod terminal;
 mod tray;
@@ -147,7 +149,7 @@ impl AppState {
         };
         self.settings_dirty.store(false, Ordering::SeqCst);
         if let Err(error) = self.settings().save(path) {
-            eprintln!("could not save the settings: {error}");
+            log::error!("could not save the settings: {error}");
         }
     }
 }
@@ -189,6 +191,12 @@ fn user_agent(app: &AppHandle) -> String {
 
 fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Error>> {
     let handle = app.handle().clone();
+    logging::init(&handle);
+    log::info!(
+        "Singline {} started on {}",
+        handle.package_info().version,
+        system::version()
+    );
     let override_dir = std::env::var_os("SINGLINE_DATA_DIR").map(PathBuf::from);
     let config_dir = override_dir
         .clone()
@@ -215,7 +223,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
         .unwrap_or_default();
     let store = match (&data_dir, demo) {
         (Some(dir), false) => Store::open(&dir.join("singline.sqlite")).or_else(|error| {
-            eprintln!("could not open the song database, keeping data in memory: {error}");
+            log::error!("could not open the song database, keeping data in memory: {error}");
             Store::open_in_memory()
         })?,
         _ => Store::open_in_memory()?,

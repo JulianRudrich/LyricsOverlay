@@ -171,7 +171,7 @@ impl Shuffle {
                 fs::rename(&temporary, path)
             });
         if let Err(error) = written {
-            eprintln!("could not save the shuffle progress: {error}");
+            log::error!("could not save the shuffle progress: {error}");
         }
     }
 
@@ -268,7 +268,7 @@ fn finish(app: &AppHandle, notice: Option<Notice>) {
 }
 
 fn fail(app: &AppHandle, error: &SpotifyError) {
-    eprintln!("True Shuffle: {error}");
+    log::warn!("True Shuffle: {error}");
     spotify::note_error(app, error);
     finish(app, Some(Notice::from_error(error)));
 }

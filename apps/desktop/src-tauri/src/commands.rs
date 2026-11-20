@@ -122,7 +122,7 @@ pub fn set_song_offset(app: AppHandle, state: State<'_, AppState>, value: f64) -
         0.0
     };
     if let Err(error) = state.store().set_timing_offset(&track_key, offset) {
-        eprintln!("could not save the timing correction: {error}");
+        log::error!("could not save the timing correction: {error}");
         return view.song_offset;
     }
     view.song_offset = offset;
@@ -216,7 +216,7 @@ pub fn set_launch_at_login(app: AppHandle, enabled: bool) -> bool {
         launcher.disable()
     };
     if let Err(error) = result {
-        eprintln!("could not change launch at login: {error}");
+        log::error!("could not change launch at login: {error}");
     }
     launcher.is_enabled().unwrap_or(false)
 }
@@ -225,6 +225,6 @@ pub fn set_launch_at_login(app: AppHandle, enabled: bool) -> bool {
 #[tauri::command]
 pub fn report_line(state: State<'_, AppState>, position: f64, text: String) {
     if state.debug {
-        eprintln!("overlay-line {position:.2} {text}");
+        log::debug!(target: crate::logging::CHECKS, "overlay-line {position:.2} {text}");
     }
 }

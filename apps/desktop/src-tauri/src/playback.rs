@@ -168,7 +168,7 @@ impl LyricsView {
             LyricsOutcome::Offline => "offline",
             LyricsOutcome::RateLimited { .. } => "rateLimited",
             LyricsOutcome::Failed { message } => {
-                eprintln!("lyrics lookup failed: {message}");
+                log::warn!("lyrics lookup failed: {message}");
                 "failed"
             }
         };
@@ -187,7 +187,7 @@ pub fn spawn(app: AppHandle, demo: bool, requests: Receiver<Request>) {
         .name("playback".into())
         .spawn(move || run(&app, demo, &requests));
     if let Err(error) = started {
-        eprintln!("could not start reading players: {error}");
+        log::error!("could not start reading players: {error}");
     }
 }
 
@@ -258,7 +258,7 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
                         for backend in backends.iter_mut() {
                             match backend.send(&player, command) {
                                 Err(CommandError::PlayerGone) => continue,
-                                Err(error) => eprintln!("{player}: {error}"),
+                                Err(error) => log::warn!("{player}: {error}"),
                                 Ok(()) => {}
                             }
                             break;

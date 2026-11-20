@@ -46,7 +46,7 @@ pub(super) fn spawn(shared: Arc<Mutex<Shared>>, ports: Vec<u16>) {
             thread::sleep(RETRY);
         });
     if let Err(error) = started {
-        eprintln!("could not start the browser bridge: {error}");
+        log::error!("could not start the browser bridge: {error}");
     }
 }
 

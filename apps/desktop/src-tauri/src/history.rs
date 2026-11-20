@@ -129,7 +129,7 @@ fn save(app: &AppHandle, sessions: &[ListenSession]) {
     let store = state.store();
     for session in sessions {
         if let Err(error) = store.add_listen(session) {
-            eprintln!("could not save a song to the listening history: {error}");
+            log::error!("could not save a song to the listening history: {error}");
         }
     }
 }

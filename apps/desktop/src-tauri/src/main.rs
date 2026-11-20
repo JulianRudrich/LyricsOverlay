@@ -103,6 +103,9 @@ impl AppState {
         if old.overlay_visible != new.overlay_visible || old.auto_hide != new.auto_hide {
             autohide::settings_changed(app, &old, &new);
         }
+        if old.show_in_dock != new.show_in_dock {
+            dock::refresh(app);
+        }
         if (old.source, old.include_other_players) != (new.source, new.include_other_players) {
             self.request(Request::Preference {
                 source: new.source,
@@ -255,6 +258,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
 
     windows::create_overlay(&handle, &settings)?;
     tray::create(&handle)?;
+    dock::refresh(&handle);
     if !settings.welcomed && !demo {
         windows::open_welcome(&handle);
     }

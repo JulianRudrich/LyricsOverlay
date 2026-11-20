@@ -18,6 +18,8 @@
   "tray.quit": "Quit",
   "tray.lyricsOnly": "Lyrics only",
   "settings.lyricsOnly": "Lyrics only",
+  "settings.showInDock": "Show in Dock",
+  "settings.showInDockHint": "Keeps Singline in the Dock and the app switcher, for a menu bar too full to show its icon. A click on it opens the settings.",
   "settings.lyricsOnlyHint": "No song, buttons, microphone or timeline, not even under the pointer.",
   "settings.clickThroughHint": "Clicks go through the lyrics to the window behind them. Turn it off in Singline's menu, or open Singline again.",
   "menu.idle": "Nothing is playing",

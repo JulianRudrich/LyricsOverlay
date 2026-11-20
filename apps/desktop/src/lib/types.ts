@@ -131,6 +131,8 @@ export interface Settings {
   language: Language;
   overlayVisible: boolean;
   autoHide: boolean;
+  /** macOS: Singline stays in the Dock and the app switcher, also without a window. */
+  showInDock: boolean;
   hotkey: string;
   /** Karaoke's type size, as a factor of the size that fits the screen. */
   karaokeScale: number;

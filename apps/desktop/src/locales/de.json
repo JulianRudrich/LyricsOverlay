@@ -18,6 +18,8 @@
   "tray.quit": "Beenden",
   "tray.lyricsOnly": "Nur Songtext",
   "settings.lyricsOnly": "Nur Songtext",
+  "settings.showInDock": "Im Dock anzeigen",
+  "settings.showInDockHint": "Hält Singline im Dock und im App-Umschalter, falls die Menüleiste zu voll für sein Symbol ist. Ein Klick darauf öffnet die Einstellungen.",
   "settings.lyricsOnlyHint": "Kein Song, keine Tasten, kein Mikrofon und keine Zeitleiste, auch nicht unter dem Mauszeiger.",
   "settings.clickThroughHint": "Klicks gehen durch die Songtexte zum Fenster dahinter. Ausschalten kannst du das im Singline-Menü, oder du öffnest Singline noch einmal.",
   "menu.idle": "Gerade läuft nichts",

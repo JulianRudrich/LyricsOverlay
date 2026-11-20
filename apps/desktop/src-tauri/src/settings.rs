@@ -58,6 +58,8 @@ pub struct Settings {
     pub overlay_visible: bool,
     /// Hides the overlay a few seconds after playback stops.
     pub auto_hide: bool,
+    /// macOS: Singline stays in the Dock and the app switcher, also without a window.
+    pub show_in_dock: bool,
     /// Top-left corner in logical pixels, once the overlay was moved.
     pub overlay_position: Option<[f64; 2]>,
     pub hotkey: String,
@@ -88,6 +90,7 @@ impl Default for Settings {
             language: Language::System,
             overlay_visible: true,
             auto_hide: false,
+            show_in_dock: false,
             overlay_position: None,
             hotkey: DEFAULT_HOTKEY.to_owned(),
             karaoke_scale: 1.0,

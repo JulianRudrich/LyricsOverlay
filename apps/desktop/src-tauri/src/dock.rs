@@ -1,8 +1,8 @@
 //! On macOS Singline lives in the menu bar. While one of its windows is open
 //! it also shows in the Dock, so it can be found in the app switcher and in
 //! Force Quit, and the menu bar offers its app menu with Quit. Without a
-//! window it leaves the Dock again, which keeps the overlay above apps in full
-//! screen.
+//! window it leaves the Dock again, unless the listener keeps it there for a
+//! menu bar too full to show its icon.
 
 #![cfg_attr(not(target_os = "macos"), allow(dead_code))]
 
@@ -17,7 +17,7 @@ use tauri::AppHandle;
 use tauri::Manager;
 
 #[cfg(target_os = "macos")]
-use crate::windows;
+use crate::{windows, AppState};
 
 /// The windows that bring Singline into the Dock. The overlay, the tray panel
 /// and karaoke, which fills a display, do not.
@@ -75,9 +75,13 @@ pub fn update(app: &AppHandle, label: &str, closing: bool) {
     let Some(state) = app.try_state::<Dock>() else {
         return;
     };
-    let open = WINDOWS
-        .iter()
-        .any(|name| (*name != label || !closing) && app.get_webview_window(name).is_some());
+    let kept = app
+        .try_state::<AppState>()
+        .is_some_and(|state| state.settings().show_in_dock);
+    let open = kept
+        || WINDOWS
+            .iter()
+            .any(|name| (*name != label || !closing) && app.get_webview_window(name).is_some());
     let mut shown = state
         .shown
         .lock()
@@ -108,6 +112,11 @@ pub fn update(app: &AppHandle, label: &str, closing: bool) {
 
 #[cfg(not(target_os = "macos"))]
 pub fn update(_app: &AppHandle, _label: &str, _closing: bool) {}
+
+/// Applies the "Show in Dock" setting.
+pub fn refresh(app: &AppHandle) {
+    update(app, "", false);
+}
 
 #[cfg(target_os = "macos")]
 fn refocus(app: &AppHandle, label: &str) {

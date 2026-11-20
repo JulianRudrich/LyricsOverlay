@@ -79,6 +79,12 @@
   <Toggle label={t("settings.autoHide")} checked={settings.autoHide} onchange={(autoHide) => ctx.update({ autoHide })} />
 </Row>
 
+{#if app.platform === "macos"}
+  <Row icon="display" title={t("settings.showInDock")} hint={t("settings.showInDockHint")}>
+    <Toggle label={t("settings.showInDock")} checked={settings.showInDock} onchange={(showInDock) => ctx.update({ showInDock })} />
+  </Row>
+{/if}
+
 <Row icon="power" title={t("settings.launchAtLogin")} hint={t("settings.launchAtLoginHint")}>
   <Toggle label={t("settings.launchAtLogin")} checked={app.launchAtLogin} onchange={(enabled) => ctx.setLaunchAtLogin(enabled)} />
 </Row>

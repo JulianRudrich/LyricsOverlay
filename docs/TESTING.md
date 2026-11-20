@@ -56,6 +56,7 @@ After starting, the overlay appears in the top right corner and an icon appears 
 - [ ] Tray menu: hide and show, click-through, corners, playback source.
 - [ ] Alt+Shift+L (⌥⇧L on macOS) hides and shows the overlay.
 - [ ] Settings (the button in the overlay or the tray menu): layouts, font size, opacity, width and height take effect immediately.
+- [ ] Lyrics only (tray menu or Settings → Appearance): do the song, the buttons, the microphone and the timeline disappear, also under the pointer, and come back when it is turned off?
 - [ ] Song & timing: ±0.25 s changes the timing audibly; after switching to another song and back, the value is still there.
 - [ ] Own lyrics: import an `.lrc` file, then open the editor, stamp a few lines with Ctrl+Shift+T (⌘⇧T on macOS) and save. Does the overlay show them at once? Remove them again.
 - [ ] Switch the language between English and German: do the overlay, settings and tray menu change?

@@ -16,6 +16,7 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Click-through, remembered; opening the app again turns it off | 🧪 | 🧪 | 🧪 | macOS: also from Applications or the Dock |
 | Shortcut to show and hide | 🧪 | 🧪 | 🧪 | Linux: X11 only for now |
 | Three layouts, font size, opacity and size | ✅ | 🧪 | 🧪 | Linory has one fixed layout |
+| Lyrics only, without song, controls and timeline | ✅ | 🧪 | 🧪 | Not in Linory |
 | Word-by-word highlight from real word timing | ✅ | 🧪 | 🧪 | Linory mostly estimates |
 | Estimated word highlight for line-synced lyrics | ✅ | 🧪 | 🧪 | |
 | Scrolling lines and smooth song changes | ✅ | 🧪 | 🧪 | |

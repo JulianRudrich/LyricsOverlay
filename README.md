@@ -205,6 +205,7 @@ For **Sing to find**, Whisper first turns your singing into words on your comput
 - Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
 - Sing to find runs only while you use it. The audio stays in memory on your computer and is transcribed there by [Whisper](https://github.com/ggerganov/whisper.cpp); the speech model (about 150 MB) is downloaded once from Hugging Face into the data folder. Only the words it heard go to Genius, to find the song, and the found title and artist to LRCLIB. It needs **Search lyrics online**.
 - The Spotify connection is optional. It uses your own Spotify app, keeps the login in the system's credential store (Keychain, Credential Manager or Secret Service), and talks to Spotify only while you are connected.
+- The log file stays on your device and is only sent when you submit an issue from **Report a problem** yourself.
 - Your settings are stored in `settings.json`. The cache, your timing corrections, your own lyrics and your listening history are stored in `singline.sqlite`. Deleting these files resets Singline.
 
 | System | Location |
@@ -242,6 +243,14 @@ cargo run --release -p media-session --bin singline-watch
 ```
 
 Please include its output when you [report a problem](../../issues/new).
+
+**Report a problem.** Settings → About → **Report a problem** opens a pre-filled issue on GitHub with the Singline version, your system, the player and the last lines of the log. You see everything before you send it. **Show** next to **Log file** shows the log itself; the one before it is kept as `singline.old.log`.
+
+| System | Log file |
+|---|---|
+| Windows | `%LOCALAPPDATA%\io.github.julianrudrich.singline\logs\singline.log` |
+| macOS | `~/Library/Logs/io.github.julianrudrich.singline/singline.log` |
+| Linux | `~/.local/share/io.github.julianrudrich.singline/logs/singline.log` |
 
 ## Building from source
 
@@ -327,9 +336,9 @@ bash apps/desktop/e2e/linux-sing.sh
 
 | Variable | Effect |
 |---|---|
-| `SINGLINE_DATA_DIR` | Keeps settings and data in this folder instead of the system location |
+| `SINGLINE_DATA_DIR` | Keeps settings, data and the log in this folder instead of the system location |
 | `SINGLINE_LRCLIB_URL` | Uses another LRCLIB server, for example a local test server |
-| `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks. With it, `--karaoke` and `--menu-panel` open karaoke and the tray panel, at start or from a second launch |
+| `SINGLINE_DEBUG` | Makes the overlay report every line it shows, for end-to-end checks, and writes debug lines to the log. With it, `--karaoke` and `--menu-panel` open karaoke and the tray panel, at start or from a second launch |
 | `SINGLINE_SPOTIFY_ACCOUNTS_URL`, `SINGLINE_SPOTIFY_API_URL` | Use other Spotify servers, for example local test servers |
 | `SINGLINE_GENIUS_TOKEN` | At build time: a Genius token built into the app, so Sing to find works without setup |
 | `SINGLINE_GENIUS_URL` | Uses another Genius API server, for example a local test server |

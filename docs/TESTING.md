@@ -64,6 +64,7 @@ After starting, the overlay appears in the top right corner and an icon appears 
 - [ ] Open at login: turn it on, log out and log back in.
 - [ ] Open the app a second time while it is running (on macOS from Applications or with a click on the Dock icon): do the settings open, and is click-through off?
 - [ ] macOS: while the settings are open, is Singline in the Dock, in the app switcher (⌘Tab) and in Force Quit (⌥⌘Esc)? Does it leave the Dock when the last of its windows closes? Does ⌘Q quit it?
+- [ ] Settings → About → **Report a problem**: does the browser open a new issue with the system, its version, the Singline version, the player and the last lines of the log filled in? **Show** next to **Log file**: does Finder or Explorer open with `singline.log` selected?
 - [ ] **Quit Singline** at the bottom of the settings quits the app.
 - [ ] In the terminal (see the README): while a song plays, does `singline now` print the line being sung (macOS: `/Applications/Singline.app/Contents/MacOS/singline now`)? Does `singline lyrics` fill the terminal with the lyrics, the current line lighting up, and does q leave? With the pi extension installed, does pi's footer show the line, word by word, and does `/singline` hide it? After quitting Singline, does the footer go quiet within half a minute?
 - [ ] macOS: Settings → General → **Show in Dock**: does Singline stay in the Dock after the settings close, does a click on the Dock icon open the settings, and does it leave the Dock when the setting is off again?

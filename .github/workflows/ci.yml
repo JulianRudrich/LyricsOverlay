@@ -25,6 +25,10 @@ jobs:
   linux:
     name: Linux checks and end-to-end test
     runs-on: ubuntu-24.04
+    env:
+      # whisper.cpp as it ships, for any x86 CPU: built for the runner's own,
+      # it may use instructions such as AMX that the runner does not allow.
+      GGML_NATIVE: "OFF"
     steps:
       - uses: actions/checkout@v4
       - name: Install system libraries
@@ -141,6 +145,11 @@ jobs:
         # The Windows runners come with LLVM; elsewhere libclang is found by itself.
         if: runner.os == 'Windows'
         run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> "$GITHUB_ENV"
+      - name: Configure whisper.cpp afresh
+        # The cache can come from a runner with another Visual Studio, whose
+        # compiler paths CMake would keep.
+        if: runner.os == 'Windows'
+        run: rm -rf target/*/build/whisper-rs-sys* target/*/*/build/whisper-rs-sys*
       - name: Install system libraries
         if: runner.os == 'Linux'
         run: |

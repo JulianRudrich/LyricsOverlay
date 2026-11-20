@@ -44,8 +44,9 @@ While a player is running, test the commands:
 
 ## 2. The app
 
-After starting, the overlay appears in the top right corner and an icon appears in the tray (the menu bar on macOS).
+After starting, the overlay appears in the top right corner and an icon appears in the tray (the menu bar on macOS). At the first start the welcome window opens as well.
 
+- [ ] Welcome window (first start; to see it again, set `"welcomed": false` in `settings.json`): does the tray icon in the picture match where it really is? Choose Spotify and play a song: does it say that Singline follows the song? On macOS, deny the access once: does it offer System Settings? After **Done**, or after closing it, does it stay closed at the next start?
 - [ ] Play a Spotify song: do the lyrics appear, and does the highlighted line match the singing?
 - [ ] If the song has word timing: do the words light up one by one?
 - [ ] Pause, seek and change the song in the player: does the overlay follow within a second?

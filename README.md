@@ -30,8 +30,9 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Lyrics in motion.** The lines scroll up as the song goes on, the next line grows into place, and breaks show three breathing dots. A new song fades in with its cover, title and artist.
 - **A mini-player on hover.** Previous, play/pause and next, a seek bar with elapsed and remaining time, and markers for the chorus. Click any line to jump there.
 - **Karaoke.** The lyrics fill a second screen or a TV, white on black: the current line lights up word by word, the next ones wait below it, breaks count down with three dots, and a long intro shows the cover, title and artist. Move the mouse for the controls.
-- **Three layouts.** One line, Focus or Context, with adjustable font size, opacity, background, width and height.
-- **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. It can let clicks pass through to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
+- **Three layouts.** One line, Focus or Context, with adjustable font size, opacity, background, width and height. **Lyrics only** leaves out the song, the buttons and the timeline, even under the pointer.
+- **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. With click-through it becomes a ghost that lets every click pass to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
+- **A welcome that gets you started.** The first start shows where Singline lives, lets you choose your player, tells you as soon as Singline hears it and pairs the browser extension.
 - **Timing you can correct.** If the lyrics run early or late, move them by a quarter of a second; Singline remembers the correction for that song. A global correction makes up for your audio setup, for example Bluetooth headphones.
 - **Finds the right version.** Exact matches first, then a search that prefers the same album and versions with word timing. Plain lyrics are spread over the song and marked *~ not synced*; instrumentals are recognised.
 - **Sing to find.** Don't know what's playing on the radio, or want lyrics to sing along to? Sing a few words: Singline recognises them on your computer, finds the song, shows its lyrics from the line you sang and keeps up while you go on singing. Your voice never leaves your computer.
@@ -51,9 +52,14 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 
 <p align="center"><img src="docs/images/karaoke.gif" width="900" alt="Karaoke mode playing Lady of Namek by Tory Lanez: large white lines on black, the current line lighting up word by word, the next lines waiting below"><br><sub>Karaoke mode for a second screen or a TV.</sub></p>
 
-<p align="center"><img src="docs/images/mini-player.png" width="440" alt="The mini-player over Lady of Namek by Tory Lanez: previous, pause and next next to the cover and title, and a seek bar with chorus markers and times"><br><sub>Move the pointer over the overlay for the mini-player.</sub></p>
+| Mini-player | Lyrics only |
+|:-:|:-:|
+| <img src="docs/images/mini-player.png" width="420" alt="The mini-player over Lady of Namek by Tory Lanez: previous, pause and next next to the cover and title, and a seek bar with chorus markers and times"> | <img src="docs/images/lyrics-only.png" width="420" alt="Lyrics only, with the pointer over the overlay: just the lines of Lady of Namek by Tory Lanez, no cover, title, buttons or timeline"> |
+| Move the pointer over the overlay for the controls. | Nothing but the lyrics, even under the pointer. |
 
 <img src="docs/images/settings.png" width="880" alt="The settings window with a sidebar: General (player, browser extension, auto-hide, open at login, language, shortcut), Appearance (layout, font size, opacity, size), Song &amp; timing (Lady of Namek by Tory Lanez with its timing correction and your own lyrics) and Spotify">
+
+<p align="center"><img src="docs/images/welcome.png" width="760" alt="The welcome window in four steps: where Singline lives in the menu bar, choosing the player with Singline confirming it follows Lady of Namek by Tory Lanez, pairing the browser extension with a code, and tips such as the shortcut, lyrics only and click-through"><br><sub>The welcome at the first start.</sub></p>
 
 ## Supported players
 
@@ -107,6 +113,8 @@ Then pair it once: Settings → General → **Browser extension** shows a six-di
 ## Using Singline
 
 Start Singline and play a song. Singline sits in the system tray (the menu bar on macOS) and shows the lyrics as soon as it finds them. On macOS it also appears in the Dock while one of its windows, such as the settings, is open.
+
+At the first start, a short welcome shows where Singline lives, lets you choose your player and tells you when Singline hears it, and pairs the browser extension.
 
 | To … | do this |
 |---|---|

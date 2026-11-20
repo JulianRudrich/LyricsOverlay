@@ -4,7 +4,7 @@ Linux is tested automatically in CI. Windows and macOS need a real device. One p
 
 ## Get the builds
 
-1. In the repository, open **Actions → CI** and choose the newest successful run on `main`. Every commit on `main` produces test builds; **Run workflow** starts a new run.
+1. Download the newest build from the [test build release](https://github.com/JulianRudrich/Singline/releases/tag/nightly), or open **Actions → CI** and choose the newest successful run on `main`. Every commit on `main` produces test builds; **Run workflow** starts a new run.
 2. When the run has finished, download from **Artifacts**:
    - `singline-macOS`: the `.dmg` and `singline-watch-macos.tar.gz`
    - `singline-Windows`: the installer `…-setup.exe` (or `.msi`) and `singline-watch.exe`

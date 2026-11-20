@@ -84,19 +84,18 @@ On Linux, Singline reads players through MPRIS, on Windows through the system me
 
 ### Test builds
 
-Every change on `main` produces test builds for all three systems.
+Every change on `main` produces a test build for all three systems. The newest one is always on the [test build release](../../releases/tag/nightly), with no GitHub account needed:
 
-1. Open the [latest successful build of `main`](../../actions/workflows/ci.yml?query=branch%3Amain+is%3Asuccess) and choose the newest run. You need to be signed in to GitHub to download.
-2. Under **Artifacts**, download the build for your system:
-   - **singline-Windows:** the installer as `.exe` and `.msi`
-   - **singline-macOS:** a universal `.dmg` for Apple silicon and Intel Macs
-   - **singline-Linux:** a `.deb` for Debian and Ubuntu, and an `.AppImage` for other distributions
-3. Install it. The builds are not signed yet:
+1. Download the file for your system:
+   - **macOS:** `Singline-macOS.dmg`, a universal app for Apple silicon and Intel Macs
+   - **Windows:** `Singline-Windows-setup.exe`
+   - **Linux:** `Singline-Linux.AppImage` for any distribution, or `Singline-Linux.deb` for Debian and Ubuntu
+2. Install it. The builds are not signed yet:
    - **Windows:** if SmartScreen stops the installer, choose **More info** → **Run anyway**.
    - **macOS:** if macOS refuses to open the app, go to **System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14 and earlier, right-click the app and choose **Open**). When you play music, allow Singline to control Spotify or Music.
-   - **Linux:** install the package with `sudo apt install ./Singline_*.deb`, or make the AppImage executable with `chmod +x Singline_*.AppImage` and start it.
+   - **Linux:** install the package with `sudo apt install ./Singline-Linux.deb`, or make the AppImage executable with `chmod +x Singline-Linux.AppImage` and start it.
 
-Each build also contains `singline-watch`, a small tool that shows what your players report (see [Troubleshooting](#troubleshooting)).
+Every build of `main` is also under [Actions](../../actions/workflows/ci.yml?query=branch%3Amain+is%3Asuccess), for signed-in GitHub users, together with `singline-watch`, a small tool that shows what your players report (see [Troubleshooting](#troubleshooting)).
 
 ### Browser extension
 
@@ -200,7 +199,7 @@ For **Sing to find**, Whisper first turns your singing into words on your comput
 ## Privacy
 
 - Singline has no account, no telemetry and no analytics.
-- The only network requests go to LRCLIB, sending the title, artist, album and duration of the song you are playing. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
+- To find lyrics, Singline sends the title, artist, album and duration of the song you are playing to LRCLIB. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
 - The browser extension talks only to Singline on your own computer (`127.0.0.1`), and only after you paired it. Web pages and other programs without the pairing are refused.
 - Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
 - Sing to find runs only while you use it. The audio stays in memory on your computer and is transcribed there by [Whisper](https://github.com/ggerganov/whisper.cpp); the speech model (about 150 MB) is downloaded once from Hugging Face into the data folder. Only the words it heard go to Genius, to find the song, and the found title and artist to LRCLIB. It needs **Search lyrics online**.

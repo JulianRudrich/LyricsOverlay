@@ -75,6 +75,21 @@ pub fn open(path: &Path) -> io::Result<File> {
     OpenOptions::new().create(true).append(true).open(path)
 }
 
+/// The last `count` lines of the log, oldest first; none without a log.
+pub fn last_lines(path: &Path, count: usize) -> Vec<String> {
+    let Ok(bytes) = fs::read(path) else {
+        return Vec::new();
+    };
+    let mut lines: Vec<String> = String::from_utf8_lossy(&bytes)
+        .lines()
+        .rev()
+        .take(count)
+        .map(str::to_owned)
+        .collect();
+    lines.reverse();
+    lines
+}
+
 /// Whether a log of `size` bytes is moved aside before the next line.
 fn is_full(size: u64) -> bool {
     size > MAX_SIZE
@@ -239,6 +254,27 @@ mod tests {
             error,
             "2026-11-20T12:34:56.789Z ERROR media_session::bridge::server: no port\n"
         );
+    }
+
+    #[test]
+    fn reads_the_last_lines_oldest_first() {
+        let directory = directory("tail");
+        let path = directory.join(FILE_NAME);
+        assert!(last_lines(&path, 200).is_empty(), "no log yet");
+
+        fs::create_dir_all(&directory).expect("created");
+        fs::write(&path, "one\ntwo\n").expect("written");
+        assert_eq!(last_lines(&path, 200), ["one", "two"]);
+
+        let long: String = (1..=500).map(|number| format!("line {number}\n")).collect();
+        fs::write(&path, long).expect("written");
+        let last = last_lines(&path, 200);
+        assert_eq!(last.len(), 200);
+        assert_eq!(
+            (last[0].as_str(), last[199].as_str()),
+            ("line 301", "line 500")
+        );
+        let _ = fs::remove_dir_all(directory);
     }
 
     #[test]

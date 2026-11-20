@@ -1,5 +1,16 @@
 //! The system Singline runs on, as the log and problem reports name it.
 
+/// The system as the bug report form lists it: "macOS", "Windows" or "Linux".
+pub fn name() -> &'static str {
+    if cfg!(target_os = "macos") {
+        "macOS"
+    } else if cfg!(windows) {
+        "Windows"
+    } else {
+        "Linux"
+    }
+}
+
 /// The system's version and the processor architecture, such as
 /// "macOS 15.2, aarch64", "Windows 11 (build 26100.2605), x86_64" or
 /// "Ubuntu 24.04.1 LTS (Wayland), x86_64".

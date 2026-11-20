@@ -60,6 +60,9 @@ export const api = {
   moveOverlay: (corner: Corner) => invoke<void>("move_overlay", { corner }),
   setLaunchAtLogin: (enabled: boolean) => invoke<boolean>("set_launch_at_login", { enabled }),
   reportLine: (position: number, text: string) => invoke<void>("report_line", { position, text }),
+  // Settings → About: a pre-filled issue on GitHub, and the log file in Finder or Explorer.
+  reportProblem: () => invoke<void>("report_problem"),
+  showLogFile: () => invoke<void>("show_log_file"),
 };
 
 export interface Listeners {

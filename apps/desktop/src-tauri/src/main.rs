@@ -13,6 +13,7 @@ mod menu_panel;
 mod now;
 mod own_lyrics;
 mod playback;
+mod report;
 mod settings;
 mod shuffle;
 mod sing;
@@ -369,6 +370,8 @@ fn main() {
             commands::move_overlay,
             commands::set_launch_at_login,
             commands::report_line,
+            report::report_problem,
+            report::show_log_file,
             history::listening_stats,
             history::clear_history,
             browser_bridge::browser_bridge,

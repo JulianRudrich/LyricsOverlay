@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { api } from "../lib/api";
+  import Button from "../lib/ui/Button.svelte";
   import Card from "../lib/ui/Card.svelte";
   import Glyph, { type GlyphName } from "../lib/ui/Glyph.svelte";
   import Mark from "../lib/ui/Mark.svelte";
@@ -46,6 +48,15 @@
       </Row>
     </a>
   {/each}
+</Card>
+
+<Card>
+  <Row card={false} icon="about" title={t("about.report")} hint={t("about.reportHint")}>
+    <Button onclick={() => api.reportProblem()}>{t("about.reportButton")}</Button>
+  </Row>
+  <Row card={false} icon="license" title={t("about.log")} hint={t("about.logHint")}>
+    <Button onclick={() => api.showLogFile()}>{t("about.logButton")}</Button>
+  </Row>
 </Card>
 
 <style>

@@ -31,7 +31,7 @@ Singline is the cross-platform successor of Lyrics Overlay: one code base for Wi
 - [x] Own lyrics: LRC import and an editor with a timestamp key
 - [x] Hiding the overlay while nothing plays
 - [ ] A configurable shortcut
-- [ ] Installers with automatic updates
+- [x] Installers with automatic updates, and a test build release that updates itself
 - [ ] Fixes from measurements A and B, for example keeping the overlay above full-screen apps on macOS
 
 ### Everything the native macOS app can do

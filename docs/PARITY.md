@@ -76,4 +76,4 @@ Before its first release, Singline must offer every feature of the native macOS 
 | Spotify connection, True Shuffle and top lists | ✅ | 🧪 | 🧪 | Linux tested against a simulated Spotify |
 | Installers | 🧪 | 🧪 | 🧪 | CI builds .deb, AppImage, .exe, .msi and .dmg |
 | Homebrew | — | — | ⬜ | |
-| Automatic updates | ⬜ | ⬜ | ⬜ | |
+| Automatic updates | 🧪 | 🧪 | 🧪 | From releases, or from the test build release for test builds. Linux: the AppImage |

@@ -95,6 +95,8 @@ Every change on `main` produces a test build for all three systems. The newest o
    - **macOS:** if macOS refuses to open the app, go to **System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14 and earlier, right-click the app and choose **Open**). When you play music, allow Singline to control Spotify or Music.
    - **Linux:** install the package with `sudo apt install ./Singline-Linux.deb`, or make the AppImage executable with `chmod +x Singline-Linux.AppImage` and start it.
 
+From then on Singline updates itself: it downloads a newer build in the background and offers **Restart to update** in the tray menu and in Settings → About. The `.deb` is the exception and updates through a new download.
+
 Every build of `main` is also under [Actions](../../actions/workflows/ci.yml?query=branch%3Amain+is%3Asuccess), for signed-in GitHub users, together with `singline-watch`, a small tool that shows what your players report (see [Troubleshooting](#troubleshooting)).
 
 ### Browser extension
@@ -200,6 +202,7 @@ For **Sing to find**, Whisper first turns your singing into words on your comput
 
 - Singline has no account, no telemetry and no analytics.
 - To find lyrics, Singline sends the title, artist, album and duration of the song you are playing to LRCLIB. Turn off **Search lyrics online** in Settings → Song & timing to keep everything on your device.
+- To look for updates, Singline asks GitHub at start and every six hours whether there is a newer version; that request carries nothing about you or your music. Turn it off in Settings → About.
 - The browser extension talks only to Singline on your own computer (`127.0.0.1`), and only after you paired it. Web pages and other programs without the pairing are refused.
 - Your listening history never leaves your device. Turn it off or clear it at the bottom of the **Your music** window; cleared entries are overwritten on disk.
 - Sing to find runs only while you use it. The audio stays in memory on your computer and is transcribed there by [Whisper](https://github.com/ggerganov/whisper.cpp); the speech model (about 150 MB) is downloaded once from Hugging Face into the data folder. Only the words it heard go to Genius, to find the song, and the found title and artist to LRCLIB. It needs **Search lyrics online**.

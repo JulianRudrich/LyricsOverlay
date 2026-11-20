@@ -32,7 +32,7 @@ For Spotify, Apple Music, Amazon Music and YouTube Music, on Windows, macOS and 
 - **Karaoke.** The lyrics fill a second screen or a TV, white on black: the current line lights up word by word, the next ones wait below it, breaks count down with three dots, and a long intro shows the cover, title and artist. Move the mouse for the controls.
 - **Three layouts.** One line, Focus or Context, with adjustable font size, opacity, background, width and height. **Lyrics only** leaves out the song, the buttons and the timeline, even under the pointer.
 - **Stays out of your way.** The overlay floats above other windows on every desktop and never takes the focus. With click-through it becomes a ghost that lets every click pass to the window below, and Alt+Shift+L (⌥⇧L on macOS) shows or hides it. Drag it anywhere or send it to a corner.
-- **In your terminal.** The line being sung in the footer of pi, the coding agent, in your tmux status bar or any other status line, for coding with music.
+- **In your terminal.** The line being sung in the footer of pi, the coding agent, in your tmux status bar or in a terminal of its own, word by word, for coding with music.
 - **A welcome that gets you started.** The first start shows where Singline lives, lets you choose your player, tells you as soon as Singline hears it and pairs the browser extension.
 - **Timing you can correct.** If the lyrics run early or late, move them by a quarter of a second; Singline remembers the correction for that song. A global correction makes up for your audio setup, for example Bluetooth headphones.
 - **Finds the right version.** Exact matches first, then a search that prefers the same album and versions with word timing. Plain lyrics are spread over the song and marked *~ not synced*; instrumentals are recognised.
@@ -164,6 +164,10 @@ curl -fsSL https://raw.githubusercontent.com/JulianRudrich/Singline/main/extensi
 
 Then start pi, or run `/reload` in a running one. `/singline` shows or hides the lyrics.
 
+**A terminal of its own.** `singline lyrics` fills a terminal, or a tmux pane next to your code, with the lyrics: the line being sung in the middle, lighting up word by word, and the time at the bottom. q leaves.
+
+<p align="center"><img src="docs/images/terminal.png" width="640" alt="singline lyrics in a terminal: Lady of Namek by Tory Lanez at the top, the current line Play with the stars tonight? in the middle with its sung words bright, the lines around it dimmer, and a time bar at the bottom"></p>
+
 **tmux and other status lines.** `singline now` prints the current line, the song between two lines, and nothing while no song plays. `--format` chooses what to print, with `{line}`, `{next}`, `{title}`, `{artist}`, `{album}` and `{player}`. For tmux, add this to `~/.tmux.conf`:
 
 ```tmux
@@ -181,7 +185,7 @@ sudo mkdir -p /usr/local/bin
 sudo ln -sf /Applications/Singline.app/Contents/MacOS/singline /usr/local/bin/singline
 ```
 
-`singline now` works on macOS and Linux. On Windows, use the pi extension.
+`singline now` and `singline lyrics` work on macOS and Linux. On Windows, use the pi extension.
 
 ## Where the lyrics come from
 

@@ -18,8 +18,14 @@
       "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'"
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFMDk4RjQ3QTI5OTY0NjAKUldSZ1pKbWlSNDhKbnQ5bW1uSkxSaWNFT0hpMFNRU2NFL2hGOXI4cGlxbG5kSTFoM1N2QXJRNDIK"
+    }
+  },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "category": "Music",
     "shortDescription": "Synced lyrics above your other windows",

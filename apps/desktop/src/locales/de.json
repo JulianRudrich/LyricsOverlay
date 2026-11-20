@@ -411,5 +411,20 @@
   "welcome.tipControls": "Fahre mit der Maus über die Songtexte für die Steuerung und ziehe sie, wohin du willst.",
   "welcome.tipLyricsOnly": "Nur den Songtext? Schalte im Singline-Menü „Nur Songtext“ ein.",
   "welcome.tipClickThrough": "Im Weg? „Klicks durchlassen“ macht die Songtexte zum Geist, durch den du klicken kannst.",
-  "welcome.tipSing": "Song unbekannt? Sing ihn: „Mitsingen“ im Singline-Menü."
+  "welcome.tipSing": "Song unbekannt? Sing ihn: „Mitsingen“ im Singline-Menü.",
+  "update.title": "Updates",
+  "update.idle": "Singline sucht selbst nach neuen Versionen.",
+  "update.off": "Die automatische Suche ist aus.",
+  "update.checking": "Suche nach einer neuen Version …",
+  "update.upToDate": "Singline ist auf dem neuesten Stand.",
+  "update.downloading": "Version {version} wird geladen …",
+  "update.downloadingProgress": "Version {version} wird geladen: {percent} %",
+  "update.ready": "Version {version} ist bereit. Starte Singline neu, um sie zu nutzen.",
+  "update.failed": "Die Suche nach Updates hat nicht geklappt. Singline versucht es später noch einmal.",
+  "update.unavailable": "Diese Version aktualisiert sich nicht selbst.",
+  "update.check": "Jetzt suchen",
+  "update.restart": "Neu starten",
+  "update.auto": "Automatisch nach Updates suchen",
+  "update.autoHint": "Beim Start und alle sechs Stunden fragt Singline bei GitHub nach einer neuen Version.",
+  "tray.update": "Neu starten für Version {version}"
 }

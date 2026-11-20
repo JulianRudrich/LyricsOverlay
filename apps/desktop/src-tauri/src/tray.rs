@@ -133,13 +133,20 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     } else {
         "tray.singToFind"
     };
-    MenuBuilder::new(app)
-        .item(
-            &MenuItemBuilder::with_id("title", texts.get("app.name"))
-                .enabled(false)
-                .build(app)?,
-        )
-        .separator()
+    let mut menu = MenuBuilder::new(app).item(
+        &MenuItemBuilder::with_id("title", texts.get("app.name"))
+            .enabled(false)
+            .build(app)?,
+    );
+    // A downloaded update waits at the top until a restart installs it.
+    if let Some(crate::update::UpdateView::Ready { version }) = app
+        .try_state::<crate::update::Updates>()
+        .map(|updates| updates.view())
+    {
+        let label = texts.get("tray.update").replace("{version}", &version);
+        menu = menu.item(&MenuItemBuilder::with_id("update", label).build(app)?);
+    }
+    menu.separator()
         .item(&MenuItemBuilder::with_id("toggle-overlay", texts.get(visibility)).build(app)?)
         .item(
             &CheckMenuItemBuilder::with_id("click-through", texts.get("tray.clickThrough"))
@@ -186,6 +193,7 @@ fn handle_event(app: &AppHandle, event: MenuEvent) {
             state.update_settings(app, |settings| settings.lyrics_only = enabled);
         }
         "settings" => windows::open_settings(app),
+        "update" => crate::update::restart_into_update(app),
         "karaoke" => windows::open_karaoke(app, None),
         "stats" => windows::open_stats(app),
         "sing" => crate::sing::toggle(app),

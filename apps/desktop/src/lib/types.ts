@@ -138,7 +138,19 @@ export interface Settings {
   karaokeScale: number;
   /** The welcome window was closed; it opens once, at the first start. */
   welcomed: boolean;
+  /** Looks for a new version at start and every few hours. */
+  autoUpdate: boolean;
 }
+
+/** Whether Singline is up to date, as the settings and the tray panel show it. */
+export type UpdateView =
+  | { kind: "idle" }
+  | { kind: "checking" }
+  | { kind: "upToDate" }
+  | { kind: "downloading"; version: string; progress: number | null }
+  | { kind: "ready"; version: string }
+  | { kind: "failed"; error: string }
+  | { kind: "unavailable" };
 
 export interface AppInfo {
   version: string;

@@ -411,5 +411,20 @@
   "welcome.tipControls": "Move the pointer over the lyrics for the controls, and drag them wherever you like.",
   "welcome.tipLyricsOnly": "Nothing but the lyrics? Turn on Lyrics only in Singline’s menu.",
   "welcome.tipClickThrough": "In the way? Click-through turns the lyrics into a ghost you can click through.",
-  "welcome.tipSing": "Don’t know the song? Sing it: Sing to find in Singline’s menu."
+  "welcome.tipSing": "Don’t know the song? Sing it: Sing to find in Singline’s menu.",
+  "update.title": "Updates",
+  "update.idle": "Singline looks for new versions by itself.",
+  "update.off": "Automatic checks are off.",
+  "update.checking": "Looking for a new version…",
+  "update.upToDate": "Singline is up to date.",
+  "update.downloading": "Downloading version {version}…",
+  "update.downloadingProgress": "Downloading version {version}: {percent} %",
+  "update.ready": "Version {version} is ready. Restart Singline to use it.",
+  "update.failed": "Could not look for updates. Singline tries again later.",
+  "update.unavailable": "This build does not update itself.",
+  "update.check": "Check now",
+  "update.restart": "Restart",
+  "update.auto": "Look for updates automatically",
+  "update.autoHint": "At start and every six hours, Singline asks GitHub for a new version.",
+  "tray.update": "Restart to update to {version}"
 }

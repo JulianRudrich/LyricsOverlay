@@ -23,6 +23,7 @@ mod system;
 #[cfg(unix)]
 mod terminal;
 mod tray;
+mod update;
 mod windows;
 
 use std::path::PathBuf;
@@ -256,6 +257,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     app.manage(history::History::default());
     app.manage(dock::Dock::default());
     app.manage(now::Publisher::default());
+    app.manage(update::Updates::default());
     let bridge_store = handle
         .state::<AppState>()
         .settings_path
@@ -278,6 +280,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     if !settings.welcomed && !demo {
         windows::open_welcome(&handle);
     }
+    update::start(&handle);
     hotkey::register_saved(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
     spotify::restore(&handle);
@@ -335,6 +338,7 @@ fn main() {
             None,
         ))
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, _shortcut, event| {
@@ -359,6 +363,9 @@ fn main() {
             own_lyrics::remove_local_lyrics,
             commands::player_command,
             commands::open_settings,
+            update::update_view,
+            update::update_check,
+            update::update_install,
             commands::finish_welcome,
             commands::open_automation_settings,
             commands::open_stats,

@@ -3,6 +3,7 @@
   // player's controls, quick switches, the sleep timer and the other windows.
   // The Rust side shows and hides the window and sizes it to this page; the
   // page plays the entrance and fades out.
+  import { listen } from "@tauri-apps/api/event";
   import { onMount, tick } from "svelte";
   import { prefersReducedMotion as reducedMotion } from "svelte/motion";
   import { api, subscribe } from "../lib/api";
@@ -11,7 +12,7 @@
   import { clamp } from "../lib/lyrics";
   import { dropIn, duration, easeOutCss, panelKeyframes, prefersReducedMotion } from "../lib/motion";
   import { SeekHold } from "../lib/player";
-  import type { AppInfo, Playback, Settings, SleepView } from "../lib/types";
+  import type { AppInfo, Playback, Settings, SleepView, UpdateView } from "../lib/types";
   import Mark from "../lib/ui/Mark.svelte";
   import Toggle from "../lib/ui/Toggle.svelte";
   import Controls from "../overlay/Controls.svelte";
@@ -23,6 +24,7 @@
   import MenuRow from "./MenuRow.svelte";
 
   let settings = $state<Settings | null>(null);
+  let updateView = $state<UpdateView>({ kind: "idle" });
   let singView = $state<SingView | null>(null);
   const singing = $derived(isActive(singView));
   let playback = $state<Playback | null>(null);
@@ -162,17 +164,26 @@
         menuPanel: (event) => (event.open ? opened() : closed()),
       });
       const unlistenSing = await onSing({ view: (next) => (singView = next) });
+      const unlistenUpdate = await listen<UpdateView>("update", (event) => (updateView = event.payload));
       if (!alive) {
         unlistenSing();
+        unlistenUpdate();
         return unlisten();
       }
       stop = () => {
         unlisten();
         unlistenSing();
+        unlistenUpdate();
       };
-      const [snapshot, timer, singing] = await Promise.all([api.snapshot(), api.sleepTimer(), sing.view()]);
+      const [snapshot, timer, singing, update] = await Promise.all([
+        api.snapshot(),
+        api.sleepTimer(),
+        sing.view(),
+        api.updateView(),
+      ]);
       if (!alive) return;
       singView = singing;
+      updateView = update;
       settings = snapshot.settings;
       app = snapshot.app;
       sleep = timer;
@@ -281,6 +292,9 @@
       <MenuRow icon="mic" title={t("tray.karaoke")} onclick={() => openWindow(() => api.openKaraoke())} />
       <MenuRow icon="chart" title={t("tray.stats")} onclick={() => openWindow(api.openStats)} />
       <MenuRow icon="shuffle" title={t("tray.trueShuffle")} onclick={() => openWindow(shuffle.openWindow)} />
+      {#if updateView.kind === "ready"}
+        <MenuRow icon="download" title={t("tray.update", { version: updateView.version })} onclick={() => api.updateInstall()} />
+      {/if}
       <MenuRow icon="general" title={t("tray.settings")} shortcut={mac ? "⌘," : "Ctrl+,"} onclick={() => openWindow(api.openSettings)} />
       <MenuRow icon="power" title={t("tray.quit")} shortcut={mac ? "⌘Q" : "Ctrl+Q"} onclick={() => api.quit()} />
     </main>

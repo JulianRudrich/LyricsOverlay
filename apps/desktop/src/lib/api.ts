@@ -12,6 +12,7 @@ import type {
   SleepView,
   Snapshot,
   StampEdit,
+  UpdateView,
 } from "./types";
 
 export type PlayerCommand =
@@ -40,6 +41,11 @@ export const api = {
   browserBridge: () => invoke<BridgeView>("browser_bridge"),
   forgetBrowser: (id: string) => invoke<BridgeView>("forget_browser", { id }),
   openSettings: () => invoke<void>("open_settings"),
+  updateView: () => invoke<UpdateView>("update_view"),
+  /** Looks for a new version now and downloads it; resolves to the state afterwards. */
+  updateCheck: () => invoke<UpdateView>("update_check"),
+  /** Installs the downloaded version and restarts Singline. */
+  updateInstall: () => invoke<void>("update_install"),
   /** Closes the welcome window, which then does not open again by itself. */
   finishWelcome: () => invoke<void>("finish_welcome"),
   /** macOS: System Settings at Privacy & Security → Automation. */

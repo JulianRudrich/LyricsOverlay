@@ -7,6 +7,7 @@
   import Note from "../lib/ui/Note.svelte";
   import Row from "../lib/ui/Row.svelte";
   import type { PaneContext } from "./panes";
+  import Updates from "./Updates.svelte";
 
   let { ctx }: { ctx: PaneContext } = $props();
   const t = $derived(ctx.t);
@@ -38,6 +39,7 @@
     </div>
   </div>
 </Card>
+<Updates {ctx} />
 <Note>{t("about.privacy")}</Note>
 
 <Card>

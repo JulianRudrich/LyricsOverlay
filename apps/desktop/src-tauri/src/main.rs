@@ -119,6 +119,7 @@ impl AppState {
             windows::set_editor_title(app, &title);
         }
         let tray_changed = old.click_through != new.click_through
+            || old.lyrics_only != new.lyrics_only
             || old.overlay_visible != new.overlay_visible
             || old.source != new.source
             || old.language != new.language;

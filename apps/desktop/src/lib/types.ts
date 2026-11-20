@@ -115,6 +115,8 @@ export type OwnLyricsError = "noTrack" | "tooLarge" | "notText" | "missingTimest
 
 export interface Settings {
   layout: Layout;
+  /** Only the lyrics: no song, controls, microphone or timeline, even under the pointer. */
+  lyricsOnly: boolean;
   fontSize: number;
   backgroundOpacity: number;
   overlayOpacity: number;

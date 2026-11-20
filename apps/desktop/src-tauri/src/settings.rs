@@ -38,6 +38,8 @@ pub enum Corner {
 #[serde(rename_all = "camelCase", default)]
 pub struct Settings {
     pub layout: Layout,
+    /// Only the lyrics: no song, controls, microphone or timeline, even under the pointer.
+    pub lyrics_only: bool,
     pub font_size: f64,
     pub background_opacity: f64,
     pub overlay_opacity: f64,
@@ -69,6 +71,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             layout: Layout::Context,
+            lyrics_only: false,
             font_size: 25.0,
             background_opacity: 0.78,
             overlay_opacity: 1.0,

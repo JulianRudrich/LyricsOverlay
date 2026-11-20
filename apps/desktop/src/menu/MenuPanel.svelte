@@ -249,6 +249,9 @@
       <MenuRow icon="pointer" title={t("tray.clickThrough")} onclick={() => update({ clickThrough: !settings?.clickThrough })}>
         <Toggle label={t("tray.clickThrough")} checked={settings.clickThrough} onchange={(clickThrough) => update({ clickThrough })} />
       </MenuRow>
+      <MenuRow icon="lyrics" title={t("tray.lyricsOnly")} onclick={() => update({ lyricsOnly: !settings?.lyricsOnly })}>
+        <Toggle label={t("tray.lyricsOnly")} checked={settings.lyricsOnly} onchange={(lyricsOnly) => update({ lyricsOnly })} />
+      </MenuRow>
       <MenuRow icon="moon" title={t("tray.sleep")} detail={sleepDetail} expanded={sleepOpen} onclick={() => (sleepOpen = !sleepOpen)} />
       {#if sleepOpen && sleep}
         <div class="sleep" role="radiogroup" aria-label={t("tray.sleep")} in:dropIn={{ reduced: reducedMotion.current }}>

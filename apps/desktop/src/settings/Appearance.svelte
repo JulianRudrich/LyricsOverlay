@@ -4,8 +4,10 @@
   import type { Layout } from "../lib/types";
   import Card from "../lib/ui/Card.svelte";
   import Note from "../lib/ui/Note.svelte";
+  import Row from "../lib/ui/Row.svelte";
   import Segmented from "../lib/ui/Segmented.svelte";
   import Slider from "../lib/ui/Slider.svelte";
+  import Toggle from "../lib/ui/Toggle.svelte";
   import type { PaneContext } from "./panes";
 
   let { ctx }: { ctx: PaneContext } = $props();
@@ -28,6 +30,9 @@
       onchange={(layout) => ctx.update({ layout })}
     />
   </div>
+  <Row card={false} icon="lyrics" title={t("settings.lyricsOnly")} hint={t("settings.lyricsOnlyHint")}>
+    <Toggle label={t("settings.lyricsOnly")} checked={settings.lyricsOnly} onchange={(lyricsOnly) => ctx.update({ lyricsOnly })} />
+  </Row>
 </Card>
 
 <Card>

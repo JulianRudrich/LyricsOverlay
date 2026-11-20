@@ -41,6 +41,7 @@
   const offset = $derived((settings?.globalOffset ?? 0) + (lyricsView?.songOffset ?? 0));
   const effective = $derived(position + offset);
   const layout = $derived(settings?.layout ?? "context");
+  const lyricsOnly = $derived(settings?.lyricsOnly ?? false);
   const fontSize = $derived(settings?.fontSize ?? 25);
 
   // Lines too long for one row are split in two, once, to fit the lyrics area.
@@ -60,7 +61,7 @@
   let hovering = $state(false);
   let scrubbing = $state(false);
   const seekHold = new SeekHold();
-  const controlsShown = $derived((hovering || scrubbing) && track !== null && !settings?.clickThrough);
+  const controlsShown = $derived((hovering || scrubbing) && track !== null && !settings?.clickThrough && !lyricsOnly);
   const capabilities = $derived(playback?.capabilities);
   const transport = $derived(
     controlsShown && !!capabilities && (capabilities.previous || capabilities.playPause || capabilities.next),
@@ -220,22 +221,25 @@
   onpointermove={() => (hovering = true)}
   onpointerleave={() => (hovering = false)}
 >
-  <Header
-    {track}
-    {playerName}
-    controls={transport && playback ? playback.capabilities : null}
-    playing={playback?.playing ?? false}
-    notSynced={lyrics?.sync === "unsynced" && showLyrics}
-    ownLyrics={lyricsView?.origin === "local" && lyrics !== null}
-    paused={track !== null && !playback?.playing}
-    mic={micShown}
-    {singing}
-    {t}
-    onsettings={() => api.openSettings()}
-    onsing={() => singApi.toggle()}
-  />
+  <!-- Lyrics only leaves out the song, the controls and the timeline. -->
+  {#if !lyricsOnly}
+    <Header
+      {track}
+      {playerName}
+      controls={transport && playback ? playback.capabilities : null}
+      playing={playback?.playing ?? false}
+      notSynced={lyrics?.sync === "unsynced" && showLyrics}
+      ownLyrics={lyricsView?.origin === "local" && lyrics !== null}
+      paused={track !== null && !playback?.playing}
+      mic={micShown}
+      {singing}
+      {t}
+      onsettings={() => api.openSettings()}
+      onsing={() => singApi.toggle()}
+    />
+  {/if}
 
-  {#if foundSong && (justFound || hovering)}
+  {#if foundSong && (justFound || (hovering && !lyricsOnly))}
     <SingFound
       title={foundSong.title}
       artist={foundSong.artist}
@@ -290,7 +294,7 @@
     {/key}
   </div>
 
-  {#if track?.duration && track.duration > 0}
+  {#if !lyricsOnly && track?.duration && track.duration > 0}
     <Scrubber
       {position}
       duration={track.duration}

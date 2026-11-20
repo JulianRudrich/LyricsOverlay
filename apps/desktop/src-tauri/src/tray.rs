@@ -146,6 +146,11 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
                 .checked(settings.click_through)
                 .build(app)?,
         )
+        .item(
+            &CheckMenuItemBuilder::with_id("lyrics-only", texts.get("tray.lyricsOnly"))
+                .checked(settings.lyrics_only)
+                .build(app)?,
+        )
         .item(&sources.build()?)
         .item(&corners.build()?)
         .item(&crate::sleep::submenu(app, &texts)?)
@@ -175,6 +180,10 @@ fn handle_event(app: &AppHandle, event: MenuEvent) {
         "click-through" => {
             let enabled = !state.settings().click_through;
             state.update_settings(app, |settings| settings.click_through = enabled);
+        }
+        "lyrics-only" => {
+            let enabled = !state.settings().lyrics_only;
+            state.update_settings(app, |settings| settings.lyrics_only = enabled);
         }
         "settings" => windows::open_settings(app),
         "karaoke" => windows::open_karaoke(app, None),

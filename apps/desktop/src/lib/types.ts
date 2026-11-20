@@ -134,6 +134,8 @@ export interface Settings {
   hotkey: string;
   /** Karaoke's type size, as a factor of the size that fits the screen. */
   karaokeScale: number;
+  /** The welcome window was closed; it opens once, at the first start. */
+  welcomed: boolean;
 }
 
 export interface AppInfo {

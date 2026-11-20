@@ -1,4 +1,4 @@
-//! The overlay, settings, lyrics editor and karaoke windows.
+//! The overlay, settings, welcome, lyrics editor and karaoke windows.
 
 use serde::Serialize;
 use tauri::utils::config::WindowEffectsConfig;
@@ -17,6 +17,7 @@ pub const EDITOR: &str = "editor";
 pub const STATS: &str = "stats";
 pub const SHUFFLE: &str = "shuffle";
 pub const KARAOKE: &str = "karaoke";
+pub const WELCOME: &str = "welcome";
 
 /// Distance from the screen edge, in logical pixels.
 const MARGIN: f64 = 16.0;
@@ -142,14 +143,64 @@ pub fn move_to_corner(app: &AppHandle, corner: Corner) {
 }
 
 pub fn open_settings(app: &AppHandle) {
-    if let Some(window) = app.get_webview_window(SETTINGS) {
-        let _ = window.unminimize();
-        let _ = window.show();
-        let _ = window.set_focus();
+    if show_existing(app, SETTINGS) {
         return;
     }
-    let title = i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
-        .get("settings.title");
+    let title = texts(app).get("settings.title");
+    match glass_window(app, SETTINGS, "settings", &title, 700.0, 480.0) {
+        Ok(_) => dock::update(app, SETTINGS, false),
+        Err(error) => eprintln!("could not open the settings: {error}"),
+    }
+}
+
+/// The welcome window, shown once at the first start: where Singline lives,
+/// the player it follows and the browser extension.
+pub fn open_welcome(app: &AppHandle) {
+    if show_existing(app, WELCOME) {
+        return;
+    }
+    let title = texts(app).get("welcome.windowTitle");
+    match glass_window(app, WELCOME, "welcome", &title, 560.0, 540.0) {
+        Ok(_) => {
+            dock::update(app, WELCOME, false);
+            if app.state::<AppState>().debug {
+                println!("welcome-window");
+            }
+        }
+        Err(error) => eprintln!("could not open the welcome window: {error}"),
+    }
+}
+
+pub fn close_welcome(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(WELCOME) {
+        let _ = window.close();
+    }
+}
+
+/// Brings the window `label` to the front if it is open.
+fn show_existing(app: &AppHandle, label: &str) -> bool {
+    let Some(window) = app.get_webview_window(label) else {
+        return false;
+    };
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.set_focus();
+    true
+}
+
+fn texts(app: &AppHandle) -> i18n::Texts {
+    i18n::Texts::new(i18n::resolve(app.state::<AppState>().settings().language))
+}
+
+/// A fixed-size window in the dark glass of the settings, showing `route`.
+fn glass_window(
+    app: &AppHandle,
+    label: &str,
+    route: &str,
+    title: &str,
+    width: f64,
+    height: f64,
+) -> tauri::Result<WebviewWindow> {
     let glass = glass(20.0);
     // The page matches the window from its first paint: see-through over glass,
     // and room for the traffic lights where it runs under the title bar.
@@ -161,13 +212,13 @@ pub fn open_settings(app: &AppHandle) {
         look.push("titlebar=overlay");
     }
     let url = if look.is_empty() {
-        "index.html#/settings".to_owned()
+        format!("index.html#/{route}")
     } else {
-        format!("index.html?{}#/settings", look.join("&"))
+        format!("index.html?{}#/{route}", look.join("&"))
     };
-    let mut builder = WebviewWindowBuilder::new(app, SETTINGS, WebviewUrl::App(url.into()))
+    let mut builder = WebviewWindowBuilder::new(app, label, WebviewUrl::App(url.into()))
         .title(title)
-        .inner_size(700.0, 480.0)
+        .inner_size(width, height)
         .resizable(false)
         .maximizable(false)
         .theme(Some(Theme::Dark))
@@ -185,10 +236,7 @@ pub fn open_settings(app: &AppHandle) {
         Some(effects) => builder.transparent(true).effects(effects),
         None => builder.background_color(SOLID_BACKGROUND),
     };
-    match builder.build() {
-        Ok(_) => dock::update(app, SETTINGS, false),
-        Err(error) => eprintln!("could not open the settings: {error}"),
-    }
+    builder.build()
 }
 
 /// The "Your music" window. It is always dark, and its own background color

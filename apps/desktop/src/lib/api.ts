@@ -40,6 +40,10 @@ export const api = {
   browserBridge: () => invoke<BridgeView>("browser_bridge"),
   forgetBrowser: (id: string) => invoke<BridgeView>("forget_browser", { id }),
   openSettings: () => invoke<void>("open_settings"),
+  /** Closes the welcome window, which then does not open again by itself. */
+  finishWelcome: () => invoke<void>("finish_welcome"),
+  /** macOS: System Settings at Privacy & Security → Automation. */
+  openAutomationSettings: () => invoke<void>("open_automation_settings"),
   openStats: () => invoke<void>("open_stats"),
   /** Opens karaoke fullscreen, on the overlay's display or the one given; moves it there when open. */
   openKaraoke: (display?: string) => invoke<void>("open_karaoke", { display: display ?? null }),

@@ -162,6 +162,15 @@ fn launched_again(app: &AppHandle, arguments: &[String]) {
     }
 }
 
+/// However the welcome window closed, it does not open again by itself.
+fn welcome_closed(app: &AppHandle) {
+    let Some(state) = app.try_state::<AppState>() else {
+        return;
+    };
+    state.update_settings_quietly(|settings| settings.welcomed = true);
+    state.save_settings_now();
+}
+
 fn user_agent(app: &AppHandle) -> String {
     format!(
         "Singline/{} (https://github.com/JulianRudrich/Singline)",
@@ -246,6 +255,9 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
 
     windows::create_overlay(&handle, &settings)?;
     tray::create(&handle)?;
+    if !settings.welcomed && !demo {
+        windows::open_welcome(&handle);
+    }
     hotkey::register_saved(&handle, &handle.state::<AppState>(), &settings.hotkey);
     playback::spawn(handle.clone(), demo, receiver);
     spotify::restore(&handle);
@@ -317,6 +329,8 @@ fn main() {
             own_lyrics::remove_local_lyrics,
             commands::player_command,
             commands::open_settings,
+            commands::finish_welcome,
+            commands::open_automation_settings,
             commands::open_stats,
             commands::open_karaoke,
             commands::close_karaoke,
@@ -383,7 +397,12 @@ fn main() {
                 label,
                 event: tauri::WindowEvent::Destroyed,
                 ..
-            } => dock::update(app, &label, true),
+            } => {
+                if label == windows::WELCOME {
+                    welcome_closed(app);
+                }
+                dock::update(app, &label, true);
+            }
             // Opening the app again from the Finder, Launchpad or the Dock, as
             // a second launch does elsewhere.
             #[cfg(target_os = "macos")]

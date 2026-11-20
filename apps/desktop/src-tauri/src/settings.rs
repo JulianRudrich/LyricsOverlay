@@ -63,6 +63,8 @@ pub struct Settings {
     pub hotkey: String,
     /// Karaoke's type size, as a factor of the size that fits its screen.
     pub karaoke_scale: f64,
+    /// The welcome window was closed; it opens once, at the first start.
+    pub welcomed: bool,
 }
 
 pub const DEFAULT_HOTKEY: &str = "Alt+Shift+L";
@@ -89,6 +91,7 @@ impl Default for Settings {
             overlay_position: None,
             hotkey: DEFAULT_HOTKEY.to_owned(),
             karaoke_scale: 1.0,
+            welcomed: false,
         }
     }
 }

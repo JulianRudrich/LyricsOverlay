@@ -146,6 +146,24 @@ pub async fn open_settings(app: AppHandle) {
     windows::open_settings(&app);
 }
 
+/// Closes the welcome window; closing it any way marks it as seen.
+#[tauri::command]
+pub fn finish_welcome(app: AppHandle) {
+    windows::close_welcome(&app);
+}
+
+/// Opens System Settings at Privacy & Security → Automation, where Singline
+/// gets access to Spotify or Music back after it was denied.
+#[tauri::command]
+pub fn open_automation_settings() {
+    #[cfg(target_os = "macos")]
+    if let Err(error) =
+        open::that("x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")
+    {
+        eprintln!("could not open System Settings: {error}");
+    }
+}
+
 /// Async, like `open_settings`.
 #[tauri::command]
 pub async fn open_stats(app: AppHandle) {

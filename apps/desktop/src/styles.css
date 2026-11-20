@@ -56,18 +56,21 @@ body {
   height: 100%;
 }
 
-/* The settings are dark glass. Without a behind-window material (`data-glass`),
-   they sit on a solid near-black instead. */
-html[data-view="settings"] {
+/* The settings and the welcome window are dark glass. Without a behind-window
+   material (`data-glass`), they sit on a solid near-black instead. */
+html[data-view="settings"],
+html[data-view="welcome"] {
   color-scheme: dark;
   background: #161618;
 }
 
-html[data-view="settings"][data-glass] {
+html[data-view="settings"][data-glass],
+html[data-view="welcome"][data-glass] {
   background: transparent;
 }
 
-html[data-view="settings"] body {
+html[data-view="settings"] body,
+html[data-view="welcome"] body {
   overflow: hidden;
 }
 

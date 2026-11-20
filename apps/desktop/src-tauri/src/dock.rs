@@ -22,8 +22,9 @@ use crate::windows;
 /// The windows that bring Singline into the Dock. The overlay, the tray panel
 /// and karaoke, which fills a display, do not.
 #[cfg(target_os = "macos")]
-const WINDOWS: [&str; 4] = [
+const WINDOWS: [&str; 5] = [
     windows::SETTINGS,
+    windows::WELCOME,
     windows::STATS,
     windows::EDITOR,
     windows::SHUFFLE,

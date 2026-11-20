@@ -1,8 +1,8 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "What the overlay, settings, lyrics editor, True Shuffle and karaoke windows may do.",
-  "windows": ["overlay", "settings", "editor", "shuffle", "karaoke"],
+  "description": "What the overlay, settings, welcome, lyrics editor, True Shuffle and karaoke windows may do.",
+  "windows": ["overlay", "settings", "welcome", "editor", "shuffle", "karaoke"],
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",

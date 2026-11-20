@@ -9,6 +9,7 @@ mod history;
 mod hotkey;
 mod i18n;
 mod menu_panel;
+mod now;
 mod own_lyrics;
 mod playback;
 mod settings;
@@ -105,6 +106,9 @@ impl AppState {
         }
         if old.show_in_dock != new.show_in_dock {
             dock::refresh(app);
+        }
+        if old.global_offset != new.global_offset {
+            now::update(app);
         }
         if (old.source, old.include_other_players) != (new.source, new.include_other_players) {
             self.request(Request::Preference {
@@ -240,6 +244,7 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
     app.manage(menu_panel::MenuPanel::default());
     app.manage(history::History::default());
     app.manage(dock::Dock::default());
+    app.manage(now::Publisher::default());
     let bridge_store = handle
         .state::<AppState>()
         .settings_path
@@ -297,6 +302,12 @@ fn setup(app: &mut tauri::App, demo: bool) -> Result<(), Box<dyn std::error::Err
 }
 
 fn main() {
+    // `singline now` prints the line being sung for a status line, and exits
+    // before anything of the app starts.
+    let arguments: Vec<String> = std::env::args().skip(1).collect();
+    if arguments.first().map(String::as_str) == Some("now") {
+        std::process::exit(now::print(&arguments[1..]));
+    }
     let demo = std::env::args().any(|argument| argument == "--demo");
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(
@@ -394,6 +405,7 @@ fn main() {
                 api, code: None, ..
             } => api.prevent_exit(),
             tauri::RunEvent::Exit => {
+                now::clear(app);
                 history::flush(app);
                 app.state::<AppState>().save_settings_now();
             }

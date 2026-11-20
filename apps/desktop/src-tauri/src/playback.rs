@@ -235,6 +235,7 @@ fn run(app: &AppHandle, demo: bool, requests: &Receiver<Request>) {
             *state.playback.lock().unwrap_or_else(|p| p.into_inner()) = view.clone();
         }
         let _ = app.emit("playback", &view);
+        crate::now::update(app);
         crate::autohide::update(app, &view);
         crate::sleep::tick(app, &view, interval);
         if track.as_ref().map(|t| &t.key) != current_track.as_ref().map(|t| &t.key) {
@@ -338,6 +339,7 @@ pub fn publish(app: &AppHandle, view: LyricsView) {
     let state = app.state::<AppState>();
     *state.lyrics_view.lock().unwrap_or_else(|p| p.into_inner()) = view.clone();
     let _ = app.emit("lyrics", &view);
+    crate::now::update(app);
 }
 
 #[cfg(test)]

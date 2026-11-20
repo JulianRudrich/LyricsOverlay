@@ -53,6 +53,8 @@ jobs:
           pnpm --filter singline-desktop build
       - name: Test the browser extension
         run: node --test "extensions/browser/test/*.test.js"
+      - name: Test the Pi extension
+        run: node --test "extensions/pi/test/*.test.ts"
       - name: Rust formatting
         run: cargo fmt --all --check
       - name: Rust lints

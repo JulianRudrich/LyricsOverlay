@@ -57,6 +57,12 @@ body:
       description: Run `singline-watch` (included in every build) while the song plays and paste about 20 seconds of its output. It shows what your player reports.
       render: text
   - type: textarea
+    id: logs
+    attributes:
+      label: Log
+      description: Filled in by Settings → About → Report a problem. Please check it for anything private before you send it.
+      render: text
+  - type: textarea
     id: screenshots
     attributes:
       label: Screenshots

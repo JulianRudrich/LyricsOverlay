@@ -164,9 +164,9 @@ curl -fsSL https://raw.githubusercontent.com/JulianRudrich/Singline/main/extensi
 
 Then start pi, or run `/reload` in a running one. `/singline` shows or hides the lyrics.
 
-**A terminal of its own.** `singline lyrics` fills a terminal, or a tmux pane next to your code, with the lyrics: the line being sung in the middle, lighting up word by word, and the time at the bottom. q leaves.
+**A terminal of its own.** `singline lyrics` fills a terminal, or a tmux pane next to your code, with the lyrics: the line being sung in the middle, lighting up letter by letter as it is sung, the lines around it fading with distance, and the time at the bottom. It takes its colours from your terminal's theme, dark or light. q leaves.
 
-<p align="center"><img src="docs/images/terminal.png" width="640" alt="singline lyrics in a terminal: Lady of Namek by Tory Lanez at the top, the current line Play with the stars tonight? in the middle with its sung words bright, the lines around it dimmer, and a time bar at the bottom"></p>
+<p align="center"><img src="docs/images/terminal.png" width="640" alt="singline lyrics in a terminal: Lady of Namek by Tory Lanez at the top, the current line Play with the stars tonight? in the middle, bright up to the letter being sung, the lines around it fading with distance, and a time bar at the bottom"></p>
 
 **tmux and other status lines.** `singline now` prints the current line, the song between two lines, and nothing while no song plays. `--format` chooses what to print, with `{line}`, `{next}`, `{title}`, `{artist}`, `{album}` and `{player}`. For tmux, add this to `~/.tmux.conf`:
 

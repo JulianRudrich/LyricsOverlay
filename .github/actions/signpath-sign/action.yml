@@ -1,0 +1,61 @@
+name: SignPath sign
+description: >-
+  Uploads build output as a GitHub Actions artifact, submits it to the
+  Singline project at SignPath and downloads the signed files. SignPath checks
+  that the artifact was built by this repository's workflow on a GitHub runner.
+
+inputs:
+  api-token:
+    description: API token of the SignPath CI user (secret SIGNPATH_API_TOKEN)
+    required: true
+  organization-id:
+    description: SignPath organization ID (variable SIGNPATH_ORGANIZATION_ID)
+    required: true
+  signing-policy:
+    description: SignPath signing policy slug, release-signing or test-signing
+    required: true
+  artifact-configuration:
+    description: SignPath artifact configuration slug; the sources are in .signpath/artifact-configurations
+    required: true
+  artifact-name:
+    description: Name of the unsigned GitHub Actions artifact
+    required: true
+  path:
+    description: Files to submit; they become the root of the artifact ZIP
+    required: true
+  output-directory:
+    description: Directory that receives the signed files
+    required: true
+
+outputs:
+  signing-request-url:
+    description: The signing request's page at SignPath
+    value: ${{ steps.sign.outputs.signing-request-web-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Upload the unsigned files for SignPath
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.path }}
+        overwrite: true
+        if-no-files-found: error
+        retention-days: 1
+
+    # Release signing waits until a project approver approves the request at SignPath.
+    - name: Submit the signing request
+      id: sign
+      uses: signpath/github-action-submit-signing-request@v3
+      with:
+        api-token: ${{ inputs.api-token }}
+        organization-id: ${{ inputs.organization-id }}
+        project-slug: Singline
+        signing-policy-slug: ${{ inputs.signing-policy }}
+        artifact-configuration-slug: ${{ inputs.artifact-configuration }}
+        github-artifact-id: ${{ steps.upload.outputs.artifact-id }}
+        wait-for-completion: true
+        wait-for-completion-timeout-in-seconds: ${{ inputs.signing-policy == 'release-signing' && '7200' || '900' }}
+        output-artifact-directory: ${{ inputs.output-directory }}

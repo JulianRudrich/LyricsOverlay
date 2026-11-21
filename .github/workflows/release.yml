@@ -176,6 +176,7 @@ jobs:
           SECRET_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           SINGLINE_GENIUS_TOKEN: ${{ secrets.SINGLINE_GENIUS_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
         run: |
           # macOS signing and notarization start as soon as the secrets exist.
           for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
@@ -188,7 +189,64 @@ jobs:
             echo '{"bundle":{"createUpdaterArtifacts":false}}' > "$RUNNER_TEMP/no-updater.json"
             config=(--config "$RUNNER_TEMP/no-updater.json")
           fi
-          pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }} "${config[@]}"
+          # Windows with SignPath builds only the app here: SignPath signs it
+          # before the installers package it, in the steps below.
+          if [ "${{ runner.os }}" = "Windows" ] && [ -n "$SIGNPATH_ORGANIZATION_ID" ]; then
+            pnpm --filter singline-desktop tauri build --no-bundle "${config[@]}"
+          else
+            pnpm --filter singline-desktop tauri build ${{ matrix.tauri-args }} "${config[@]}"
+          fi
+      - name: Sign the Windows app
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: ./.github/actions/signpath-sign
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          signing-policy: release-signing
+          artifact-configuration: singline-app
+          artifact-name: singline-app-unsigned
+          path: target/release/singline.exe
+          output-directory: signed/app
+      - name: Package the signed app
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          cp signed/app/singline.exe target/release/singline.exe
+          config=()
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            config=(--config "$RUNNER_TEMP/no-updater.json")
+          fi
+          pnpm --filter singline-desktop tauri bundle "${config[@]}"
+          mkdir -p unsigned
+          cp target/release/bundle/nsis/*-setup.exe unsigned/Singline-Windows-setup.exe
+          cp target/release/bundle/msi/*.msi unsigned/Singline-Windows.msi
+      - name: Sign the Windows installers
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: ./.github/actions/signpath-sign
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          signing-policy: release-signing
+          artifact-configuration: singline-installers
+          artifact-name: singline-installers-unsigned
+          path: unsigned/*
+          output-directory: signed/installers
+      - name: Put the signed installers in place
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          setup=$(ls target/release/bundle/nsis/*-setup.exe)
+          msi=$(ls target/release/bundle/msi/*.msi)
+          cp signed/installers/Singline-Windows-setup.exe "$setup"
+          cp signed/installers/Singline-Windows.msi "$msi"
+          # Signing changed the setup, so its update signature is made again.
+          if [ -n "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            rm -f "$setup.sig"
+            # pnpm runs the CLI in apps/desktop, so the path is absolute.
+            pnpm --filter singline-desktop tauri signer sign "$(cygpath -w "$PWD/$setup")"
+          fi
       - name: Collect the installers
         run: |
           find target -path '*/release/bundle/*' \( -name '*.dmg' -o -name '*-setup.exe' -o -name '*.msi' -o -name '*.deb' -o -name '*.AppImage' \) -exec cp {} dist/ \;

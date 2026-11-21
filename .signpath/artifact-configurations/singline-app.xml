@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SignPath artifact configuration "singline-app": the Windows app itself,
+     signed before the installers package it. The submitted GitHub artifact is
+     a ZIP holding only this file. -->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="singline.exe" product-name="Singline">
+      <authenticode-sign />
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

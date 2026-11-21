@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SignPath artifact configuration "singline-installers": the two Windows
+     installers, which package the signed app. The setup is also the payload of
+     the in-app update. The submitted GitHub artifact is a ZIP holding only these
+     two files. -->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="Singline-Windows-setup.exe" product-name="Singline">
+      <authenticode-sign />
+    </pe-file>
+    <msi-file path="Singline-Windows.msi">
+      <authenticode-sign />
+    </msi-file>
+  </zip-file>
+</artifact-configuration>

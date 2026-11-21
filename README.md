@@ -91,7 +91,7 @@ Every change on `main` produces a test build for all three systems. The newest o
    - **Windows:** `Singline-Windows-setup.exe`
    - **Linux:** `Singline-Linux.AppImage` for any distribution, or `Singline-Linux.deb` for Debian and Ubuntu
 2. Install it. The builds are not signed yet:
-   - **Windows:** if SmartScreen stops the installer, choose **More info** → **Run anyway**.
+   - **Windows:** if SmartScreen stops the installer, choose **More info** → **Run anyway**. Windows releases are to be signed through the SignPath Foundation; see the [code signing policy](docs/CODE_SIGNING_POLICY.md).
    - **macOS:** if macOS refuses to open the app, go to **System Settings → Privacy & Security** and choose **Open Anyway** (on macOS 14 and earlier, right-click the app and choose **Open**). When you play music, allow Singline to control Spotify or Music.
    - **Linux:** install the package with `sudo apt install ./Singline-Linux.deb`, or make the AppImage executable with `chmod +x Singline-Linux.AppImage` and start it.
 

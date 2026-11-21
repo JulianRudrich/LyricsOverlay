@@ -139,6 +139,7 @@ At the first start, a short welcome shows where Singline lives, lets you choose 
 | Sing along on a big screen | Tray menu → **Karaoke**; pick another display in its controls. Space plays or pauses, ← / → jump 5 seconds, ↑ / ↓ move the lyrics by a quarter second, and Esc or the shortcut leaves |
 | See your listening statistics | Tray menu → **Your music…** |
 | Find a song by singing it | Tray menu → **Sing to find…**, or the microphone in the overlay's corner, then sing a line |
+| Hide the microphone | Turn off Settings → General → **Sing to find**; the overlay and the menus then leave it out |
 | Say a found song is the wrong one | Click **Not this song** above the lyrics, or ↻ to listen again |
 | Hide the overlay while nothing plays | Settings → General → **Hide when nothing is playing** |
 | Search a song's lyrics again | Click the retry button that appears when a search fails |

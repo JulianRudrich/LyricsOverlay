@@ -1,0 +1,5 @@
+# Windows: the C and C++ runtime go into the app itself, so Singline starts on
+# PCs without the Visual C++ Redistributable. whisper.cpp, the only C++ part,
+# would otherwise need MSVCP140.dll.
+[target.'cfg(all(windows, target_env = "msvc"))']
+rustflags = ["-C", "target-feature=+crt-static"]

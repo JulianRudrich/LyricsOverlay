@@ -39,9 +39,11 @@ tauri-plugin-single-instance = "2"
 tokio = { version = "1", features = ["time"] }
 transcription.workspace = true
 
-# The terminal view, `singline lyrics`. A Windows app has no terminal to draw in.
+# The terminal view, `singline lyrics`, in the terminal's own colours. A
+# Windows app has no terminal to draw in.
 [target.'cfg(unix)'.dependencies]
 crossterm = "0.29"
+terminal-colorsaurus = "1.0"
 
 [target.'cfg(windows)'.dependencies]
 windows-version = "0.1"

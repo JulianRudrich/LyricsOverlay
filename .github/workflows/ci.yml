@@ -25,10 +25,6 @@ jobs:
   linux:
     name: Linux checks and end-to-end test
     runs-on: ubuntu-24.04
-    env:
-      # whisper.cpp as it ships, for any x86 CPU: built for the runner's own,
-      # it may use instructions such as AMX that the runner does not allow.
-      GGML_NATIVE: "OFF"
     steps:
       - uses: actions/checkout@v4
       - name: Install system libraries
@@ -44,6 +40,11 @@ jobs:
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+        with:
+          # whisper.cpp is built again only for a new version of it, never for
+          # new settings, so other settings in .cargo/config.toml need a cache
+          # of their own.
+          key: whisper-${{ hashFiles('.cargo/config.toml') }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -125,8 +126,6 @@ jobs:
       run:
         shell: bash
     env:
-      # whisper.cpp for any CPU of the platform (AVX2 on x86), not only the runner's.
-      GGML_NATIVE: "OFF"
       # A Genius token for Sing to find, built in so test builds work without setup.
       SINGLINE_GENIUS_TOKEN: ${{ secrets.SINGLINE_GENIUS_TOKEN }}
       # Signs the update packages; without it the builds cannot update themselves.
@@ -137,6 +136,11 @@ jobs:
         with:
           targets: ${{ matrix.targets }}
       - uses: Swatinem/rust-cache@v2
+        with:
+          # whisper.cpp is built again only for a new version of it, never for
+          # new settings, so other settings in .cargo/config.toml need a cache
+          # of their own.
+          key: whisper-${{ hashFiles('.cargo/config.toml') }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

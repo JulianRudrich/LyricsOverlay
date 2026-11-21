@@ -4,10 +4,13 @@
 [target.'cfg(all(windows, target_env = "msvc"))']
 rustflags = ["-C", "target-feature=+crt-static"]
 
-# whisper-rs passes CMAKE_* variables on to the build of whisper.cpp, which
-# then uses the same static runtime in every configuration. The policy lets the
-# runtime setting apply although whisper.cpp asks for an older CMake. Other
-# systems ignore both.
+# whisper-rs passes GGML_* and CMAKE_* variables on to the build of whisper.cpp.
 [env]
+# For every processor of the platform (AVX2 on x86-64), not only the one that
+# builds it, so Sing to find runs on the computer Singline is installed on.
+GGML_NATIVE = "OFF"
+# The static Windows runtime in every configuration. The policy lets the
+# setting apply although whisper.cpp asks for an older CMake. Other systems
+# ignore both.
 CMAKE_POLICY_DEFAULT_CMP0091 = "NEW"
 CMAKE_MSVC_RUNTIME_LIBRARY = "MultiThreaded"

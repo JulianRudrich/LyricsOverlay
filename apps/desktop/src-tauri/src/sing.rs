@@ -76,6 +76,8 @@ pub enum Phase {
 pub enum SingProblem {
     /// This build has no Whisper.
     Unavailable,
+    /// The processor lacks the instructions Whisper is built for.
+    Processor,
     NoToken,
     Unauthorized,
     OnlineOff,
@@ -414,6 +416,9 @@ pub fn start(app: &AppHandle) {
     }
     if !transcription::can_transcribe() {
         return fail(app, SingProblem::Unavailable);
+    }
+    if !transcription::processor_supported() {
+        return fail(app, SingProblem::Processor);
     }
     if !state.settings().lookup_online {
         return fail(app, SingProblem::OnlineOff);
@@ -1042,8 +1047,11 @@ impl WhisperEngine {
 fn transcription_engine(path: &Path) -> Result<Transcriber, SingProblem> {
     transcription::Transcriber::load(path)
         .map(WhisperEngine)
-        .map_err(|error| SingProblem::Model {
-            detail: error.to_string(),
+        .map_err(|error| match error {
+            transcription::TranscribeError::Processor => SingProblem::Processor,
+            other => SingProblem::Model {
+                detail: other.to_string(),
+            },
         })
 }
 

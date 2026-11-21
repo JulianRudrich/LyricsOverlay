@@ -22,6 +22,9 @@ pub struct Transcriber {
 
 impl Transcriber {
     pub fn load(path: &Path) -> Result<Self, TranscribeError> {
+        if !crate::processor_supported() {
+            return Err(TranscribeError::Processor);
+        }
         static QUIET: Once = Once::new();
         // Keeps whisper.cpp from printing to the terminal.
         QUIET.call_once(whisper_rs::install_logging_hooks);

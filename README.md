@@ -224,6 +224,8 @@ For **Sing to find**, Whisper first turns your singing into words on your comput
 
 **Sing to find needs a Genius token.** Builds from source have none. Create a free API client at [genius.com/api-clients](https://genius.com/api-clients), generate an access token and paste the **Client Access Token** in Settings → General → **Sing to find**.
 
+**Sing to find says the processor is too old.** Its speech recognition needs a processor with AVX2, as Intel Core processors have since 2013, AMD processors since 2015 and every Mac with Apple silicon. Many Celeron, Pentium and Atom processors lack it. Everything else in Singline works without it.
+
 **The lyrics are early or late.** Correct the song with −0.25 / +0.25. If every song is off by the same amount, which is typical for Bluetooth headphones, use the global correction instead.
 
 **Spotify cannot connect.** Check that the redirect URI in your Spotify app is exactly `http://127.0.0.1:43821/callback`, and that no other app uses port 43821. Spotify only lets accounts with Premium use apps in development mode.

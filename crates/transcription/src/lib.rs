@@ -32,6 +32,26 @@ pub const fn can_transcribe() -> bool {
     cfg!(feature = "whisper")
 }
 
+/// True when this processor runs whisper.cpp. On x86 it is built for AVX2 and
+/// the instructions that come with it (see `.cargo/config.toml`); an older
+/// processor, such as many a Celeron or Pentium, would stop the whole app with
+/// an illegal instruction.
+pub fn processor_supported() -> bool {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        std::arch::is_x86_feature_detected!("sse4.2")
+            && std::arch::is_x86_feature_detected!("avx")
+            && std::arch::is_x86_feature_detected!("avx2")
+            && std::arch::is_x86_feature_detected!("bmi2")
+            && std::arch::is_x86_feature_detected!("fma")
+            && std::arch::is_x86_feature_detected!("f16c")
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+    {
+        true
+    }
+}
+
 /// A word Whisper heard; `start` is seconds from the start of the audio it got.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TimedWord {
@@ -101,6 +121,8 @@ pub fn is_hallucination(text: &str) -> bool {
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum TranscribeError {
+    #[error("this processor lacks AVX2, which the speech recognition is built for")]
+    Processor,
     #[error("the speech model could not be loaded: {0}")]
     Model(String),
     #[error("the transcription failed: {0}")]

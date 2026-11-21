@@ -336,6 +336,7 @@
   "sing.stop": "Stop",
   "sing.openSettings": "Open settings",
   "sing.problem.unavailable": "This build of Singline cannot recognise singing.",
+  "sing.problem.processor": "This computer's processor is too old for Sing to find: it lacks AVX2. Everything else in Singline works as usual.",
   "sing.problem.noToken": "Sing to find needs a Genius token. Add one in Settings → General.",
   "sing.problem.unauthorized": "Genius refused the token. Check it in Settings → General.",
   "sing.problem.onlineOff": "Sing to find needs online search. Turn on Search lyrics online in Settings → Song & timing.",

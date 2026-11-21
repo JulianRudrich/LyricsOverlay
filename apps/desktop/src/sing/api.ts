@@ -10,6 +10,7 @@ export type SingPhase = "idle" | "preparing" | "listening" | "searching" | "foll
 
 export type SingProblem =
   | { kind: "unavailable" }
+  | { kind: "processor" }
   | { kind: "noToken" }
   | { kind: "unauthorized" }
   | { kind: "onlineOff" }

@@ -336,6 +336,7 @@
   "sing.stop": "Beenden",
   "sing.openSettings": "Einstellungen öffnen",
   "sing.problem.unavailable": "Diese Version von Singline kann keinen Gesang erkennen.",
+  "sing.problem.processor": "Für Mitsingen ist der Prozessor dieses Computers zu alt: Ihm fehlt AVX2. Alles andere in Singline funktioniert wie gewohnt.",
   "sing.problem.noToken": "Mitsingen braucht einen Genius-Token. Trag ihn unter Einstellungen → Allgemein ein.",
   "sing.problem.unauthorized": "Genius hat den Token abgelehnt. Prüfe ihn unter Einstellungen → Allgemein.",
   "sing.problem.onlineOff": "Mitsingen braucht die Online-Suche. Schalte „Lyrics online suchen“ unter Einstellungen → Song & Timing ein.",

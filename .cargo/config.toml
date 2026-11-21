@@ -3,3 +3,11 @@
 # would otherwise need MSVCP140.dll.
 [target.'cfg(all(windows, target_env = "msvc"))']
 rustflags = ["-C", "target-feature=+crt-static"]
+
+# whisper-rs passes CMAKE_* variables on to the build of whisper.cpp, which
+# then uses the same static runtime in every configuration. The policy lets the
+# runtime setting apply although whisper.cpp asks for an older CMake. Other
+# systems ignore both.
+[env]
+CMAKE_POLICY_DEFAULT_CMP0091 = "NEW"
+CMAKE_MSVC_RUNTIME_LIBRARY = "MultiThreaded"

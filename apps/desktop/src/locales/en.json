@@ -411,5 +411,8 @@
   "welcome.tipControls": "Move the pointer over the lyrics for the controls, and drag them wherever you like.",
   "welcome.tipLyricsOnly": "Nothing but the lyrics? Turn on Lyrics only in Singline’s menu.",
   "welcome.tipClickThrough": "In the way? Click-through turns the lyrics into a ghost you can click through.",
-  "welcome.tipSing": "Don’t know the song? Sing it: Sing to find in Singline’s menu."
+  "welcome.tipSing": "Don’t know the song? Sing it: Sing to find in Singline’s menu.",
+  "sing.offHint": "Off: no microphone in the overlay and no Sing to find in the menus.",
+  "sing.listen": "Listen now",
+  "sing.listenHint": "Or click the microphone in the overlay, then sing a line."
 }

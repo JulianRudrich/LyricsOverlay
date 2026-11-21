@@ -7,6 +7,7 @@
   import Glyph from "../lib/ui/Glyph.svelte";
   import Note from "../lib/ui/Note.svelte";
   import Row from "../lib/ui/Row.svelte";
+  import Toggle from "../lib/ui/Toggle.svelte";
   import { isActive, onSing, percent, sing, type ModelView, type SingSettings, type SingView } from "../sing/api";
   import type { PaneContext } from "./panes";
 
@@ -20,6 +21,7 @@
   let saved = $state(false);
 
   const active = $derived(isActive(view));
+  const enabled = $derived(ctx.settings.singToFind);
   const changed = $derived(current !== null && draft.trim() !== current.token);
 
   const modelHint = $derived.by(() => {
@@ -66,7 +68,12 @@
 
 {#if current && model}
   <Card>
-    <Row icon="mic" title={t("sing.title")} hint={t("sing.hint")} card={false}>
+    <Row icon="mic" title={t("sing.title")} hint={enabled ? t("sing.hint") : t("sing.offHint")} card={false}>
+      <Toggle label={t("sing.title")} checked={enabled} onchange={(singToFind) => ctx.update({ singToFind })} />
+    </Row>
+  {#if enabled}
+    <div class="divider"></div>
+    <Row icon="search" title={t("sing.listen")} hint={t("sing.listenHint")} card={false}>
       <Button disabled={!current.available} onclick={() => sing.toggle().then((next) => (view = next))}>
         {active ? t("sing.stop") : t("sing.start")}
       </Button>
@@ -113,8 +120,11 @@
     {#if model.state === "downloading"}
       <span class="progress" aria-hidden="true"><span style:width="{percent(model)}%"></span></span>
     {/if}
+  {/if}
   </Card>
-  <Note>{t("sing.privacy")}</Note>
+  {#if enabled}
+    <Note>{t("sing.privacy")}</Note>
+  {/if}
 {/if}
 
 <style>

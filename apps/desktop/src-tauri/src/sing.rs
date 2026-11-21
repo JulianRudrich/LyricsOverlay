@@ -408,6 +408,10 @@ pub fn start(app: &AppHandle) {
         return;
     }
     let state = app.state::<AppState>();
+    // Turned off in the settings: nothing starts it, not even the menus.
+    if !state.settings().sing_to_find && !sing.starts_by_itself() {
+        return;
+    }
     if !transcription::can_transcribe() {
         return fail(app, SingProblem::Unavailable);
     }

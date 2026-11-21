@@ -128,12 +128,13 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     } else {
         "tray.showOverlay"
     };
-    let sing = if app.state::<crate::sing::Sing>().is_active() {
+    let singing = app.state::<crate::sing::Sing>().is_active();
+    let sing = if singing {
         "tray.stopSinging"
     } else {
         "tray.singToFind"
     };
-    MenuBuilder::new(app)
+    let menu = MenuBuilder::new(app)
         .item(
             &MenuItemBuilder::with_id("title", texts.get("app.name"))
                 .enabled(false)
@@ -154,9 +155,14 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .item(&sources.build()?)
         .item(&corners.build()?)
         .item(&crate::sleep::submenu(app, &texts)?)
-        .separator()
-        .item(&MenuItemBuilder::with_id("sing", texts.get(sing)).build(app)?)
-        .item(&MenuItemBuilder::with_id("karaoke", texts.get("tray.karaoke")).build(app)?)
+        .separator();
+    // Sing to find is left out while it is turned off, unless it is listening.
+    let menu = if settings.sing_to_find || singing {
+        menu.item(&MenuItemBuilder::with_id("sing", texts.get(sing)).build(app)?)
+    } else {
+        menu
+    };
+    menu.item(&MenuItemBuilder::with_id("karaoke", texts.get("tray.karaoke")).build(app)?)
         .item(&MenuItemBuilder::with_id("stats", texts.get("tray.stats")).build(app)?)
         .item(&MenuItemBuilder::with_id("true-shuffle", texts.get("tray.trueShuffle")).build(app)?)
         .item(

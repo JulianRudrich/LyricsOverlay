@@ -92,7 +92,7 @@
     const timer = setTimeout(() => (justFound = false), 8000);
     return () => clearTimeout(timer);
   });
-  const micShown = $derived(hovering && !settings?.clickThrough);
+  const micShown = $derived(hovering && !settings?.clickThrough && (settings?.singToFind ?? true));
 
   const playerName = $derived(
     playback?.player?.service === "microphone" ? t("sing.microphone") : (playback?.player?.name ?? ""),

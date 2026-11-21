@@ -67,6 +67,8 @@ pub struct Settings {
     pub karaoke_scale: f64,
     /// The welcome window was closed; it opens once, at the first start.
     pub welcomed: bool,
+    /// Sing to find: off, the overlay shows no microphone and the menus no entry.
+    pub sing_to_find: bool,
 }
 
 pub const DEFAULT_HOTKEY: &str = "Alt+Shift+L";
@@ -95,6 +97,7 @@ impl Default for Settings {
             hotkey: DEFAULT_HOTKEY.to_owned(),
             karaoke_scale: 1.0,
             welcomed: false,
+            sing_to_find: true,
         }
     }
 }

@@ -411,5 +411,8 @@
   "welcome.tipControls": "Fahre mit der Maus über die Songtexte für die Steuerung und ziehe sie, wohin du willst.",
   "welcome.tipLyricsOnly": "Nur den Songtext? Schalte im Singline-Menü „Nur Songtext“ ein.",
   "welcome.tipClickThrough": "Im Weg? „Klicks durchlassen“ macht die Songtexte zum Geist, durch den du klicken kannst.",
-  "welcome.tipSing": "Song unbekannt? Sing ihn: „Mitsingen“ im Singline-Menü."
+  "welcome.tipSing": "Song unbekannt? Sing ihn: „Mitsingen“ im Singline-Menü.",
+  "sing.offHint": "Aus: kein Mikrofon im Overlay und kein „Mitsingen“ in den Menüs.",
+  "sing.listen": "Jetzt zuhören",
+  "sing.listenHint": "Oder klicke im Overlay auf das Mikrofon und sing eine Zeile."
 }

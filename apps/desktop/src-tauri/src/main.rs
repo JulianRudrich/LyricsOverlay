@@ -130,8 +130,12 @@ impl AppState {
             let title = i18n::Texts::new(i18n::resolve(new.language)).get("editor.title");
             windows::set_editor_title(app, &title);
         }
+        if old.sing_to_find && !new.sing_to_find {
+            sing::stop(app);
+        }
         let tray_changed = old.click_through != new.click_through
             || old.lyrics_only != new.lyrics_only
+            || old.sing_to_find != new.sing_to_find
             || old.overlay_visible != new.overlay_visible
             || old.source != new.source
             || old.language != new.language;

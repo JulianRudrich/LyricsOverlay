@@ -138,6 +138,8 @@ export interface Settings {
   karaokeScale: number;
   /** The welcome window was closed; it opens once, at the first start. */
   welcomed: boolean;
+  /** Sing to find: off, the overlay shows no microphone and the menus no entry. */
+  singToFind: boolean;
 }
 
 export interface AppInfo {
